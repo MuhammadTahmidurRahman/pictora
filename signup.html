@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="signupstyle.css">
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js"></script>
+    <script type="module" src="auth.js"></script> <!-- Link to auth.js -->
+</head>
+<body>
+<div class="container">
+    <h2>Create an Account</h2>
+    <input type="text" id="name" placeholder="Name" class="input-field">
+    <input type="email" id="email" placeholder="Email" class="input-field">
+    <input type="password" id="password" placeholder="Password" class="input-field">
+    <input type="password" id="confirmPassword" placeholder="Confirm Password" class="input-field">
+
+    <!-- Image Upload -->
+    <label class="upload-label" for="imageUpload">
+        <img src="camera_icon.png" alt="Upload Icon" style="width: 20px; margin-right: 8px;"> Upload your photo here
+    </label>
+    <input type="file" id="imageUpload" accept="image/*">
+
+    <!-- Sign Up Button -->
+    <button id="signupBtn">Sign Up</button>
+    <p>Already have an account? <span class="link" onclick="navigateToLogin()">Login</span></p>
+</div>
+
+<script type="module">
+    import { registerUser } from './auth.js';
+
+    document.getElementById('signupBtn').addEventListener('click', () => {
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const imageUpload = document.getElementById('imageUpload').files[0];
+
+        // Call the registerUser function from auth.js
+        registerUser(name, email, password, confirmPassword, imageUpload);
+    });
+</script>
+</body>
+</html>
