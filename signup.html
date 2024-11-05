@@ -31,20 +31,20 @@
 <body>
 <div class="container">
     <h2>Create an Account</h2>
-    <input type="text" id="name" placeholder="Name" class="input-field">
-    <input type="email" id="email" placeholder="Email" class="input-field">
-    <input type="password" id="password" placeholder="Password" class="input-field">
-    <input type="password" id="confirmPassword" placeholder="Confirm Password" class="input-field">
+    <input type="text" id="name" placeholder="Name" class="input-field" required>
+    <input type="email" id="email" placeholder="Email" class="input-field" required>
+    <input type="password" id="password" placeholder="Password" class="input-field" required>
+    <input type="password" id="confirmPassword" placeholder="Confirm Password" class="input-field" required>
     
     <!-- Image Upload -->
     <label class="upload-label" for="imageUpload">
         <img src="camera_icon.png" alt="Upload Icon" style="width: 20px; margin-right: 8px;"> Upload your photo here
     </label>
-    <input type="file" id="imageUpload" accept="image/*">
+    <input type="file" id="imageUpload" accept="image/*" required>
 
     <!-- Buttons -->
-    <button id="signupBtn" >Sign Up</button>
-    <button id="googleSignInBtn" >Sign Up with Google</button>
+    <button id="signupBtn" disabled>Sign Up</button>
+    <button id="googleSignInBtn" disabled>Sign Up with Google</button>
     <p>Already have an account? <span class="link" onclick="navigateToLogin()">Login</span></p>
 </div>
 </body>

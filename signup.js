@@ -8,7 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Enable buttons when an image is uploaded
     imageUpload.addEventListener('change', () => {
-        if (imageUpload.files.length > 0) {
+        const files = imageUpload.files;
+        if (files.length > 0) {
             signupBtn.disabled = false;
             googleSignInBtn.disabled = false;
         } else {
