@@ -9,8 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Enable buttons when an image is uploaded
     imageUpload.addEventListener('change', () => {
         const files = imageUpload.files;
-        signupBtn = files.length === 0;
-        googleSignInBtn = files.length === 0;
+        signupBtn.disabled = files.length === 0;
+        googleSignInBtn.disabled = files.length === 0;
     });
 
     // Signup button event listener
