@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+        input[type="file"] {
+            margin-bottom: 20px;
+        }
+        img {
+            max-width: 200px;
+            margin: 10px;
+            border: 1px solid #ddd;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Upload Your Images</h1>
+    <input type="file" id="fileInput" accept="image/*" multiple>
+    <div id="imagePreview"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
