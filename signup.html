@@ -8,11 +8,9 @@
 
     <!-- Firebase initialization script -->
     <script type="module">
-        // Import Firebase app and analytics (if needed)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js";
 
-        // Your Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
             authDomain: "pictora-7f0ad.firebaseapp.com",
@@ -24,12 +22,11 @@
             measurementId: "G-Q9WR3JSVH1"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
     </script>
 
-    <script type="module" src="auth.js"></script> <!-- Link to auth.js -->
+    <script type="module" src="signup.js"></script> <!-- Link to signup.js -->
 </head>
 <body>
 <div class="container">
@@ -38,32 +35,17 @@
     <input type="email" id="email" placeholder="Email" class="input-field">
     <input type="password" id="password" placeholder="Password" class="input-field">
     <input type="password" id="confirmPassword" placeholder="Confirm Password" class="input-field">
+    
+    <!-- Image Upload -->
     <label class="upload-label" for="imageUpload">
         <img src="camera_icon.png" alt="Upload Icon" style="width: 20px; margin-right: 8px;"> Upload your photo here
     </label>
     <input type="file" id="imageUpload" accept="image/*">
 
-    <button id="signupBtn">Sign Up</button>
-    <button id="googleSignInBtn">Sign Up with Google</button>
+    <!-- Buttons -->
+    <button id="signupBtn" disabled>Sign Up</button>
+    <button id="googleSignInBtn" disabled>Sign Up with Google</button>
     <p>Already have an account? <span class="link" onclick="navigateToLogin()">Login</span></p>
 </div>
-
-<script type="module">
-    import { registerUser, signInWithGoogle } from './auth.js';
-
-    document.getElementById('signupBtn').addEventListener('click', () => {
-        const name = document.getElementById('name').value;
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
-        const imageUpload = document.getElementById('imageUpload').files[0];
-
-        registerUser(name, email, password, confirmPassword, imageUpload);
-    });
-
-    document.getElementById('googleSignInBtn').addEventListener('click', () => {
-        signInWithGoogle();
-    });
-</script>
 </body>
 </html>
