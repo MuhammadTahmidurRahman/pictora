@@ -1,5 +1,7 @@
+// auth.js
+
 // Import the necessary Firebase modules
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Initialize Firebase Authentication and Storage
@@ -35,15 +37,28 @@ export async function registerUser(name, email, password, confirmPassword, image
             const storageRef = ref(storage, `uploads/${user.uid}`);
             await uploadBytes(storageRef, imageUpload);
             const imageUrl = await getDownloadURL(storageRef);
-
-            // Here you can implement the logic to store user's details along with the imageUrl
             console.log(`User created: ${user.uid}, Image URL: ${imageUrl}`);
         }
 
         alert("User registered successfully!");
-        // Redirect to another page or perform further actions
+        // Redirect or further actions
     } catch (error) {
         console.error("Error signing up: ", error);
+        alert(error.message);
+    }
+}
+
+export async function signInWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    try {
+        console.log("Attempting to sign in with Google...");
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        console.log(`User signed in: ${user.uid}`);
+        alert("User signed in with Google successfully!");
+        // Redirect or further actions
+    } catch (error) {
+        console.error("Error signing in with Google: ", error);
         alert(error.message);
     }
 }
