@@ -1,5 +1,3 @@
-// auth.js
-
 // Import the necessary Firebase modules
 import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
@@ -31,16 +29,20 @@ export async function registerUser(name, email, password, confirmPassword, image
         // Create user with email and password
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
+        console.log(`User created: ${user.uid}`);
 
         // Upload image to Firebase Storage if provided
         if (imageUpload) {
-            const storageRef = ref(storage, `uploads/${user.uid}`);
+            const storageRef = ref(storage, `uploads/${user.uid}/${imageUpload.name}`); // Include the filename for easier access
             await uploadBytes(storageRef, imageUpload);
             const imageUrl = await getDownloadURL(storageRef);
             console.log(`User created: ${user.uid}, Image URL: ${imageUrl}`);
+            alert("User registered successfully with image uploaded!");
+        } else {
+            console.log("No image uploaded.");
+            alert("User registered successfully without an image.");
         }
 
-        alert("User registered successfully!");
         // Redirect or further actions
     } catch (error) {
         console.error("Error signing up: ", error);
