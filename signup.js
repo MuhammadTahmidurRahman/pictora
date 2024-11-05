@@ -9,13 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Enable buttons when an image is uploaded
     imageUpload.addEventListener('change', () => {
         const files = imageUpload.files;
-        if (files.length > 0) {
-            signupBtn.disabled = false;
-            googleSignInBtn.disabled = false;
-        } else {
-            signupBtn.disabled = true;
-            googleSignInBtn.disabled = true;
-        }
+        signupBtn.disabled = files.length === 0;
+        googleSignInBtn.disabled = files.length === 0;
     });
 
     // Signup button event listener
