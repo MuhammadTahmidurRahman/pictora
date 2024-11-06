@@ -26,12 +26,12 @@ window.loginWithEmailPassword = function () {
 
       // Check if the user is newly created (new user will have same creation and last sign-in time)
       if (user.metadata.creationTime === user.metadata.lastSignInTime) {
-        // The user is new, so we sign them out and prompt them to sign up
+        // The user is new, sign them out and prompt them to sign up
         signOut(auth)
           .then(() => {
             alert("You are not registered. Please sign up first.");
             // Redirect to sign-up page
-            window.location.href = 'signup.html';
+            window.location.href = 'signup.html'; // Adjust path to your signup page
           })
           .catch((error) => {
             console.error("Error signing out:", error);
@@ -40,8 +40,8 @@ window.loginWithEmailPassword = function () {
       } else {
         // The user is a returning user
         alert("Login successful");
-        // Redirect to the homepage (or the appropriate page)
-        window.location.href = 'homepage.html'; // Replace with your desired homepage URL
+        // Redirect to the homepage or wherever appropriate
+        window.location.href = 'homepage.html'; // Adjust path to your homepage
       }
     })
     .catch((error) => {
@@ -65,7 +65,7 @@ window.loginWithGoogle = function () {
           .then(() => {
             alert("You are not registered. Please sign up first.");
             // Redirect to sign-up page
-            window.location.href = 'signup.html';
+            window.location.href = 'signup.html'; // Adjust path to your signup page
           })
           .catch((error) => {
             console.error("Error signing out:", error);
@@ -74,8 +74,8 @@ window.loginWithGoogle = function () {
       } else {
         // The user is a returning user
         alert("Google sign-in successful");
-        // Redirect to the homepage (or the appropriate page)
-        window.location.href = 'homepage.html'; // Replace with your desired homepage URL
+        // Redirect to the homepage or wherever appropriate
+        window.location.href = 'homepage.html'; // Adjust path to your homepage
       }
     })
     .catch((error) => {
