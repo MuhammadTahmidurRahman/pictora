@@ -1,4 +1,4 @@
-// Import Firebase functions from auth.js
+// signup.js
 import { registerUser, signInWithGoogle } from './auth.js';
 
 document.addEventListener("DOMContentLoaded", () => {
