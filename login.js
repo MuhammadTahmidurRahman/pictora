@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, fetchSignInMethodsForEmail, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged, fetchSignInMethodsForEmail, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -15,10 +15,27 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Function to handle Google login with email check
+// Check if a user is already logged in and bypass email check if true
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // User is already logged in, redirect them directly to the homepage
+    alert("Already logged in");
+    window.location.href = 'homepage.html'; // Replace with your desired homepage URL
+  }
+});
+
+// Function to handle Google login with email check for new logins only
 window.loginWithGoogle = async function () {
   try {
-    // Prompt user for their email first to check registration status
+    // Check if the user is already logged in
+    if (auth.currentUser) {
+      // User is already logged in, no need for additional checks
+      alert("You are already logged in");
+      window.location.href = 'homepage.html'; // Replace with your desired homepage URL
+      return;
+    }
+
+    // Prompt user for their email to check registration status
     const email = prompt("Please enter your email to proceed with Google Sign-In:");
 
     if (!email) {
