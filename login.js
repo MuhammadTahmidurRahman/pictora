@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -26,12 +26,12 @@ window.loginWithEmailPassword = function () {
 
       // Check if the user is newly created (new user will have same creation and last sign-in time)
       if (user.metadata.creationTime === user.metadata.lastSignInTime) {
-        // The user is new, sign them out and prompt them to sign up
+        // The user is new, so we sign them out and prompt them to sign up
         signOut(auth)
           .then(() => {
             alert("You are not registered. Please sign up first.");
             // Redirect to sign-up page
-            window.location.href = 'signup.html'; // Adjust path to your signup page
+            window.location.href = 'signup.html';
           })
           .catch((error) => {
             console.error("Error signing out:", error);
@@ -40,8 +40,8 @@ window.loginWithEmailPassword = function () {
       } else {
         // The user is a returning user
         alert("Login successful");
-        // Redirect to the homepage or wherever appropriate
-        window.location.href = 'homepage.html'; // Adjust path to your homepage
+        // Redirect to the homepage (or the appropriate page)
+        window.location.href = 'homepage.html'; // Replace with your desired homepage URL
       }
     })
     .catch((error) => {
@@ -51,34 +51,31 @@ window.loginWithEmailPassword = function () {
 }
 
 // Function to handle Google login
-window.loginWithGoogle = function () {
+window.loginWithGoogle = async function () {
   const provider = new GoogleAuthProvider();
-  const email = document.getElementById("email").value;
 
-  // Check if the email already exists in Firebase Auth
-  fetchSignInMethodsForEmail(auth, email)
-    .then((methods) => {
-      if (methods.length === 0) {
-        // If no sign-in methods are available for the email, the user is new
-        alert("You are not registered. Please sign up first.");
-        window.location.href = 'signup.html'; // Redirect to signup page
-      } else {
-        // Proceed with Google login since the email exists in Firebase
-        signInWithPopup(auth, provider)
-          .then((result) => {
-            const user = result.user;
-            alert("Google sign-in successful");
-            // Redirect to homepage or wherever appropriate
-            window.location.href = 'homepage.html'; // Adjust path to your homepage
-          })
-          .catch((error) => {
-            console.error("Google sign-in failed:", error);
-            alert("Failed to sign in with Google.");
-          });
-      }
-    })
-    .catch((error) => {
-      console.error("Error checking email:", error);
-      alert("An error occurred while checking your email.");
-    });
-}
+  try {
+    // Start Google sign-in
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    // Check if the user's email is already registered
+    const signInMethods = await fetchSignInMethodsForEmail(auth, user.email);
+
+    if (signInMethods.length === 0) {
+      // If no sign-in methods exist, the user is not registered
+      await signOut(auth);
+      alert("You are not registered. Please sign up first.");
+      // Redirect to the sign-up page
+      window.location.href = 'signup.html';
+    } else {
+      // The user is a returning user
+      alert("Google sign-in successful");
+      // Redirect to the homepage (or the appropriate page)
+      window.location.href = 'homepage.html'; // Replace with your desired homepage URL
+    }
+  } catch (error) {
+    console.error("Google sign-in failed:", error);
+    alert("Failed to sign in with Google.");
+  }
+};
