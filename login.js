@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, fetchSignInMethodsForEmail, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -15,24 +15,22 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Function to handle Google login with direct email verification
+// Function to handle Google login with user metadata verification
 window.loginWithGoogle = async function () {
   try {
-    // Initiate Google sign-in
+    // Perform Google sign-in
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
-    const googleUserEmail = result.user.email; // Retrieve email from signed-in Google user
+    const user = result.user;
 
-    // Check if this email is registered in Firebase
-    const signInMethods = await fetchSignInMethodsForEmail(auth, googleUserEmail);
-
-    if (signInMethods.length === 0) {
-      // If no sign-in methods exist, the user is not registered
-      await signOut(auth); // Sign out the user to prevent unintended account creation
+    // Check if the user is new based on creation and last sign-in times
+    if (user.metadata.creationTime === user.metadata.lastSignInTime) {
+      // This is a new user; sign them out and prompt to sign up
+      await signOut(auth);
       alert("You are not registered. Please sign up first.");
       window.location.href = 'signup.html'; // Redirect to sign-up page
     } else {
-      // The user is registered, redirect to the homepage
+      // Existing user; allow access to the homepage
       alert("Google sign-in successful");
       window.location.href = 'homepage.html'; // Replace with your desired homepage URL
     }
