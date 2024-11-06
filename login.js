@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, fetchSignInMethodsForEmail, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, fetchSignInMethodsForEmail, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -15,55 +15,26 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Check if a user is already logged in and bypass email check if true
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // User is already logged in, redirect them directly to the homepage
-    alert("Already logged in");
-    window.location.href = 'homepage.html'; // Replace with your desired homepage URL
-  }
-});
-
-// Function to handle Google login with email check for new logins only
+// Function to handle Google login with direct email verification
 window.loginWithGoogle = async function () {
   try {
-    // Check if the user is already logged in
-    if (auth.currentUser) {
-      // User is already logged in, no need for additional checks
-      alert("You are already logged in");
-      window.location.href = 'homepage.html'; // Replace with your desired homepage URL
-      return;
-    }
+    // Initiate Google sign-in
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const googleUserEmail = result.user.email; // Retrieve email from signed-in Google user
 
-    // Prompt user for their email to check registration status
-    const email = prompt("Please enter your email to proceed with Google Sign-In:");
-
-    if (!email) {
-      alert("Email is required for Google Sign-In.");
-      return;
-    }
-
-    // Check if the email is registered
-    const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+    // Check if this email is registered in Firebase
+    const signInMethods = await fetchSignInMethodsForEmail(auth, googleUserEmail);
 
     if (signInMethods.length === 0) {
       // If no sign-in methods exist, the user is not registered
+      await signOut(auth); // Sign out the user to prevent unintended account creation
       alert("You are not registered. Please sign up first.");
-      window.location.href = 'signup.html';
+      window.location.href = 'signup.html'; // Redirect to sign-up page
     } else {
-      // If the user is registered, proceed with Google sign-in
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-
-      // Verify that the signed-in user's email matches the entered email
-      if (result.user.email === email) {
-        alert("Google sign-in successful");
-        window.location.href = 'homepage.html'; // Replace with your desired homepage URL
-      } else {
-        // Sign out if the emails don't match, to prevent unintended account creation
-        await signOut(auth);
-        alert("Email mismatch. Please use the registered email.");
-      }
+      // The user is registered, redirect to the homepage
+      alert("Google sign-in successful");
+      window.location.href = 'homepage.html'; // Replace with your desired homepage URL
     }
   } catch (error) {
     console.error("Google sign-in failed:", error);
