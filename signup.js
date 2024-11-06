@@ -91,7 +91,7 @@ async function signInWithGoogle() {
     const user = result.user;
 
     // Upload profile image to Firebase Storage
-    const storageRef = ref(storage, `profile_images/${user.uid}`);
+    const storageRef = ref(storage, `uploads/${user.uid}`);
     await uploadBytes(storageRef, imageFile);
     const imageUrl = await getDownloadURL(storageRef);
 
