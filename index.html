@@ -8,10 +8,12 @@
 
     <!-- Firebase initialization scripts -->
     <script type="module">
+        // Import Firebase SDKs needed
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
         import { getStorage } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
+        // Firebase configuration for your app
         const firebaseConfig = {
             apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
             authDomain: "pictora-7f0ad.firebaseapp.com",
@@ -27,15 +29,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app); // Initialize Firebase Auth
         const storage = getStorage(app); // Initialize Firebase Storage
-
-        // Check if Firebase services are initialized
-        if (app && auth && storage) {
-            console.log("Firebase initialized successfully:", app);
-            console.log("Firebase Auth instance:", auth);
-            console.log("Firebase Storage instance:", storage);
-        } else {
-            console.error("Firebase initialization failed.");
-        }
     </script>
 </head>
 <body>

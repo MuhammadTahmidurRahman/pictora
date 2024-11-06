@@ -1,4 +1,4 @@
-// signup.js
+// Import Firebase functions from auth.js
 import { registerUser, signInWithGoogle } from './auth.js';
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Google Sign-In button event listener
     googleSignInBtn.addEventListener('click', () => {
         if (imageUpload.files.length === 0) {
-            alert("Please upload an image to proceed with Google Sign-In.");//chnage
+            alert("Please upload an image to proceed with Google Sign-In.");
             return;
         }
 
