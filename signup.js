@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Google Sign-In button event listener
     googleSignInBtn.addEventListener('click', () => {
         if (imageUpload.files.length === 0) {
-            alert("Please upload an image to proceed with Google Sign-In.");
+            alert("Please upload an image to proceed with Google Sign-In.");//chnage
             return;
         }
 
