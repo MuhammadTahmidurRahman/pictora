@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -27,8 +27,12 @@ window.loginWithEmailPassword = function () {
       // Check if the user is newly created (new user will have same creation and last sign-in time)
       if (user.metadata.creationTime === user.metadata.lastSignInTime) {
         // The user is new, sign them out and show a prompt
-        auth.signOut();
-        alert("You are not registered. Please sign up first.");
+        signOut(auth).then(() => {
+          alert("You are not registered. Please sign up first.");
+        }).catch((error) => {
+          console.error("Error signing out:", error);
+          alert("An error occurred while logging out. Please try again.");
+        });
       } else {
         // The user is a returning user
         alert("Login successful");
@@ -52,8 +56,12 @@ window.loginWithGoogle = function () {
       // Check if the user is newly created (new user will have same creation and last sign-in time)
       if (user.metadata.creationTime === user.metadata.lastSignInTime) {
         // The user is new, sign them out and show a prompt
-        auth.signOut();
-        alert("You are not registered. Please sign up first.");
+        signOut(auth).then(() => {
+          alert("You are not registered. Please sign up first.");
+        }).catch((error) => {
+          console.error("Error signing out:", error);
+          alert("An error occurred while logging out. Please try again.");
+        });
       } else {
         // The user is a returning user
         alert("Google sign-in successful");
