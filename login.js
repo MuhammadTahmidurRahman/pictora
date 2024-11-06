@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, fetchSignInMethodsForEmail, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -15,69 +15,33 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Function to handle login with email and password
-window.loginWithEmailPassword = function () {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  signInWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
-
-      // Check if the user is newly created (new user will have same creation and last sign-in time)
-      if (user.metadata.creationTime === user.metadata.lastSignInTime) {
-        // The user is new, so we sign them out and prompt them to sign up
-        signOut(auth)
-          .then(() => {
-            alert("You are not registered. Please sign up first.");
-            // Redirect to sign-up page
-            window.location.href = 'signup.html';
-          })
-          .catch((error) => {
-            console.error("Error signing out:", error);
-            alert("An error occurred while logging out. Please try again.");
-          });
-      } else {
-        // The user is a returning user
-        alert("Login successful");
-        // Redirect to the homepage (or the appropriate page)
-        window.location.href = 'homepage.html'; // Replace with your desired homepage URL
-      }
-    })
-    .catch((error) => {
-      console.error("Login failed:", error);
-      alert("Failed to log in. Please check your credentials.");
-    });
-}
-
 // Function to handle Google login
 window.loginWithGoogle = async function () {
-    const provider = new GoogleAuthProvider();
-    
-    try {
-      // First, ask for the Google account email only (no sign-in attempt yet)
-      const dummyResult = await signInWithPopup(auth, provider);
-      const email = dummyResult.user.email;
-  
-      // Now check if this email already has a sign-in method registered in Firebase
-      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-  
-      // Immediately sign out of the dummy login to avoid creating a new user
-      await signOut(auth);
-  
-      if (signInMethods.length === 0) {
-        // If no sign-in methods exist, the user is not registered
-        alert("You are not registered. Please sign up first.");
-        window.location.href = 'signup.html';
-      } else {
-        // If the user is registered, proceed with the actual Google sign-in
-        const finalResult = await signInWithPopup(auth, provider);
-        alert("Google sign-in successful");
-        window.location.href = 'homepage.html'; // Replace with your desired homepage URL
-      }
-    } catch (error) {
-      console.error("Google sign-in failed:", error);
-      alert("Failed to sign in with Google.");
+  const provider = new GoogleAuthProvider();
+
+  try {
+    // Step 1: Prompt the user to pick an account and get the email
+    const dummyResult = await signInWithPopup(auth, provider);
+    const email = dummyResult.user.email;
+
+    // Step 2: Immediately sign out the dummy result to prevent account creation
+    await signOut(auth);
+
+    // Step 3: Check if the email is already registered
+    const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+
+    if (signInMethods.length === 0) {
+      // If no sign-in methods exist, the user is not registered
+      alert("You are not registered. Please sign up first.");
+      window.location.href = 'signup.html';
+    } else {
+      // If the user is registered, proceed with the actual Google sign-in
+      const finalResult = await signInWithPopup(auth, provider);
+      alert("Google sign-in successful");
+      window.location.href = 'homepage.html'; // Replace with your desired homepage URL
     }
-  };
-  
+  } catch (error) {
+    console.error("Google sign-in failed:", error);
+    alert("Failed to sign in with Google.");
+  }
+};
