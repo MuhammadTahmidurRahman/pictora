@@ -25,18 +25,18 @@ window.loginWithGoogle = async function () {
     const signInMethods = await fetchSignInMethodsForEmail(auth, email);
 
     if (signInMethods.length === 0) {
-      // No sign-in methods exist for this email, user is not registered
+      // If no sign-in methods exist for this email, the user is not registered
       alert("You are not registered. Please sign up first.");
-      window.location.href = 'signup.html'; // Redirect to sign-up page
+      window.location.href = 'signup.html'; // Redirect to the sign-up page
       return;
     }
 
-    // Email is registered, proceed with Google Sign-In
+    // If email is registered, proceed with Google Sign-In
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Since the user is existing, allow access to the homepage
+    // Allow access to the homepage or dashboard
     alert("Google sign-in successful");
     window.location.href = 'homepage.html'; // Replace with your desired homepage URL
   } catch (error) {
