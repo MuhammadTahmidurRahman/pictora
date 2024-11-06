@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -15,25 +15,30 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Function to handle Google login with user metadata verification
+// Function to handle Google login with email pre-check
 window.loginWithGoogle = async function () {
   try {
-    // Perform Google sign-in
+    // Prompt the user for their email
+    const email = prompt("Please enter your registered email:");
+
+    // Check if the email has existing sign-in methods
+    const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+
+    if (signInMethods.length === 0) {
+      // No sign-in methods exist for this email, user is not registered
+      alert("You are not registered. Please sign up first.");
+      window.location.href = 'signup.html'; // Redirect to sign-up page
+      return;
+    }
+
+    // Email is registered, proceed with Google Sign-In
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Check if the user is new based on creation and last sign-in times
-    if (user.metadata.creationTime === user.metadata.lastSignInTime) {
-      // This is a new user; sign them out and prompt to sign up
-      await signOut(auth);
-      alert("You are not registered. Please sign up first.");
-      window.location.href = 'signup.html'; // Redirect to sign-up page
-    } else {
-      // Existing user; allow access to the homepage
-      alert("Google sign-in successful");
-      window.location.href = 'homepage.html'; // Replace with your desired homepage URL
-    }
+    // Since the user is existing, allow access to the homepage
+    alert("Google sign-in successful");
+    window.location.href = 'homepage.html'; // Replace with your desired homepage URL
   } catch (error) {
     console.error("Google sign-in failed:", error);
     alert("Failed to sign in with Google.");
