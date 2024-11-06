@@ -15,19 +15,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Function to handle Google login
+// Function to handle Google login with email check
 window.loginWithGoogle = async function () {
-  const provider = new GoogleAuthProvider();
-
   try {
-    // Step 1: Prompt the user to pick an account and get the email
-    const dummyResult = await signInWithPopup(auth, provider);
-    const email = dummyResult.user.email;
+    // Prompt user for their email first to check registration status
+    const email = prompt("Please enter your email to proceed with Google Sign-In:");
 
-    // Step 2: Immediately sign out the dummy result to prevent account creation
-    await signOut(auth);
+    if (!email) {
+      alert("Email is required for Google Sign-In.");
+      return;
+    }
 
-    // Step 3: Check if the email is already registered
+    // Check if the email is registered
     const signInMethods = await fetchSignInMethodsForEmail(auth, email);
 
     if (signInMethods.length === 0) {
@@ -35,10 +34,19 @@ window.loginWithGoogle = async function () {
       alert("You are not registered. Please sign up first.");
       window.location.href = 'signup.html';
     } else {
-      // If the user is registered, proceed with the actual Google sign-in
-      const finalResult = await signInWithPopup(auth, provider);
-      alert("Google sign-in successful");
-      window.location.href = 'homepage.html'; // Replace with your desired homepage URL
+      // If the user is registered, proceed with Google sign-in
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+
+      // Verify that the signed-in user's email matches the entered email
+      if (result.user.email === email) {
+        alert("Google sign-in successful");
+        window.location.href = 'homepage.html'; // Replace with your desired homepage URL
+      } else {
+        // Sign out if the emails don't match, to prevent unintended account creation
+        await signOut(auth);
+        alert("Email mismatch. Please use the registered email.");
+      }
     }
   } catch (error) {
     console.error("Google sign-in failed:", error);
