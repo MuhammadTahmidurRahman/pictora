@@ -53,28 +53,31 @@ window.loginWithEmailPassword = function () {
 // Function to handle Google login
 window.loginWithGoogle = async function () {
     const provider = new GoogleAuthProvider();
-  
+    
     try {
-      // Sign in with a popup first to retrieve the email without creating a new account.
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+      // First, ask for the Google account email only (no sign-in attempt yet)
+      const dummyResult = await signInWithPopup(auth, provider);
+      const email = dummyResult.user.email;
   
-      // Check if the user's email is already registered in Firebase
-      const signInMethods = await fetchSignInMethodsForEmail(auth, user.email);
+      // Now check if this email already has a sign-in method registered in Firebase
+      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+  
+      // Immediately sign out of the dummy login to avoid creating a new user
+      await signOut(auth);
   
       if (signInMethods.length === 0) {
-        // If no sign-in methods exist, the user is not registered.
-        await signOut(auth);
+        // If no sign-in methods exist, the user is not registered
         alert("You are not registered. Please sign up first.");
-        // Redirect to the sign-up page
         window.location.href = 'signup.html';
       } else {
-        // The user is a returning user, allow them to sign in and redirect
+        // If the user is registered, proceed with the actual Google sign-in
+        const finalResult = await signInWithPopup(auth, provider);
         alert("Google sign-in successful");
         window.location.href = 'homepage.html'; // Replace with your desired homepage URL
       }
     } catch (error) {
-      console.error("Error during Google sign-in:", error);
+      console.error("Google sign-in failed:", error);
       alert("Failed to sign in with Google.");
     }
   };
+  
