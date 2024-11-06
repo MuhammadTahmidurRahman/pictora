@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
 
+        // Pass image file to registerUser
         registerUser(name, email, password, confirmPassword, imageUpload.files[0]);
     });
 
@@ -34,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Please upload an image to proceed with Google Sign-In.");
             return;
         }
-        
+
         signInWithGoogle();
     });
 });

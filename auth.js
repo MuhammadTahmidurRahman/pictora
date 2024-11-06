@@ -1,4 +1,4 @@
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.3.3./firebase-storage.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.3.3/firebase-storage.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.3.3/firebase-auth.js";
 
 const auth = getAuth();
@@ -22,8 +22,8 @@ export async function registerUser(name, email, password, confirmPassword, file)
         // Get the download URL
         const downloadURL = await getDownloadURL(storageRef);
         console.log("Image uploaded successfully, download URL:", downloadURL);
-        // You can now save the URL in your database or display it as needed.
 
+        // Optional: Save downloadURL to Firebase Database/Firestore or display it
     } catch (error) {
         console.error("Error registering user:", error);
         alert(error.message);
