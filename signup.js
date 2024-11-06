@@ -108,4 +108,4 @@ window.togglePassword = togglePassword;
 window.showImagePicker = showImagePicker;
 window.displayImage = displayImage;
 window.registerUser = registerUser;
-window.signInWithGoogle = signInWithGoogle;
+window.signInWithGoogle = signInWithGoogle;//
