@@ -26,17 +26,22 @@ window.loginWithEmailPassword = function () {
 
       // Check if the user is newly created (new user will have same creation and last sign-in time)
       if (user.metadata.creationTime === user.metadata.lastSignInTime) {
-        // The user is new, sign them out and show a prompt
-        signOut(auth).then(() => {
-          alert("You are not registered. Please sign up first.");
-        }).catch((error) => {
-          console.error("Error signing out:", error);
-          alert("An error occurred while logging out. Please try again.");
-        });
+        // The user is new, so we sign them out and prompt them to sign up
+        signOut(auth)
+          .then(() => {
+            alert("You are not registered. Please sign up first.");
+            // Redirect to sign-up page
+            window.location.href = 'signup.html';
+          })
+          .catch((error) => {
+            console.error("Error signing out:", error);
+            alert("An error occurred while logging out. Please try again.");
+          });
       } else {
         // The user is a returning user
         alert("Login successful");
-        // Redirect or navigate to the homepage
+        // Redirect to the homepage (or the appropriate page)
+        window.location.href = 'homepage.html'; // Replace with your desired homepage URL
       }
     })
     .catch((error) => {
@@ -55,17 +60,22 @@ window.loginWithGoogle = function () {
 
       // Check if the user is newly created (new user will have same creation and last sign-in time)
       if (user.metadata.creationTime === user.metadata.lastSignInTime) {
-        // The user is new, sign them out and show a prompt
-        signOut(auth).then(() => {
-          alert("You are not registered. Please sign up first.");
-        }).catch((error) => {
-          console.error("Error signing out:", error);
-          alert("An error occurred while logging out. Please try again.");
-        });
+        // The user is new, sign them out and prompt them to sign up
+        signOut(auth)
+          .then(() => {
+            alert("You are not registered. Please sign up first.");
+            // Redirect to sign-up page
+            window.location.href = 'signup.html';
+          })
+          .catch((error) => {
+            console.error("Error signing out:", error);
+            alert("An error occurred while logging out. Please try again.");
+          });
       } else {
         // The user is a returning user
         alert("Google sign-in successful");
-        // Redirect or navigate to the homepage
+        // Redirect to the homepage (or the appropriate page)
+        window.location.href = 'homepage.html'; // Replace with your desired homepage URL
       }
     })
     .catch((error) => {
