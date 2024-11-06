@@ -1,0 +1,59 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: url('assets/hpbg1.png') no-repeat center center fixed;
+    background-size: cover;
+    color: #fff;
+  }
+  
+  .login-page {
+    background-color: rgba(0, 0, 0, 0.7); /* Slightly transparent background */
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+  }
+  
+  h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: #555;
+    color: white;
+  }
+  
+  button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .login-button, .google-button {
+    background-color: black;
+  }
+  
+  p {
+    margin-top: 15px;
+  }
+  

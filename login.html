@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - PicTora</title>
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+  <div class="login-page">
+    <h1>Log in to PicTora</h1>
+    <p>Enter your registered email and password.</p>
+
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button onclick="loginWithEmailPassword()" class="login-button">Log In</button>
+
+    <button onclick="loginWithGoogle()" class="google-button">Sign in with Google</button>
+
+    <p>Don't have an account? <a href="signup.html">Register</a></p>
+    <p><a href="forgot_password.html">Forgot Password?</a></p>
+  </div>
+
+  <!-- Firebase and custom script tags -->
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"></script>
+  <script src="login.js"></script>
+</body>
+</html>
