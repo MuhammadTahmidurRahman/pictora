@@ -1,4 +1,3 @@
-// Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { 
     getAuth, 
@@ -9,7 +8,6 @@ import {
     deleteUser 
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -21,86 +19,49 @@ const firebaseConfig = {
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
 
-// Initialize Firebase
+// Initialize Firebase and Firestore
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
-const storage = getStorage();
 
 // Monitor authentication state for automatic redirection if the user is already logged in
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, (user) => {
   if (user) {
-    try {
-      // Check if user exists in Firestore
-      const userRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userRef);
-      
-      if (userDoc.exists()) {
-        // User exists, redirect to main page
-        window.location.href = "createorjoinroom.html";
-      } else {
-        // User does not exist in Firestore, delete from auth
-        await deleteUser(user);
-        alert("This account is not registered. Please sign up first.");
-        // Optionally, redirect to login page
-        window.location.href = "login.html";
-      }
-    } catch (error) {
-      console.error("Error checking user in Firestore:", error);
-      alert("An error occurred. Please try again.");
-      // Optionally, sign out the user
-      await auth.signOut();
-    }
+    window.location.href = "createorjoinroom.html"; // Redirect if logged in
   }
 });
 
-// Toggle password visibility
-function togglePasswordVisibility() {
-    const passwordField = document.getElementById("password");
-    passwordField.type = passwordField.type === "password" ? "text" : "password";
-}
+// Email/Password Login with Check for Existing User
+function loginWithEmailPassword() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-// Email/Password Login
-async function loginWithEmailPassword() {
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
-
-    if (!email || !password) {
-        alert("Please enter both email and password.");
-        return;
-    }
-
-    try {
-        // Sign in the user with email and password
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        // Check if user exists in Firestore
-        const userRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userRef);
-
-        if (userDoc.exists()) {
-            // User exists, redirect to main page
-            alert("Login successful!");
-            window.location.href = "createorjoinroom.html";
-        } else {
-            // User does not exist in Firestore, delete from auth
-            await deleteUser(user);
-            alert("This account is not registered. Please sign up first.");
-            // Optionally, redirect to login page
-            window.location.href = "login.html";
-        }
-    } catch (error) {
-        // Handle errors appropriately
-        if (error.code === 'auth/user-not-found') {
-            alert("This email is not registered. Please sign up first.");
-        } else if (error.code === 'auth/wrong-password') {
-            alert("Incorrect password. Please try again.");
-        } else {
-            console.error("Error during login:", error);
-            alert("Login failed: " + error.message);
-        }
-    }
+    signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            // Check if the user exists in Firestore
+            const user = userCredential.user;
+            const userRef = doc(db, "users", user.uid); // Assuming you store users in Firestore under 'users'
+            getDoc(userRef).then((docSnap) => {
+                if (docSnap.exists()) {
+                    alert("Login successful!");
+                    window.location.href = "createorjoinroom.html"; // Redirect to homepage
+                } else {
+                    alert("This email is not registered. Please sign up first.");
+                    // Sign the user out if they are not found in Firestore
+                    auth.signOut();
+                }
+            });
+        })
+        .catch((error) => {
+            // Handle error
+            if (error.code === 'auth/user-not-found') {
+                alert("This email is not registered. Please sign up first.");
+            } else if (error.code === 'auth/wrong-password') {
+                alert("Incorrect password. Please try again.");
+            } else {
+                alert("Login failed: " + error.message);
+            }
+        });
 }
 
 // Google Sign-In with User Existence Check
@@ -110,54 +71,32 @@ async function loginWithGoogle() {
     try {
         // Attempt to sign in with Google
         const result = await signInWithPopup(auth, provider);
-
-        // Get the signed-in user
         const user = result.user;
 
-        // Check if user exists in Firestore
-        const userRef = doc(db, "users", user.uid);
+        // Check if the user exists in Firestore
+        const userRef = doc(db, "users", user.uid); // Assuming users are stored in 'users' collection
         const userDoc = await getDoc(userRef);
 
         if (userDoc.exists()) {
-            // User exists, proceed to the main page
             alert("Google Sign-In successful!");
-            window.location.href = "createorjoinroom.html";
+            window.location.href = "createorjoinroom.html"; // Redirect if user is found
         } else {
-            // User does not exist, delete their auth record and sign them out
-            await deleteUser(user);
+            // If user doesn't exist in Firestore, delete them from Firebase Authentication and sign out
+            await deleteUser(user); // Remove user from Firebase Authentication
             alert("This Google account is not registered. Please sign up first.");
-            // Optionally, redirect to login page
-            window.location.href = "login.html";
         }
     } catch (error) {
-        console.error("Google Sign-In Error:", error);
+        console.error("Google Sign-In Error:", error.message);
 
-        // Handle specific errors
+        // Handle error in case deleteUser fails (e.g., network issue)
         if (error.code === 'auth/requires-recent-login') {
-            alert("To remove this account, please log in again and try.");
+            alert("Please log in again to remove this account.");
         } else {
             alert("Google Sign-In failed: " + error.message);
         }
     }
 }
 
-// Navigation Functions
-function goBack() {
-    window.history.back();
-}
-
-function navigateToForgotPassword() {
-    window.location.href = "forgot_password.html"; // Link to forgot password page
-}
-
-function navigateToRegister() {
-    window.location.href = "signup.html"; // Link to registration page
-}
-
 // Exporting functions for use in HTML
 window.loginWithEmailPassword = loginWithEmailPassword;
 window.loginWithGoogle = loginWithGoogle;
-window.goBack = goBack;
-window.navigateToForgotPassword = navigateToForgotPassword;
-window.navigateToRegister = navigateToRegister;
-window.togglePasswordVisibility = togglePasswordVisibility;
