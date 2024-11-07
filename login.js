@@ -7,7 +7,7 @@ import {
     onAuthStateChanged, 
     signOut 
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -25,50 +25,48 @@ const auth = getAuth();
 const db = getFirestore();
 
 // Monitor authentication state for automatic redirection if the user is already logged in
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, (user) => {
   if (user) {
-    // Check if the user exists in Firestore
-    await _checkIfUserExists(user);
+    checkIfUserExists(user);
   }
 });
 
-// Function to check if the user is new or existing in Firestore
-async function _checkIfUserExists(user) {
-  const userDocRef = doc(db, "users", user.uid);
-  const userDoc = await getDoc(userDocRef);
-
-  if (userDoc.exists()) {
+// Function to check if the user is new or existing
+function checkIfUserExists(user) {
+  const metadata = user.metadata;
+  if (metadata.creationTime !== metadata.lastSignInTime) {
     // Existing user, proceed to the main page
     window.location.href = "createorjoinroom.html";
   } else {
-    // New user, prompt sign-up or set initial data
-    await setDoc(userDocRef, {
-      email: user.email,
-      createdAt: new Date().toISOString()
+    // User is new, prevent account from being saved and sign them out
+    signOut(auth).then(() => {
+      alert("You are not registered. Please sign up first.");
+      window.location.href = "signup.html";
+    }).catch((error) => {
+      console.error("Error signing out: ", error);
     });
-    window.location.href = "createorjoinroom.html";
   }
 }
 
 // Email/Password Login with Check for Existing User
-async function loginWithEmailPassword() {
+function loginWithEmailPassword() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        await _checkIfUserExists(user);
-    } catch (error) {
-        // Handle error
-        if (error.code === 'auth/user-not-found') {
-            alert("This email is not registered. Please sign up first.");
-        } else if (error.code === 'auth/wrong-password') {
-            alert("Incorrect password. Please try again.");
-        } else {
-            alert("Login failed: " + error.message);
-        }
-    }
+    signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            checkIfUserExists(user);
+        })
+        .catch((error) => {
+            if (error.code === 'auth/user-not-found') {
+                alert("This email is not registered. Please sign up first.");
+            } else if (error.code === 'auth/wrong-password') {
+                alert("Incorrect password. Please try again.");
+            } else {
+                alert("Login failed: " + error.message);
+            }
+        });
 }
 
 // Google Sign-In with Check for Existing User
@@ -78,13 +76,13 @@ async function loginWithGoogle() {
     try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
-        await _checkIfUserExists(user);
+        checkIfUserExists(user);
     } catch (error) {
         console.error("Google Sign-In Error:", error.message);
         alert("Google Sign-In failed: " + error.message);
     }
 }
 
-// Exporting functions for use in HTML
+// Export functions for use in HTML
 window.loginWithEmailPassword = loginWithEmailPassword;
 window.loginWithGoogle = loginWithGoogle;
