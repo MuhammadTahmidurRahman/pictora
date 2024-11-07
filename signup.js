@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -14,6 +15,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
+const storage = getStorage();
 
 // Toggle password visibility
 function togglePassword(fieldId) {
@@ -21,46 +23,92 @@ function togglePassword(fieldId) {
   field.type = field.type === "password" ? "text" : "password";
 }
 
-// Email/Password Login
-async function loginWithEmailPassword() {
+// Show image picker
+function showImagePicker() {
+  document.getElementById("image").click();
+}
+
+// Display selected image status
+function displayImage(input) {
+  const uploadText = document.getElementById("upload-text");
+  uploadText.textContent = input.files && input.files[0] ? "Photo selected" : "Upload your photo here";
+}
+
+// Register user with email and password and upload profile image
+async function registerUser() {
+  const name = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
+  const confirmPassword = document.getElementById("confirm-password").value.trim();
+  const imageFile = document.getElementById("image").files[0];
 
-  if (!email || !password) {
-    alert("Please fill in both email and password.");
+  if (!name || !email || !password || !confirmPassword) {
+    alert("Please fill up all the information boxes.");
+    return;
+  }
+  if (password !== confirmPassword) {
+    alert("Passwords do not match.");
+    return;
+  }
+  if (password.length < 6) {
+    alert("Password must be at least 6 characters long.");
+    return;
+  }
+  if (!imageFile) {
+    alert("Please upload a profile image.");
     return;
   }
 
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-    alert("Login successful!");
+
+    // Upload profile image to Firebase Storage
+    const storageRef = ref(storage, `uploads/${user.uid}`);
+    await uploadBytes(storageRef, imageFile);
+    const imageUrl = await getDownloadURL(storageRef);
+    await setDoc(doc(db, "users", user.uid), { email: email, name: name });
+
+    alert("User registered successfully with image uploaded!");
+    console.log("Profile image URL:", imageUrl);
     window.location.href = "createorjoinroom.html";
   } catch (error) {
-    if (error.code === 'auth/user-not-found') {
-      alert("This email is not registered. Please sign up first.");
-    } else if (error.code === 'auth/wrong-password') {
-      alert("Incorrect password. Please try again.");
-    } else {
-      alert("Login failed. Please try again.");
-    }
+    console.error("Error creating user:", error);
+    alert("Failed to register user. Please try again.");
   }
 }
 
-// Google Sign-In
-async function loginWithGoogle() {
+// Google Sign-In with image upload validation
+async function signInWithGoogle() {
   const provider = new GoogleAuthProvider();
+  const imageFile = document.getElementById("image").files[0];
+
+  if (!imageFile) {
+    alert("Please upload an image before signing up with Google.");
+    return;
+  }
 
   try {
     const result = await signInWithPopup(auth, provider);
-    alert("Google Sign-In successful!");
+    const user = result.user;
+
+    // Upload profile image to Firebase Storage
+    const storageRef = ref(storage, `uploads/${user.uid}`);
+    await uploadBytes(storageRef, imageFile);
+    const imageUrl = await getDownloadURL(storageRef);
+
+    alert("Google Sign-In successful and image uploaded!");
+    console.log("Profile image URL:", imageUrl);
     window.location.href = "createorjoinroom.html";
   } catch (error) {
+    console.error("Error with Google Sign-In:", error);
     alert("Google Sign-In failed. Please try again.");
   }
 }
 
-// Expose functions for inline HTML event handlers
+// Expose functions to global scope for inline HTML event handlers
 window.togglePassword = togglePassword;
-window.loginWithEmailPassword = loginWithEmailPassword;
-window.loginWithGoogle = loginWithGoogle;
+window.showImagePicker = showImagePicker;
+window.displayImage = displayImage;
+window.registerUser = registerUser;
+window.signInWithGoogle = signInWithGoogle;
