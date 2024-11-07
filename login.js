@@ -34,12 +34,14 @@ window.loginWithGoogle = async function () {
       // Redirect to the create or join room page
       window.location.href = 'createorjoinroom.html';
     } else {
-      // If user does not exist, sign out and show an error message
+      // If user does not exist, sign out and redirect to signup page
       await signOut(auth);
-      alert("User not registered. Please sign up first.");
+      alert("User not registered. Redirecting to sign-up page.");
+      window.location.href = 'signup.html';
     }
   } catch (error) {
     console.error("Google sign-in failed:", error);
-    alert("Failed to sign in with Google.");
+    alert("Failed to sign in with Google. Redirecting to sign-up page.");
+    window.location.href = 'signup.html';
   }
 };
