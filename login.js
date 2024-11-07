@@ -36,9 +36,9 @@ window.loginWithGoogle = async function () {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Allow access to the homepage or dashboard
+    // Allow access to the create or join room page
     alert("Google sign-in successful");
-    window.location.href = 'homepage.html'; // Replace with your desired homepage URL
+    window.location.href = 'createorjoinroom.html'; // Redirect to create or join room page
   } catch (error) {
     console.error("Google sign-in failed:", error);
     alert("Failed to sign in with Google.");
