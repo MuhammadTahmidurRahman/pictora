@@ -4,11 +4,10 @@ import {
     signInWithEmailAndPassword, 
     GoogleAuthProvider, 
     signInWithPopup, 
-    onAuthStateChanged, 
-    deleteUser 
+    onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -24,6 +23,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
+const functions = getFunctions();
 
 // Listen to the authentication state (for automatic redirection if the user is already logged in)
 onAuthStateChanged(auth, (user) => {
@@ -82,19 +82,14 @@ async function loginWithGoogle() {
             alert("Google Sign-In successful!");
             window.location.href = "createorjoinroom.html";
         } else {
-            // User does not exist, delete their auth record and sign them out
-            await deleteUser(user); // Delete the user from Firebase Authentication
+            // User does not exist, call the function to delete their auth record
+            const deleteUnregisteredUser = httpsCallable(functions, 'deleteUnregisteredUser');
+            await deleteUnregisteredUser({ uid: user.uid }); // Call the function to delete the user
             alert("This Google account is not registered. Please sign up first.");
         }
     } catch (error) {
         console.error("Google Sign-In Error:", error.message);
-
-        // Handle error in case deleteUser fails (e.g., if there’s a network issue)
-        if (error.code === 'auth/requires-recent-login') {
-            alert("To remove this account, please log in again and try.");
-        } else {
-            alert("Google Sign-In failed: " + error.message);
-        }
+        alert("Google Sign-In failed: " + error.message);
     }
 }
 
