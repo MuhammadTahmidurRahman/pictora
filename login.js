@@ -1,6 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -11,7 +10,6 @@ const firebaseConfig = {
   messagingSenderId: "155732133141",
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
-
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -34,8 +32,15 @@ function loginWithEmailPassword() {
             window.location.href = "createorjoinroom.html"; // Redirect to homepage
         })
         .catch((error) => {
-            console.error("Error during login:", error.message);
-            alert("Login failed: " + error.message);
+            // Display specific error message for non-registered users
+            if (error.code === 'auth/user-not-found') {
+                alert("This email is not registered. Please contact the admin if you believe this is an error.");
+            } else if (error.code === 'auth/wrong-password') {
+                alert("Incorrect password. Please try again.");
+            } else {
+                console.error("Error during login:", error.message);
+                alert("Login failed: " + error.message);
+            }
         });
 }
 
