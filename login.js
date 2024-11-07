@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 // Firebase configuration
@@ -16,6 +16,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// Set persistence to local
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    console.log("Persistence set to local");
+  })
+  .catch((error) => {
+    console.error("Error setting persistence:", error);
+  });
 
 // Function to handle Google login and check if user exists
 window.loginWithGoogle = async function () {
@@ -45,3 +54,18 @@ window.loginWithGoogle = async function () {
     window.location.href = 'signup.html';
   }
 };
+
+// Handle authentication state changes
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // User is signed in
+    console.log("User is signed in:", user);
+    // Redirect to the create or join room page
+    window.location.href = 'createorjoinroom.html';
+  } else {
+    // User is signed out
+    console.log("User is signed out");
+    // Redirect to the sign-up page
+    window.location.href = 'signup.html';
+  }
+});
