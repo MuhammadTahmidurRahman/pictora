@@ -8,7 +8,6 @@ import {
     deleteUser 
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -28,15 +27,26 @@ const db = getFirestore();
 // Monitor authentication state for automatic redirection if the user is already logged in
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    // If user is already logged in, redirect them to the main page
-    window.location.href = "createorjoinroom.html";
+    // Check if the user is new or existing
+    _checkIfUserExists(user);
   }
 });
 
-// Toggle password visibility
-function togglePasswordVisibility() {
-    const passwordField = document.getElementById("password");
-    passwordField.type = passwordField.type === "password" ? "text" : "password";
+// Function to check if the user is new or existing
+function _checkIfUserExists(user) {
+  const metadata = user.metadata;
+  if (metadata.creationTime !== metadata.lastSignInTime) {
+    // Existing user, proceed to the main page
+    window.location.href = "createorjoinroom.html"; // Redirect to homepage
+  } else {
+    // User is new, prevent account from being saved and sign them out
+    auth.signOut().then(() => {
+      alert("You are not registered. Please sign up first.");
+      window.location.href = "signup.html"; // Redirect to the sign-up page
+    }).catch((error) => {
+      console.error("Error signing out: ", error);
+    });
+  }
 }
 
 // Email/Password Login with Check for Existing User
@@ -62,24 +72,7 @@ function loginWithEmailPassword() {
         });
 }
 
-// Function to handle user metadata check
-function _checkIfUserExists(user) {
-    const metadata = user.metadata;
-    if (metadata.creationTime !== metadata.lastSignInTime) {
-        // Existing user, proceed to the main page
-        window.location.href = "createorjoinroom.html"; // Redirect to homepage
-    } else {
-        // User is new, prevent account from being saved and sign them out
-        auth.signOut().then(() => {
-            alert("You are not registered. Please sign up first.");
-            window.location.href = "signup.html"; // Redirect to the sign-up page
-        }).catch((error) => {
-            console.error("Error signing out: ", error);
-        });
-    }
-}
-
-// Google Sign-In with Check for Existing User and Deleting User if Not Found
+// Google Sign-In with Check for Existing User
 async function loginWithGoogle() {
     const provider = new GoogleAuthProvider();
 
@@ -88,43 +81,14 @@ async function loginWithGoogle() {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
 
-        // Check if the user exists in Firestore
-        const userRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userRef);
-
-        if (userDoc.exists()) {
-            // User exists, proceed to the main page
-            alert("Google Sign-In successful!");
-            window.location.href = "createorjoinroom.html"; // Redirect to homepage
-        } else {
-            // User does not exist in Firestore, sign them out and delete their Firebase Authentication record
-            await deleteUser(user); // Delete user from Firebase Authentication
-            alert("This Google account is not registered. Please sign up first.");
-            window.location.href = "signup.html"; // Redirect to sign-up page
-        }
+        // Check if the user is new or existing
+        _checkIfUserExists(user); // Run the check
     } catch (error) {
         console.error("Google Sign-In Error:", error.message);
         alert("Google Sign-In failed: " + error.message);
     }
 }
 
-// Navigation Functions
-function goBack() {
-    window.history.back();
-}
-
-function navigateToForgotPassword() {
-    window.location.href = "forgot_password.html"; // Link to forgot password page
-}
-
-function navigateToRegister() {
-    window.location.href = "signup.html"; // Link to registration page
-}
-
 // Exporting functions for use in HTML
 window.loginWithEmailPassword = loginWithEmailPassword;
 window.loginWithGoogle = loginWithGoogle;
-window.goBack = goBack;
-window.navigateToForgotPassword = navigateToForgotPassword;
-window.navigateToRegister = navigateToRegister;
-window.togglePasswordVisibility = togglePasswordVisibility;
