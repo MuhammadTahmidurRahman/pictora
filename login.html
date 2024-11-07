@@ -1,29 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - PicTora</title>
-  <link rel="stylesheet" href="login.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login to PicTora</title>
+    <link rel="stylesheet" href="login.css">
+    <script type="module" src="login.js"></script>
 </head>
 <body>
-  <div class="login-page">
-    <h1>Log in to PicTora</h1>
-    <p>Enter your registered email and password.</p>
+    <div class="background">
+        <div class="login-container">
+            <button class="back-button" onclick="goBack()">&larr; Back</button>
+            <h1>Log in to PicTora</h1>
+            <p>Enter the email you have registered with.</p>
 
-    <input type="email" id="email" placeholder="Email" required>
-    <input type="password" id="password" placeholder="Password" required>
-    <button onclick="loginWithEmailPassword()" class="login-button">Log In</button>
+            <!-- Email Field -->
+            <input type="email" id="email" placeholder="Email">
 
-    <button onclick="loginWithGoogle()" class="google-button">Sign in with Google</button>
+            <!-- Password Field -->
+            <div class="password-container">
+                <input type="password" id="password" placeholder="Password">
+                <button class="toggle-password" onclick="togglePasswordVisibility()">👁</button>
+            </div>
 
-    <p>Don't have an account? <a href="signup.html">Register</a></p>
-    <p><a href="forgot_password.html">Forgot Password?</a></p>
-  </div>
+            <button class="forgot-password" onclick="navigateToForgotPassword()">Forgot Password?</button>
 
-  <!-- Firebase and custom script tags -->
-  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"></script>
-  <script type="module" src="login.js"></script>
+            <!-- Login Button -->
+            <button class="login-button" onclick="loginWithEmailPassword()">Log in</button>
+
+            <!-- Google Sign-In Button -->
+            <button class="google-button" onclick="loginWithGoogle()">Sign in with Google</button>
+
+            <!-- Register Option -->
+            <button class="register-button" onclick="navigateToRegister()">Don't have an account? Register</button>
+        </div>
+    </div>
 </body>
 </html>

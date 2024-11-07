@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -11,45 +12,65 @@ const firebaseConfig = {
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
 
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const auth = getAuth();
 
-// Function to handle Google login with email pre-check
-window.loginWithGoogle = async function () {
-  try {
-    // Prompt the user for their registered email
-    const email = prompt("Please enter your registered email:");
+// Toggle password visibility
+function togglePasswordVisibility() {
+    const passwordField = document.getElementById("password");
+    passwordField.type = passwordField.type === "password" ? "text" : "password";
+}
 
-    if (!email) {
-      alert("Email cannot be empty.");
-      return;
-    }
+// Email/Password Login
+function loginWithEmailPassword() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-    // Check if the email is already registered with any sign-in method
-    const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+    signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            alert("Login successful!");
+            window.location.href = "createorjoinroom.html"; // Redirect to homepage
+        })
+        .catch((error) => {
+            console.error("Error during login:", error.message);
+            alert("Login failed: " + error.message);
+        });
+}
 
-    // Check if registered with Google specifically
-    if (signInMethods.includes('google.com')) {
-      // Email is registered with Google, proceed with Google Sign-In
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
+// Google Sign-In
+function loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
 
-      // Successful Google sign-in
-      alert("Google sign-in successful.");
-      window.location.href = 'homepage.html';
-    } else {
-      // Email is not registered with Google sign-in
-      alert("This email is not registered with Google. Please use a different method or sign up.");
-    }
+    signInWithPopup(auth, provider)
+        .then((result) => {
+            alert("Google Sign-In successful!");
+            window.location.href = "createorjoinroom.html"; // Redirect to homepage
+        })
+        .catch((error) => {
+            console.error("Google Sign-In Error:", error.message);
+            alert("Google Sign-In failed: " + error.message);
+        });
+}
 
-  } catch (error) {
-    console.error("Error during Google sign-in:", error);
+// Navigation Functions
+function goBack() {
+    window.history.back();
+}
 
-    if (error.code === 'auth/popup-closed-by-user') {
-      alert("The sign-in popup was closed. Please try again.");
-    } else {
-      alert("An error occurred during sign-in. Please try again.");
-    }
-  }
-};
+function navigateToForgotPassword() {
+    window.location.href = "forgot_password.html"; // Link to forgot password page
+}
+
+function navigateToRegister() {
+    window.location.href = "signup.html"; // Link to registration page
+}
+
+// Exporting functions for use in HTML
+window.loginWithEmailPassword = loginWithEmailPassword;
+window.loginWithGoogle = loginWithGoogle;
+window.goBack = goBack;
+window.navigateToForgotPassword = navigateToForgotPassword;
+window.navigateToRegister = navigateToRegister;
+window.togglePasswordVisibility = togglePasswordVisibility;

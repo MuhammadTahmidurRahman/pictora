@@ -1,59 +1,107 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: url('assets/hpbg1.png') no-repeat center center fixed;
-    background-size: cover;
-    color: #fff;
-  }
-  
-  .login-page {
-    background-color: rgba(0, 0, 0, 0.7); /* Slightly transparent background */
-    padding: 20px;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
-  }
-  
-  h1 {
-    font-size: 24px;
-    margin-bottom: 20px;
-  }
-  
-  input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border: none;
-    border-radius: 5px;
-    background-color: #555;
-    color: white;
-  }
-  
-  button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 10px;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    cursor: pointer;
-  }
-  
-  .login-button, .google-button {
-    background-color: black;
-  }
-  
-  p {
-    margin-top: 15px;
-  }
-  
+/* General Styling */
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  color: white;
+}
+
+.background {
+  background: url('assets/hpbg1.png') no-repeat center center fixed;
+  background-size: cover;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-container {
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 30px;
+  width: 300px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.back-button {
+  background: none;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+p {
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  margin: 10px 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.password-container {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.forgot-password {
+  background: none;
+  color: white;
+  border: none;
+  margin: 10px 0;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button.login-button,
+button.google-button,
+button.register-button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 5px;
+  margin-top: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button.login-button, button.google-button {
+  background-color: black;
+  color: white;
+}
+
+button.google-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+button.register-button {
+  background: none;
+  color: white;
+}
