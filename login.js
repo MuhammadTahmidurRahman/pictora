@@ -1,13 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { 
-    getAuth, 
-    signInWithEmailAndPassword, 
-    GoogleAuthProvider, 
-    signInWithPopup, 
-    onAuthStateChanged, 
-    signOut 
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -19,66 +11,36 @@ const firebaseConfig = {
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
 
-// Initialize Firebase and Firestore
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const db = getFirestore();
+const auth = getAuth(app);
 
-// Monitor authentication state and redirect if user is logged in
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    checkIfUserExists(user);
-  }
-});
-
-// Function to check if the user is new or existing by checking Firestore for user data
-async function checkIfUserExists(user) {
-  const userDocRef = doc(db, "users", user.uid);
-  const userDoc = await getDoc(userDocRef);
-
-  if (userDoc.exists()) {
-    // Existing user, redirect to main page
-    window.location.href = "createorjoinroom.html";
-  } else {
-    // User is new, sign out and show alert
-    await signOut(auth);
-    alert("You are not registered. Please sign up first.");
-    window.location.href = "signup.html";
-  }
-}
-
-// Email/Password Login
-function loginWithEmailPassword() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  signInWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      checkIfUserExists(userCredential.user);
-    })
-    .catch((error) => {
-      if (error.code === 'auth/user-not-found') {
-        alert("This email is not registered. Please sign up first.");
-      } else if (error.code === 'auth/wrong-password') {
-        alert("Incorrect password. Please try again.");
-      } else {
-        alert("Login failed: " + error.message);
-      }
-    });
-}
-
-// Google Sign-In
-async function loginWithGoogle() {
-  const provider = new GoogleAuthProvider();
-
+// Function to handle Google login with email pre-check
+window.loginWithGoogle = async function () {
   try {
-    const result = await signInWithPopup(auth, provider);
-    checkIfUserExists(result.user);
-  } catch (error) {
-    alert("Google Sign-In failed: " + error.message);
-  }
-}
+    // Prompt the user for their email
+    const email = prompt("Please enter your registered email:");
 
-// Export functions for use in HTML
-window.loginWithEmailPassword = loginWithEmailPassword;
-window.loginWithGoogle = loginWithGoogle;
+    // Check if the email has existing sign-in methods
+    const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+
+    if (signInMethods.length === 0) {
+      // If no sign-in methods exist for this email, the user is not registered
+      alert("You are not registered. Please sign up first.");
+      window.location.href = 'signup.html'; // Redirect to the sign-up page
+      return;
+    }
+
+    // If email is registered, proceed with Google Sign-In
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    // Allow access to the homepage or dashboard
+    alert("Google sign-in successful");
+    window.location.href = 'homepage.html'; // Replace with your desired homepage URL
+  } catch (error) {
+    console.error("Google sign-in failed:", error);
+    alert("Failed to sign in with Google.");
+  }
+};
