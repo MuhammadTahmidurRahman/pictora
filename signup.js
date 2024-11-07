@@ -1,21 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { 
-    getAuth, 
-    createUserWithEmailAndPassword, 
-    GoogleAuthProvider, 
-    signInWithPopup 
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { 
-    getStorage, 
-    ref, 
-    uploadBytes, 
-    getDownloadURL 
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import { 
-    getFirestore, 
-    doc, 
-    setDoc 
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -31,7 +16,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const storage = getStorage();
-const db = getFirestore();
 
 // Toggle password visibility
 function togglePassword(fieldId) {
@@ -83,16 +67,11 @@ async function registerUser() {
     const storageRef = ref(storage, `uploads/${user.uid}`);
     await uploadBytes(storageRef, imageFile);
     const imageUrl = await getDownloadURL(storageRef);
-
-    // Save user details to Firestore
-    await setDoc(doc(db, "users", user.uid), {
-      email: email,
-      name: name,
-      profileImageUrl: imageUrl
-    });
+    await setDoc(doc(db, "users", user.uid), { email: email, name: name });
 
     alert("User registered successfully with image uploaded!");
-    window.location.href = "createorjoinroom.html"; // Redirect to main page
+    console.log("Profile image URL:", imageUrl);
+    window.location.href = "createorjoinroom.html";
   } catch (error) {
     console.error("Error creating user:", error);
     alert("Failed to register user. Please try again.");
@@ -118,15 +97,9 @@ async function signInWithGoogle() {
     await uploadBytes(storageRef, imageFile);
     const imageUrl = await getDownloadURL(storageRef);
 
-    // Save user details to Firestore
-    await setDoc(doc(db, "users", user.uid), {
-      email: user.email,
-      name: user.displayName || "Google User",
-      profileImageUrl: imageUrl
-    });
-
     alert("Google Sign-In successful and image uploaded!");
-    window.location.href = "createorjoinroom.html"; // Redirect to main page
+    console.log("Profile image URL:", imageUrl);
+    window.location.href = "createorjoinroom.html";
   } catch (error) {
     console.error("Error with Google Sign-In:", error);
     alert("Google Sign-In failed. Please try again.");
