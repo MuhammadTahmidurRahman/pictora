@@ -20,15 +20,15 @@ const firebaseConfig = {
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
 
-// Initialize Firebase
+// Initialize Firebase and Firestore
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
 
-// Listen to the authentication state (for automatic redirection if the user is already logged in)
+// Monitor authentication state for automatic redirection if the user is already logged in
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    // If the user is already logged in, redirect them to the main page
+    // If user is already logged in, redirect them to the main page
     window.location.href = "createorjoinroom.html";
   }
 });

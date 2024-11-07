@@ -67,6 +67,7 @@ async function registerUser() {
     const storageRef = ref(storage, `uploads/${user.uid}`);
     await uploadBytes(storageRef, imageFile);
     const imageUrl = await getDownloadURL(storageRef);
+    await setDoc(doc(db, "users", user.uid), { email: email, name: name });
 
     alert("User registered successfully with image uploaded!");
     console.log("Profile image URL:", imageUrl);
