@@ -7,7 +7,7 @@ import {
     onAuthStateChanged, 
     signOut 
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -31,16 +31,19 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// Function to check if the user is new or existing
+// Function to check if the user is new or existing by checking Firestore for user data
 async function checkIfUserExists(user) {
-  const isNewUser = user.metadata.creationTime === user.metadata.lastSignInTime;
+  const userDocRef = doc(db, "users", user.uid);
+  const userDoc = await getDoc(userDocRef);
 
-  if (isNewUser) {
+  if (userDoc.exists()) {
+    // Existing user, redirect to main page
+    window.location.href = "createorjoinroom.html";
+  } else {
+    // User is new, sign out and show alert
     await signOut(auth);
     alert("You are not registered. Please sign up first.");
     window.location.href = "signup.html";
-  } else {
-    window.location.href = "createorjoinroom.html";
   }
 }
 
