@@ -5,7 +5,8 @@ import {
     GoogleAuthProvider, 
     signInWithPopup, 
     onAuthStateChanged, 
-    deleteUser 
+    createUserWithEmailAndPassword,
+    signOut 
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
@@ -40,7 +41,7 @@ function _checkIfUserExists(user) {
     window.location.href = "createorjoinroom.html"; // Redirect to homepage
   } else {
     // User is new, prevent account from being saved and sign them out
-    auth.signOut().then(() => {
+    signOut(auth).then(() => {
       alert("You are not registered. Please sign up first.");
       window.location.href = "signup.html"; // Redirect to the sign-up page
     }).catch((error) => {
@@ -56,12 +57,10 @@ function loginWithEmailPassword() {
 
     signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
-            // Check if the user is new or existing
-            const user = userCredential.user;
-            _checkIfUserExists(user); // Run the check
+            // User logged in, redirect to main page
+            window.location.href = "createorjoinroom.html";
         })
         .catch((error) => {
-            // Handle error
             if (error.code === 'auth/user-not-found') {
                 alert("This email is not registered. Please sign up first.");
             } else if (error.code === 'auth/wrong-password') {
@@ -72,17 +71,31 @@ function loginWithEmailPassword() {
         });
 }
 
+// Sign-Up with Email/Password and Redirect
+function signUpWithEmailPassword() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            // New user signed up, redirect to main page
+            window.location.href = "createorjoinroom.html";
+        })
+        .catch((error) => {
+            alert("Sign-up failed: " + error.message);
+        });
+}
+
 // Google Sign-In with Check for Existing User
 async function loginWithGoogle() {
     const provider = new GoogleAuthProvider();
 
     try {
-        // Attempt to sign in with Google
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
 
-        // Check if the user is new or existing
-        _checkIfUserExists(user); // Run the check
+        // Redirect to main page if sign-in successful
+        window.location.href = "createorjoinroom.html";
     } catch (error) {
         console.error("Google Sign-In Error:", error.message);
         alert("Google Sign-In failed: " + error.message);
@@ -91,4 +104,4 @@ async function loginWithGoogle() {
 
 // Exporting functions for use in HTML
 window.loginWithEmailPassword = loginWithEmailPassword;
-window.loginWithGoogle = loginWithGoogle;
+window.signUpWithEmailPassword = signUpWithEmailPassword;
