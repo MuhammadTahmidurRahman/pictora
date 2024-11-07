@@ -15,14 +15,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Function to handle Google login with email pre-check
+// Function to handle Google login and check if user exists
 window.loginWithGoogle = async function () {
   try {
-    // Prompt the user for their email
-    const email = prompt("Please enter your registered email:");
+    // Initiate Google Sign-In
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
 
-    // Check if the email has existing sign-in methods
-    const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+    // Check if the email is already registered in Firebase Authentication
+    const signInMethods = await fetchSignInMethodsForEmail(auth, user.email);
 
     if (signInMethods.length === 0) {
       // If no sign-in methods exist for this email, the user is not registered
@@ -31,12 +33,7 @@ window.loginWithGoogle = async function () {
       return;
     }
 
-    // If email is registered, proceed with Google Sign-In
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-
-    // Allow access to the create or join room page
+    // If email is registered, proceed to the create or join room page
     alert("Google sign-in successful");
     window.location.href = 'createorjoinroom.html'; // Redirect to create or join room page
   } catch (error) {
