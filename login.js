@@ -29,10 +29,16 @@ window.loginWithGoogle = async function () {
     // Check if the email is already registered with any sign-in method
     const signInMethods = await fetchSignInMethodsForEmail(auth, email);
 
-    if (!signInMethods.includes('google.com')) {
-      // If the user is not registered with Google sign-in, alert them
-      alert("This email is not registered for Google sign-in. Please sign up first.");
-      window.location.href = 'signup.html'; // Redirect to the sign-up page
+    console.log("Sign-in methods for the email:", signInMethods); // Debugging line
+
+    if (signInMethods.length === 0) {
+      // No sign-in methods exist, email is not registered
+      alert("You are not registered. Please sign up first.");
+      window.location.href = 'signup.html';
+      return;
+    } else if (!signInMethods.includes('google.com')) {
+      // Email exists but not with Google sign-in
+      alert("This email is not registered with Google sign-in. Please use a different method or sign up.");
       return;
     }
 
@@ -42,12 +48,12 @@ window.loginWithGoogle = async function () {
 
     // Successful Google sign-in
     alert("Google sign-in successful.");
-    window.location.href = 'homepage.html'; // Redirect to the homepage
+    window.location.href = 'homepage.html';
 
   } catch (error) {
     console.error("Error during Google sign-in:", error);
-    
-    // Specific error handling
+
+    // Specific error handling for popup closure
     if (error.code === 'auth/popup-closed-by-user') {
       alert("The sign-in popup was closed. Please try again.");
     } else {
