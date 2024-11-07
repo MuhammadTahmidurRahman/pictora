@@ -27,28 +27,31 @@ const db = getFirestore();
 // Monitor authentication state and redirect if user is logged in
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    const isNewUser = user.metadata.creationTime === user.metadata.lastSignInTime;
-    if (isNewUser) {
-      alert("You are not registered. Please sign up first.");
-      window.location.href = "signup.html";
-    } else {
-      console.log("Redirecting to main page for existing user");
-      window.location.href = "createorjoinroom.html";
-    }
+    checkIfUserExists(user);
   }
 });
 
-// Email/Password Login with Check for Existing User
+// Function to check if the user is new or existing
+async function checkIfUserExists(user) {
+  const isNewUser = user.metadata.creationTime === user.metadata.lastSignInTime;
+
+  if (isNewUser) {
+    await signOut(auth);
+    alert("You are not registered. Please sign up first.");
+    window.location.href = "signup.html";
+  } else {
+    window.location.href = "createorjoinroom.html";
+  }
+}
+
+// Email/Password Login
 function loginWithEmailPassword() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  console.log("User login attempt with email:", email); // Debugging log
-  
   signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
-      const user = userCredential.user;
-      console.log("User logged in:", user); // Debugging log
+      checkIfUserExists(userCredential.user);
     })
     .catch((error) => {
       if (error.code === 'auth/user-not-found') {
@@ -61,16 +64,14 @@ function loginWithEmailPassword() {
     });
 }
 
-// Google Sign-In with Check for Existing User
+// Google Sign-In
 async function loginWithGoogle() {
   const provider = new GoogleAuthProvider();
 
   try {
     const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-    console.log("Google sign-in successful for user:", user); // Debugging log
+    checkIfUserExists(result.user);
   } catch (error) {
-    console.error("Google Sign-In Error:", error.message);
     alert("Google Sign-In failed: " + error.message);
   }
 }
