@@ -34,7 +34,8 @@ onAuthStateChanged(auth, (user) => {
 // Function to check if the user is new or existing
 function checkIfUserExists(user) {
   const metadata = user.metadata;
-
+  console.log("Metadata on auth state change:", metadata);
+  
   // Adjusting logic to avoid misinterpretation of "new" user status
   if (metadata.creationTime === metadata.lastSignInTime) {
     // Treat as new user; redirect to sign-up if necessary
@@ -46,6 +47,7 @@ function checkIfUserExists(user) {
     });
   } else {
     // Existing user; redirect to main page
+    console.log("Redirecting to main page for existing user");
     window.location.href = "createorjoinroom.html";
   }
 }
@@ -55,9 +57,12 @@ function loginWithEmailPassword() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
+  console.log("User login attempt with email:", email); // Debugging log
+  
   signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       const user = userCredential.user;
+      console.log("User logged in:", user); // Debugging log
       checkIfUserExists(user);
     })
     .catch((error) => {
@@ -78,6 +83,7 @@ async function loginWithGoogle() {
   try {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
+    console.log("Google sign-in successful for user:", user); // Debugging log
     checkIfUserExists(user);
   } catch (error) {
     console.error("Google Sign-In Error:", error.message);
