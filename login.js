@@ -27,9 +27,27 @@ const db = getFirestore();
 // Monitor authentication state for automatic redirection if the user is already logged in
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    window.location.href = "createorjoinroom.html"; // Redirect if logged in
+    // Check if the user is new or existing
+    _checkIfUserExists(user);
   }
 });
+
+// Function to check if the user is new or existing
+function _checkIfUserExists(user) {
+  const metadata = user.metadata;
+  if (metadata.creationTime !== metadata.lastSignInTime) {
+    // Existing user, proceed to the main page
+    window.location.href = "createorjoinroom.html"; // Redirect to homepage
+  } else {
+    // User is new, prevent account from being saved and sign them out
+    auth.signOut().then(() => {
+      alert("You are not registered. Please sign up first.");
+      window.location.href = "signup.html"; // Redirect to the sign-up page
+    }).catch((error) => {
+      console.error("Error signing out: ", error);
+    });
+  }
+}
 
 // Email/Password Login with Check for Existing User
 function loginWithEmailPassword() {
@@ -38,19 +56,9 @@ function loginWithEmailPassword() {
 
     signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
-            // Check if the user exists in Firestore
+            // Check if the user is new or existing
             const user = userCredential.user;
-            const userRef = doc(db, "users", user.uid); // Assuming you store users in Firestore under 'users'
-            getDoc(userRef).then((docSnap) => {
-                if (docSnap.exists()) {
-                    alert("Login successful!");
-                    window.location.href = "createorjoinroom.html"; // Redirect to homepage
-                } else {
-                    alert("This email is not registered. Please sign up first.");
-                    // Sign the user out if they are not found in Firestore
-                    auth.signOut();
-                }
-            });
+            _checkIfUserExists(user); // Run the check
         })
         .catch((error) => {
             // Handle error
@@ -64,7 +72,7 @@ function loginWithEmailPassword() {
         });
 }
 
-// Google Sign-In with User Existence Check
+// Google Sign-In with Check for Existing User
 async function loginWithGoogle() {
     const provider = new GoogleAuthProvider();
 
@@ -73,27 +81,11 @@ async function loginWithGoogle() {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
 
-        // Check if the user exists in Firestore
-        const userRef = doc(db, "users", user.uid); // Assuming users are stored in 'users' collection
-        const userDoc = await getDoc(userRef);
-
-        if (userDoc.exists()) {
-            alert("Google Sign-In successful!");
-            window.location.href = "createorjoinroom.html"; // Redirect if user is found
-        } else {
-            // If user doesn't exist in Firestore, delete them from Firebase Authentication and sign out
-            await deleteUser(user); // Remove user from Firebase Authentication
-            alert("This Google account is not registered. Please sign up first.");
-        }
+        // Check if the user is new or existing
+        _checkIfUserExists(user); // Run the check
     } catch (error) {
         console.error("Google Sign-In Error:", error.message);
-
-        // Handle error in case deleteUser fails (e.g., network issue)
-        if (error.code === 'auth/requires-recent-login') {
-            alert("Please log in again to remove this account.");
-        } else {
-            alert("Google Sign-In failed: " + error.message);
-        }
+        alert("Google Sign-In failed: " + error.message);
     }
 }
 
