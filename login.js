@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -23,11 +23,11 @@ window.loginWithGoogle = async function () {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Check if the email is already registered in Firebase Authentication
+    // Check if the user email is registered in Firebase Authentication
     const signInMethods = await fetchSignInMethodsForEmail(auth, user.email);
 
+    // If no sign-in methods exist for this email, the user is not registered
     if (signInMethods.length === 0) {
-      // If no sign-in methods exist for this email, the user is not registered
       alert("You are not registered. Please sign up first.");
       window.location.href = 'signup.html'; // Redirect to the sign-up page
       return;
@@ -41,3 +41,14 @@ window.loginWithGoogle = async function () {
     alert("Failed to sign in with Google.");
   }
 };
+
+// Handle user authentication state
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // User is signed in
+    console.log("User is signed in:", user);
+  } else {
+    // User is not signed in
+    console.log("No user is signed in.");
+  }
+});
