@@ -1,5 +1,13 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { 
+    getAuth, 
+    signInWithEmailAndPassword, 
+    GoogleAuthProvider, 
+    signInWithPopup, 
+    onAuthStateChanged, 
+    deleteUser 
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Firebase configuration
@@ -15,6 +23,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
+const db = getFirestore();
 
 // Listen to the authentication state (for automatic redirection if the user is already logged in)
 onAuthStateChanged(auth, (user) => {
@@ -53,19 +62,40 @@ function loginWithEmailPassword() {
         });
 }
 
-// Google Sign-In
-function loginWithGoogle() {
+// Google Sign-In with User Existence Check
+async function loginWithGoogle() {
     const provider = new GoogleAuthProvider();
 
-    signInWithPopup(auth, provider)
-        .then((result) => {
+    try {
+        // Attempt to sign in with Google
+        const result = await signInWithPopup(auth, provider);
+
+        // Get the signed-in user
+        const user = result.user;
+
+        // Check if user exists in Firestore
+        const userRef = doc(db, "users", user.uid); // Assuming you store users under 'users' collection
+        const userDoc = await getDoc(userRef);
+
+        if (userDoc.exists()) {
+            // User exists, proceed to the main page
             alert("Google Sign-In successful!");
-            window.location.href = "createorjoinroom.html"; // Redirect to homepage
-        })
-        .catch((error) => {
-            console.error("Google Sign-In Error:", error.message);
+            window.location.href = "createorjoinroom.html";
+        } else {
+            // User does not exist, delete their auth record and sign them out
+            await deleteUser(user); // Delete the user from Firebase Authentication
+            alert("This Google account is not registered. Please sign up first.");
+        }
+    } catch (error) {
+        console.error("Google Sign-In Error:", error.message);
+
+        // Handle error in case deleteUser fails (e.g., if there’s a network issue)
+        if (error.code === 'auth/requires-recent-login') {
+            alert("To remove this account, please log in again and try.");
+        } else {
             alert("Google Sign-In failed: " + error.message);
-        });
+        }
+    }
 }
 
 // Navigation Functions
