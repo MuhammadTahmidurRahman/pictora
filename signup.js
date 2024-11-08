@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { getDatabase, ref as dbRef, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -16,6 +17,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const storage = getStorage();
+const database = getDatabase(); // Initialize Realtime Database
 
 // Toggle password visibility
 function togglePassword(fieldId) {
@@ -67,7 +69,13 @@ async function registerUser() {
     const storageRef = ref(storage, `uploads/${user.uid}`);
     await uploadBytes(storageRef, imageFile);
     const imageUrl = await getDownloadURL(storageRef);
-    await setDoc(doc(db, "users", user.uid), { email: email, name: name });
+
+    // Save user information to Firebase Realtime Database
+    await set(dbRef(database, `users/${user.uid}`), {
+      name: name,
+      email: email,
+      photo: imageUrl,
+    });
 
     alert("User registered successfully with image uploaded!");
     console.log("Profile image URL:", imageUrl);
@@ -96,6 +104,13 @@ async function signInWithGoogle() {
     const storageRef = ref(storage, `uploads/${user.uid}`);
     await uploadBytes(storageRef, imageFile);
     const imageUrl = await getDownloadURL(storageRef);
+
+    // Save user information to Firebase Realtime Database
+    await set(dbRef(database, `users/${user.uid}`), {
+      name: user.displayName ?? 'N/A',
+      email: user.email,
+      photo: imageUrl,
+    });
 
     alert("Google Sign-In successful and image uploaded!");
     console.log("Profile image URL:", imageUrl);
