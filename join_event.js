@@ -15,48 +15,63 @@ const firebaseConfig = {
   const database = firebase.database();
   
   const eventCodeInput = document.getElementById('eventCodeInput');
+  const navigateButton = document.getElementById('navigateButton');
+  const backButton = document.getElementById('backButton');
   let user = auth.currentUser;
   
+  // Function to join room as a guest
   async function joinRoomAsGuest(eventCode) {
-      user = auth.currentUser;
-      if (!user) {
-          alert('Please log in to join the room!');
-          return;
-      }
+    user = auth.currentUser;
+    if (!user) {
+      alert('Please log in to join the room!');
+      return;
+    }
   
-      const userEmail = user.email.replace('.', '_');
-      const guestData = {
-          guestId: user.uid,
-          guestName: user.displayName || 'Guest',
-          guestEmail: user.email,
-          guestPhotoUrl: user.photoURL || ''
-      };
+    const userEmail = user.email.replace('.', '_');
+    const guestData = {
+      guestId: user.uid,
+      guestName: user.displayName || 'Guest',
+      guestEmail: user.email,
+      guestPhotoUrl: user.photoURL || '',
+    };
   
-      const roomRef = database.ref(`rooms/${eventCode}/guests/${userEmail}`);
-      const snapshot = await roomRef.get();
+    const roomRef = database.ref(`rooms/${eventCode}/guests/${userEmail}`);
+    const snapshot = await roomRef.get();
   
-      if (!snapshot.exists()) {
-          await roomRef.set(guestData);
-          alert('You have successfully joined the room!');
-          window.location.href = `eventroom.html?eventCode=${eventCode}`;
-      } else {
-          alert('You have already joined this room!');
-      }
+    if (!snapshot.exists()) {
+      await roomRef.set(guestData);
+      alert('You have successfully joined the room!');
+      window.location.href = `eventroom.html?eventCode=${eventCode}`;
+    } else {
+      alert('You have already joined this room!');
+      window.location.href = `eventroom.html?eventCode=${eventCode}`;
+    }
   }
   
+  // Function to navigate to the event room after checking the code
   async function navigateToEventRoom() {
-      const eventCode = eventCodeInput.value.trim();
-      if (!eventCode) return alert('Please enter a code.');
+    const eventCode = eventCodeInput.value.trim();
+    if (!eventCode) {
+      alert('Please enter a code.');
+      return;
+    }
   
-      const snapshot = await database.ref(`rooms/${eventCode}`).get();
-      if (snapshot.exists()) {
-          await joinRoomAsGuest(eventCode);
-      } else {
-          alert('Room does not exist!');
-      }
+    // Check if the room exists
+    const snapshot = await database.ref(`rooms/${eventCode}`).get();
+    if (snapshot.exists()) {
+      // Join the room as a guest
+      await joinRoomAsGuest(eventCode);
+    } else {
+      alert('Room does not exist!');
+    }
   }
   
+  // Go back to the previous page
   function goBack() {
-      window.history.back();
+    window.history.back();
   }
+  
+  // Event Listeners
+  navigateButton.addEventListener('click', navigateToEventRoom);
+  backButton.addEventListener('click', goBack);
   
