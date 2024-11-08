@@ -71,7 +71,7 @@ async function registerUser() {
 
     alert("User registered successfully with image uploaded!");
     console.log("Profile image URL:", imageUrl);
-    window.location.href = "createorjoinroom.html";
+    window.location.href = "join_event.html";
   } catch (error) {
     console.error("Error creating user:", error);
     alert("Failed to register user. Please try again.");
@@ -99,7 +99,7 @@ async function signInWithGoogle() {
 
     alert("Google Sign-In successful and image uploaded!");
     console.log("Profile image URL:", imageUrl);
-    window.location.href = "createorjoinroom.html";
+    window.location.href = "join_event.html";
   } catch (error) {
     console.error("Error with Google Sign-In:", error);
     alert("Google Sign-In failed. Please try again.");

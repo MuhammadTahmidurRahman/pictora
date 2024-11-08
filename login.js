@@ -41,7 +41,7 @@ window.loginWithGoogle = async function () {
       alert("Google sign-in successful");
 
       // Redirect to the create or join room page
-      window.location.href = 'createorjoinroom.html';
+      window.location.href = 'join_event.html';
     } else {
       // If user does not exist, sign out and redirect to signup page
       await signOut(auth);
@@ -61,7 +61,7 @@ onAuthStateChanged(auth, (user) => {
     // User is signed in
     console.log("User is signed in:", user);
     // Redirect to the create or join room page
-    window.location.href = 'createorjoinroom.html';
+    window.location.href = 'join_event.html';
   } else {
     // User is signed out
     console.log("User is signed out");
