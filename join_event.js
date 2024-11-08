@@ -54,14 +54,14 @@ async function joinRoomAsGuest(eventCode, roomName) {
   const userRef = ref(database, `rooms/${eventCode}/guests/${guestKey}`);
 
   try {
-    // Check if the user has already joined the room
+    // Check if the user has already joined any guest with the same email
     const snapshot = await get(roomRef);
     let alreadyJoined = false;
 
     if (snapshot.exists()) {
       const guests = snapshot.val();
 
-      // Check if any guest already has the same email
+      // Check all guests in the room
       for (const key in guests) {
         if (guests[key].guestEmail === user.email) {
           alreadyJoined = true;
@@ -71,11 +71,9 @@ async function joinRoomAsGuest(eventCode, roomName) {
     }
 
     if (alreadyJoined) {
-      // User already joined, show message and give access
-      alert('You have already joined this room. Redirecting you to the room...');
-      window.location.href = `eventroom.html?eventCode=${eventCode}`;
+      alert('You have already joined this room!');
     } else {
-      // Store guest data and give access if not already joined
+      // Store guest data if the user has not joined
       await set(userRef, guestData);
       alert('You have successfully joined the room!');
       window.location.href = `eventroom.html?eventCode=${eventCode}`;
