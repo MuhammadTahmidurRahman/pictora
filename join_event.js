@@ -64,34 +64,43 @@ async function joinRoomAsGuest(eventCode) {
   }
 }
 
-// Function to navigate to the event room after checking the code
-async function navigateToEventRoom() {
-  const eventCode = document.getElementById('eventCodeInput').value.trim();
-  if (!eventCode) {
-    alert('Please enter a code.');
-    return;
-  }
-
-  try {
-    // Check if the room exists
-    const snapshot = await get(ref(database, `rooms/${eventCode}`));
-    if (snapshot.exists()) {
-      // Join the room as a guest
-      await joinRoomAsGuest(eventCode);
-    } else {
-      alert('Room does not exist!');
+// Function to join room as a guest
+async function joinRoomAsGuest(eventCode) {
+    if (!user) {
+      alert('Please log in to join the room!');
+      return;
     }
-  } catch (error) {
-    console.error('Error navigating to event room:', error);
-    alert('An error occurred while verifying the room code.');
+  
+    // Create a key by replacing dots in the email to avoid Firebase path issues
+    const userEmailKey = user.email.replace('.', '_');
+    const guestKey = `${eventCode}_${user.displayName}_${userEmailKey}`;
+  
+    // Guest data structure
+    const guestData = {
+      eventCode: eventCode,
+      guestId: user.uid,
+      guestName: user.displayName || 'Guest',
+      guestEmail: user.email,
+      guestPhotoUrl: user.photoURL || '',
+    };
+  
+    // Reference to the room and guest path
+    const roomRef = ref(database, `rooms/${eventCode}/guests/${guestKey}`);
+    const snapshot = await get(roomRef);
+  
+    try {
+      if (!snapshot.exists()) {
+        // If guest data does not exist, add it
+        await set(roomRef, guestData);
+        alert('You have successfully joined the room!');
+      } else {
+        alert('You have already joined this room!');
+      }
+      // Navigate to event room page
+      window.location.href = `eventroom.html?eventCode=${eventCode}`;
+    } catch (error) {
+      console.error('Error joining room:', error);
+      alert('An error occurred while trying to join the room.');
+    }
   }
-}
-
-// Go back to the previous page
-function goBack() {
-  window.history.back();
-}
-
-// Event Listeners
-document.getElementById('joinEventBtn').addEventListener('click', navigateToEventRoom);
-document.getElementById('backButton').addEventListener('click', goBack);
+  
