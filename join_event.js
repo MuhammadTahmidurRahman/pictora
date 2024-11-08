@@ -15,7 +15,6 @@ const firebaseConfig = {
   const database = firebase.database();
   
   const eventCodeInput = document.getElementById('eventCodeInput');
-  let scannedCode = '';
   let user = auth.currentUser;
   
   async function joinRoomAsGuest(eventCode) {
@@ -55,28 +54,6 @@ const firebaseConfig = {
       } else {
           alert('Room does not exist!');
       }
-  }
-  
-  function showQRCodeScanner() {
-      const qrScanner = document.getElementById('qrScanner');
-      qrScanner.classList.remove('hidden');
-  
-      const html5QrCode = new Html5Qrcode("reader");
-      html5QrCode.start(
-          { facingMode: "environment" },
-          { fps: 10, qrbox: 250 },
-          (decodedText) => {
-              html5QrCode.stop().then(() => {
-                  joinRoomAsGuest(decodedText);
-                  hideQRCodeScanner();
-              }).catch(console.error);
-          },
-          console.error
-      );
-  }
-  
-  function hideQRCodeScanner() {
-      document.getElementById('qrScanner').classList.add('hidden');
   }
   
   function goBack() {
