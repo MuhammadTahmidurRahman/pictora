@@ -17,7 +17,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const storage = getStorage();
-const database = getDatabase(); // Initialize Realtime Database
+const database = getDatabase(app);
 
 // Toggle password visibility
 function togglePassword(fieldId) {
@@ -71,15 +71,14 @@ async function registerUser() {
     const imageUrl = await getDownloadURL(storageRef);
 
     // Save user information to Firebase Realtime Database
-    await set(dbRef(database, `users/${user.uid}`), {
+    await set(dbRef(database, 'users/' + user.uid), {
       name: name,
       email: email,
-      photo: imageUrl,
+      photo: imageUrl
     });
 
     alert("User registered successfully with image uploaded!");
-    console.log("Profile image URL:", imageUrl);
-    window.location.href = "join_event.html";
+    window.location.href = "join_event.html"; // Redirect to the next page
   } catch (error) {
     console.error("Error creating user:", error);
     alert("Failed to register user. Please try again.");
@@ -106,15 +105,14 @@ async function signInWithGoogle() {
     const imageUrl = await getDownloadURL(storageRef);
 
     // Save user information to Firebase Realtime Database
-    await set(dbRef(database, `users/${user.uid}`), {
-      name: user.displayName ?? 'N/A',
+    await set(dbRef(database, 'users/' + user.uid), {
+      name: user.displayName,
       email: user.email,
-      photo: imageUrl,
+      photo: imageUrl
     });
 
     alert("Google Sign-In successful and image uploaded!");
-    console.log("Profile image URL:", imageUrl);
-    window.location.href = "join_event.html";
+    window.location.href = "join_event.html"; // Redirect to the next page
   } catch (error) {
     console.error("Error with Google Sign-In:", error);
     alert("Google Sign-In failed. Please try again.");
