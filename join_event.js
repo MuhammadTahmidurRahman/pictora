@@ -18,31 +18,9 @@ const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const database = getDatabase(firebaseApp);
 
-// Ensure the DOM is fully loaded before running the script
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM fully loaded and parsed');
-
-  const joinEventBtn = document.getElementById('joinEventBtn');
-  const backButton = document.getElementById('backButton');
-  const eventCodeInput = document.getElementById('eventCodeInput');
-
-  if (joinEventBtn) {
-    console.log('Join Event button found');
-    joinEventBtn.addEventListener('click', navigateToEventRoom);
-  } else {
-    console.error('Join Event button not found');
-  }
-
-  if (backButton) {
-    console.log('Back button found');
-    backButton.addEventListener('click', goBack);
-  } else {
-    console.error('Back button not found');
-  }
-});
-
-// Track user authentication state
 let user = null;
+
+// Track authentication state
 onAuthStateChanged(auth, (currentUser) => {
   if (currentUser) {
     user = currentUser;
@@ -53,21 +31,22 @@ onAuthStateChanged(auth, (currentUser) => {
   }
 });
 
-// Function to join room as a guest
-async function joinRoomAsGuest(eventCode) {
+// Function to join the room as a guest
+async function joinRoomAsGuest(eventCode, roomName) {
   if (!user) {
     alert('Please log in to join the room!');
     return;
   }
 
-  const userEmailKey = user.email.replace('.', '_');
-  const guestKey = `${eventCode}_${user.displayName}_${userEmailKey}`;
+  const userEmailKey = user.email.replace(/\./g, '_');
+  // Generate guestKey in the format: IEPVZNF9_Sad Day__tahmidworksinworkstation@gmail_com_Muhammad Tahmidur Rahman
+  const guestKey = `${eventCode}_${roomName}__${userEmailKey}_${user.displayName}`;
 
+  // Prepare guest data object
   const guestData = {
-    eventCode: eventCode,
+    guestEmail: user.email,
     guestId: user.uid,
     guestName: user.displayName || 'Guest',
-    guestEmail: user.email,
     guestPhotoUrl: user.photoURL || '',
   };
 
@@ -76,11 +55,13 @@ async function joinRoomAsGuest(eventCode) {
 
   try {
     if (!snapshot.exists()) {
+      // Store guest data if not already exists
       await set(roomRef, guestData);
       alert('You have successfully joined the room!');
     } else {
       alert('You have already joined this room!');
     }
+    // Navigate to event room page
     window.location.href = `eventroom.html?eventCode=${eventCode}`;
   } catch (error) {
     console.error('Error joining room:', error);
@@ -96,12 +77,17 @@ async function navigateToEventRoom() {
     return;
   }
 
-  console.log('Navigating to event room with code:', eventCode);
-
   try {
-    const snapshot = await get(ref(database, `rooms/${eventCode}`));
-    if (snapshot.exists()) {
-      await joinRoomAsGuest(eventCode);
+    // Check if the room exists
+    const roomSnapshot = await get(ref(database, `rooms/${eventCode}`));
+    if (roomSnapshot.exists()) {
+      const roomData = roomSnapshot.val();
+      const roomName = roomData.host.roomName || 'No Name';
+
+      console.log(`Room found: ${roomName}`);
+      
+      // Join the room as a guest with the room name
+      await joinRoomAsGuest(eventCode, roomName);
     } else {
       alert('Room does not exist!');
     }
@@ -115,3 +101,9 @@ async function navigateToEventRoom() {
 function goBack() {
   window.history.back();
 }
+
+// Attach event listeners
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('joinEventBtn').addEventListener('click', navigateToEventRoom);
+  document.getElementById('backButton').addEventListener('click', goBack);
+});
