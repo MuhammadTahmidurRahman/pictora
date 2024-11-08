@@ -71,31 +71,41 @@ async function joinRoomAsGuest(eventCode, roomName) {
 
 // Function to navigate to the event room after checking the code
 async function navigateToEventRoom() {
-  const eventCode = document.getElementById('eventCodeInput').value.trim();
-  if (!eventCode) {
-    alert('Please enter a code.');
-    return;
-  }
-
-  try {
-    // Check if the room exists
-    const roomSnapshot = await get(ref(database, `rooms/${eventCode}`));
-    if (roomSnapshot.exists()) {
-      const roomData = roomSnapshot.val();
-      const roomName = roomData.host.roomName || 'No Name';
-
-      console.log(`Room found: ${roomName}`);
-      
-      // Join the room as a guest with the room name
-      await joinRoomAsGuest(eventCode, roomName);
-    } else {
-      alert('Room does not exist!');
+    const eventCode = document.getElementById('eventCodeInput').value.trim();
+    if (!eventCode) {
+      alert('Please enter a code.');
+      return;
     }
-  } catch (error) {
-    console.error('Error navigating to event room:', error);
-    alert('An error occurred while verifying the room code.');
+  
+    try {
+      // Check if the room exists
+      const roomRef = ref(database, `rooms/${eventCode}`);
+      const roomSnapshot = await get(roomRef);
+  
+      if (roomSnapshot.exists()) {
+        const roomData = roomSnapshot.val();
+  
+        console.log('Room data fetched:', roomData); // Debug log
+  
+        // Check if `host` and `roomName` exist in the fetched data
+        let roomName = 'No Name';
+        if (roomData.host && roomData.host.roomName) {
+          roomName = roomData.host.roomName;
+        }
+  
+        console.log('Room Name:', roomName); // Debug log
+  
+        // Join the room as a guest with the fetched room name
+        await joinRoomAsGuest(eventCode, roomName);
+      } else {
+        alert('Room does not exist!');
+      }
+    } catch (error) {
+      console.error('Error navigating to event room:', error);
+      alert('An error occurred while verifying the room code.');
+    }
   }
-}
+  
 
 // Go back to the previous page
 function goBack() {
