@@ -1,26 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create or Join Room</title>
-    <link rel="stylesheet" href="createorjoinroom.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join Event</title>
+<link rel="stylesheet" href="join_event.css">
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"></script>
+<script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to Pictora!</h1>
-        <p>Select an option below:</p>
-        <button onclick="createRoom()">Create Room</button>
-        <button onclick="joinRoom()">Join Room</button>
+        <div class="header">
+            <button onclick="goBack()">&#8592; Back</button>
+            <h1>Join Room</h1>
+        </div>
+        <div class="content">
+            <div class="icon">
+                <img src="assets/qr_icon.png" alt="QR Code Icon">
+            </div>
+            <button id="scanBtn" onclick="showQRCodeScanner()">Scan to Join</button>
+            <div id="qrScanner" class="hidden">
+                <div id="reader"></div>
+                <button id="cancelScanBtn" onclick="hideQRCodeScanner()">Cancel</button>
+            </div>
+            <input type="text" id="eventCodeInput" placeholder="Enter event code to join">
+            <button id="joinEventBtn" onclick="navigateToEventRoom()">Go to EventRoom</button>
+        </div>
     </div>
-    <script>
-        function createRoom() {
-            alert("Room creation feature is under development.");
-        }
-        
-        function joinRoom() {
-            alert("Join room feature is under development.");
-        }
-    </script>
+    <script src="join_event.js"></script>
 </body>
 </html>

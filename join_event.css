@@ -1,49 +1,59 @@
-/* Centering content */
 body {
     font-family: Arial, sans-serif;
+    background-image: url('assets/hpbg1.png');
+    background-size: cover;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100vh;
     margin: 0;
-    background-color: #f0f0f0;
 }
 
-/* Styling container */
 .container {
-    text-align: center;
-    background-color: #ffffff;
-    padding: 2rem;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
     width: 300px;
+    border-radius: 15px;
+    text-align: center;
 }
 
-/* Title styling */
-h1 {
-    color: #333;
-    margin-bottom: 1rem;
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-/* Paragraph styling */
-p {
-    color: #666;
-    margin-bottom: 1.5rem;
+.header h1 {
+    font-size: 24px;
 }
 
-/* Button styling */
+.content .icon img {
+    width: 120px;
+}
+
 button {
-    background-color: #007bff;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    background-color: black;
     color: white;
     border: none;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
+    border-radius: 10px;
     cursor: pointer;
-    border-radius: 4px;
-    margin: 0.5rem;
-    transition: background-color 0.3s;
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #333;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+.hidden {
+    display: none;
 }
