@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { getDatabase, ref as dbRef, set, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -16,6 +17,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const storage = getStorage();
+const database = getDatabase();
 
 // Toggle password visibility
 function togglePassword(fieldId) {
@@ -60,6 +62,16 @@ async function registerUser() {
   }
 
   try {
+    // Check if the email is already registered in Realtime Database
+    const userQuery = query(dbRef(database, "users"), orderByChild("email"), equalTo(email));
+    const userSnapshot = await get(userQuery);
+
+    if (userSnapshot.exists()) {
+      alert("This email is already registered. Please use a different email or sign in.");
+      return;
+    }
+
+    // Create user with email and password
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
@@ -67,7 +79,13 @@ async function registerUser() {
     const storageRef = ref(storage, `uploads/${user.uid}`);
     await uploadBytes(storageRef, imageFile);
     const imageUrl = await getDownloadURL(storageRef);
-    await setDoc(doc(db, "users", user.uid), { email: email, name: name });
+
+    // Store user data in Realtime Database
+    await set(dbRef(database, `users/${user.uid}`), {
+      email: email,
+      name: name,
+      photo: imageUrl,
+    });
 
     alert("User registered successfully with image uploaded!");
     console.log("Profile image URL:", imageUrl);
@@ -92,10 +110,25 @@ async function signInWithGoogle() {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
+    // Check if the user is already registered
+    const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
+    if (userSnapshot.exists()) {
+      alert("You are already signed up. Redirecting you to the join event page.");
+      window.location.href = "join_event.html";
+      return;
+    }
+
     // Upload profile image to Firebase Storage
     const storageRef = ref(storage, `uploads/${user.uid}`);
     await uploadBytes(storageRef, imageFile);
     const imageUrl = await getDownloadURL(storageRef);
+
+    // Store user data in Realtime Database
+    await set(dbRef(database, `users/${user.uid}`), {
+      email: user.email,
+      name: user.displayName,
+      photo: imageUrl,
+    });
 
     alert("Google Sign-In successful and image uploaded!");
     console.log("Profile image URL:", imageUrl);
