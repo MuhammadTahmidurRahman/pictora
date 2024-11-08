@@ -17,7 +17,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const storage = getStorage();
-const database = getDatabase(app);
+const database = getDatabase(app, "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app");
 
 // Toggle password visibility
 function togglePassword(fieldId) {
@@ -52,7 +52,7 @@ async function registerUser() {
     alert("Passwords do not match.");
     return;
   }
-  if (password.length < 6) {
+  if (password length < 6) {
     alert("Password must be at least 6 characters long.");
     return;
   }
