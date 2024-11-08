@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import { getDatabase, ref as dbRef, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -17,7 +16,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const storage = getStorage();
-const database = getDatabase(app, "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app");
 
 // Toggle password visibility
 function togglePassword(fieldId) {
@@ -52,7 +50,7 @@ async function registerUser() {
     alert("Passwords do not match.");
     return;
   }
-  if (password length < 6) {
+  if (password.length < 6) {
     alert("Password must be at least 6 characters long.");
     return;
   }
@@ -69,16 +67,11 @@ async function registerUser() {
     const storageRef = ref(storage, `uploads/${user.uid}`);
     await uploadBytes(storageRef, imageFile);
     const imageUrl = await getDownloadURL(storageRef);
-
-    // Save user information to Firebase Realtime Database
-    await set(dbRef(database, 'users/' + user.uid), {
-      name: name,
-      email: email,
-      photo: imageUrl
-    });
+    await setDoc(doc(db, "users", user.uid), { email: email, name: name });
 
     alert("User registered successfully with image uploaded!");
-    window.location.href = "join_event.html"; // Redirect to the next page
+    console.log("Profile image URL:", imageUrl);
+    window.location.href = "join_event.html";
   } catch (error) {
     console.error("Error creating user:", error);
     alert("Failed to register user. Please try again.");
@@ -104,15 +97,9 @@ async function signInWithGoogle() {
     await uploadBytes(storageRef, imageFile);
     const imageUrl = await getDownloadURL(storageRef);
 
-    // Save user information to Firebase Realtime Database
-    await set(dbRef(database, 'users/' + user.uid), {
-      name: user.displayName,
-      email: user.email,
-      photo: imageUrl
-    });
-
     alert("Google Sign-In successful and image uploaded!");
-    window.location.href = "join_event.html"; // Redirect to the next page
+    console.log("Profile image URL:", imageUrl);
+    window.location.href = "join_event.html";
   } catch (error) {
     console.error("Error with Google Sign-In:", error);
     alert("Google Sign-In failed. Please try again.");
