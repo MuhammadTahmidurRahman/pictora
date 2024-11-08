@@ -30,41 +30,7 @@ onAuthStateChanged(auth, (currentUser) => {
     user = null;
   }
 });
-
-// Function to join room as a guest
-async function joinRoomAsGuest(eventCode) {
-  if (!user) {
-    alert('Please log in to join the room!');
-    return;
-  }
-
-  const userEmail = user.email.replace('.', '_');
-  const guestData = {
-    guestId: user.uid,
-    guestName: user.displayName || 'Guest',
-    guestEmail: user.email,
-    guestPhotoUrl: user.photoURL || '',
-  };
-
-  const roomRef = ref(database, `rooms/${eventCode}/guests/${userEmail}`);
-  const snapshot = await get(roomRef);
-
-  try {
-    if (!snapshot.exists()) {
-      await set(roomRef, guestData);
-      alert('You have successfully joined the room!');
-    } else {
-      alert('You have already joined this room!');
-    }
-    // Navigate to event room page
-    window.location.href = `eventroom.html?eventCode=${eventCode}`;
-  } catch (error) {
-    console.error('Error joining room:', error);
-    alert('An error occurred while trying to join the room.');
-  }
-}
-
-// Function to join room as a guest
+/// Function to join room as a guest
 async function joinRoomAsGuest(eventCode) {
     if (!user) {
       alert('Please log in to join the room!');
