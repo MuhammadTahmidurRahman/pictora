@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import { getDatabase, ref as dbRef, set, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
@@ -63,12 +63,18 @@ async function registerUser() {
   }
 
   try {
-    // Check if the email is already registered in Realtime Database
+    // 1. Check if the email is already registered in Firebase Authentication
+    const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+    if (signInMethods.length > 0) {
+      alert("This email is already registered. Please log in instead.");
+      return;
+    }
+
+    // 2. Check if the email is already registered in Realtime Database
     const userQuery = query(dbRef(database, "users"), orderByChild("email"), equalTo(email));
     const userSnapshot = await get(userQuery);
-
     if (userSnapshot.exists()) {
-      alert("This email is already registered. Please use a different email or sign in.");
+      alert("This email is already registered in the database. Please log in instead.");
       return;
     }
 
@@ -89,7 +95,6 @@ async function registerUser() {
     });
 
     alert("User registered successfully with image uploaded!");
-    console.log("Profile image URL:", imageUrl);
     window.location.href = "join_event.html";
   } catch (error) {
     console.error("Error creating user:", error);
@@ -111,10 +116,10 @@ async function signInWithGoogle() {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Check if the user is already registered
+    // Check if the user is already registered in Realtime Database
     const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
     if (userSnapshot.exists()) {
-      alert("You are already signed up. Redirecting you to the join event page.");
+      alert("You have already signed up. Redirecting you to the join event page.");
       window.location.href = "join_event.html";
       return;
     }
@@ -132,7 +137,6 @@ async function signInWithGoogle() {
     });
 
     alert("Google Sign-In successful and image uploaded!");
-    console.log("Profile image URL:", imageUrl);
     window.location.href = "join_event.html";
   } catch (error) {
     console.error("Error with Google Sign-In:", error);
