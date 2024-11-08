@@ -10,6 +10,7 @@ const firebaseConfig = {
   projectId: "pictora-7f0ad",
   storageBucket: "pictora-7f0ad.appspot.com",
   messagingSenderId: "155732133141",
+  databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app",
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
 
