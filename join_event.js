@@ -1,3 +1,4 @@
+
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
 import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
@@ -20,10 +21,16 @@ const database = getDatabase(firebaseApp);
 
 let user = null;
 
+
+
+
 // Track authentication state
 onAuthStateChanged(auth, (currentUser) => {
   if (currentUser) {
     user = currentUser;
+
+
+
     console.log('User logged in:', user.email);
   } else {
     console.log('No user is logged in');
@@ -41,34 +48,74 @@ async function joinRoomAsGuest(eventCode, roomName) {
   const userEmailKey = user.email.replace(/\./g, '_');
   const guestKey = `${eventCode}_${roomName}__${userEmailKey}_${user.displayName}`;
 
+
+
+
+
+
+
+
+
+
+
+
+
   // Prepare guest data object
   const guestData = {
     guestEmail: user.email,
     guestId: user.uid,
     guestName: user.displayName || 'Guest',
     guestPhotoUrl: user.photoURL || '',
+
   };
 
   // Reference to the specific room and guests
   const roomRef = ref(database, `rooms/${eventCode}/guests`);
   const userRef = ref(database, `rooms/${eventCode}/guests/${guestKey}`);
 
+
   try {
     // Check if the user has already joined any guest with the same email
     const snapshot = await get(roomRef);
     let alreadyJoined = false;
 
+
+
+
+
     if (snapshot.exists()) {
       const guests = snapshot.val();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       // Check all guests in the room
       for (const key in guests) {
         if (guests[key].guestEmail === user.email) {
           alreadyJoined = true;
           break;
+
+
+
+
         }
       }
     }
+
 
     if (alreadyJoined) {
       alert('You have already joined this room!');
@@ -88,9 +135,8 @@ async function joinRoomAsGuest(eventCode, roomName) {
 // Function to navigate to the event room after checking the code
 async function navigateToEventRoom() {
   const eventCode = document.getElementById('eventCodeInput').value.trim();
-  if (!eventCode) {
-    alert('Please enter a code.');
-    return;
+
+@@ -128,32 +94,34 @@
   }
 
   try {
