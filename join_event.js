@@ -15,13 +15,23 @@ const firebaseConfig = {
   const database = firebase.database();
   
   const eventCodeInput = document.getElementById('eventCodeInput');
-  const navigateButton = document.getElementById('navigateButton');
+  const joinEventBtn = document.getElementById('joinEventBtn');
   const backButton = document.getElementById('backButton');
-  let user = auth.currentUser;
+  let user = null;
+  
+  // Listen for auth state changes to update the `user` variable
+  auth.onAuthStateChanged((currentUser) => {
+    if (currentUser) {
+      user = currentUser;
+      console.log('User logged in:', user.email);
+    } else {
+      console.log('No user is logged in');
+      user = null;
+    }
+  });
   
   // Function to join room as a guest
   async function joinRoomAsGuest(eventCode) {
-    user = auth.currentUser;
     if (!user) {
       alert('Please log in to join the room!');
       return;
@@ -38,13 +48,18 @@ const firebaseConfig = {
     const roomRef = database.ref(`rooms/${eventCode}/guests/${userEmail}`);
     const snapshot = await roomRef.get();
   
-    if (!snapshot.exists()) {
-      await roomRef.set(guestData);
-      alert('You have successfully joined the room!');
+    try {
+      if (!snapshot.exists()) {
+        await roomRef.set(guestData);
+        alert('You have successfully joined the room!');
+      } else {
+        alert('You have already joined this room!');
+      }
+      // Navigate to event room page
       window.location.href = `eventroom.html?eventCode=${eventCode}`;
-    } else {
-      alert('You have already joined this room!');
-      window.location.href = `eventroom.html?eventCode=${eventCode}`;
+    } catch (error) {
+      console.error('Error joining room:', error);
+      alert('An error occurred while trying to join the room.');
     }
   }
   
@@ -56,13 +71,18 @@ const firebaseConfig = {
       return;
     }
   
-    // Check if the room exists
-    const snapshot = await database.ref(`rooms/${eventCode}`).get();
-    if (snapshot.exists()) {
-      // Join the room as a guest
-      await joinRoomAsGuest(eventCode);
-    } else {
-      alert('Room does not exist!');
+    try {
+      // Check if the room exists
+      const snapshot = await database.ref(`rooms/${eventCode}`).get();
+      if (snapshot.exists()) {
+        // Join the room as a guest
+        await joinRoomAsGuest(eventCode);
+      } else {
+        alert('Room does not exist!');
+      }
+    } catch (error) {
+      console.error('Error navigating to event room:', error);
+      alert('An error occurred while verifying the room code.');
     }
   }
   
@@ -72,6 +92,6 @@ const firebaseConfig = {
   }
   
   // Event Listeners
-  navigateButton.addEventListener('click', navigateToEventRoom);
+  joinEventBtn.addEventListener('click', navigateToEventRoom);
   backButton.addEventListener('click', goBack);
   
