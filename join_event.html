@@ -1,25 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Join Event</title>
-<link rel="stylesheet" href="join_event.css">
-<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join Event</title>
+  <link rel="stylesheet" href="join_event.css">
+
+  <!-- Firebase Scripts as Modules -->
+  <script type="module" src="join_event.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <button onclick="goBack()">&#8592; Back</button>
+            <button id="backButton">&#8592; Back</button>
             <h1>Join Room</h1>
         </div>
         <div class="content">
             <input type="text" id="eventCodeInput" placeholder="Enter event code to join">
-            <button id="joinEventBtn" onclick="navigateToEventRoom()">Go to EventRoom</button>
+            <button id="joinEventBtn">Go to EventRoom</button>
         </div>
     </div>
-    <script type="module" ="join_event.js"></script>
 </body>
 </html>
