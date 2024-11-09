@@ -13,6 +13,18 @@ const firebaseConfig = {
   databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app",
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
+const auth = getAuth(app);
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    const eventCode = new URLSearchParams(window.location.search).get("eventCode");
+    if (eventCode) {
+        loadEventRoom(eventCode);
+    }
+  } else {
+    alert("You need to log in to access this room.");
+    window.location.href = "login.html";
+  }
+});
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
