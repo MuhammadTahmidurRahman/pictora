@@ -1,59 +1,57 @@
 body {
-    background-image: url('assets/hpbg1.png');
+    background: url('assets/hpbg1.png') no-repeat center center fixed;
     background-size: cover;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    color: #fff;
     font-family: Arial, sans-serif;
-    color: #ffffff;
 }
 
 .container {
-    background-color: rgba(0, 0, 0, 0.6);
+    max-width: 600px;
+    margin: 50px auto;
+    background: rgba(0, 0, 0, 0.6);
     padding: 20px;
     border-radius: 10px;
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
 }
 
-.button {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: none;
-    border-radius: 5px;
-    background-color: black;
-    color: white;
-    cursor: pointer;
-    font-weight: bold;
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.red-button {
-    background-color: red;
-}
-
-.photo-container img {
-    width: 60px;
-    height: 60px;
+.host-photo {
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
 }
 
-#guestList {
+button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    background-color: #444;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #333;
+}
+
+button.danger {
+    background-color: #d9534f;
+}
+
+ul {
     list-style: none;
     padding: 0;
 }
 
-#guestList li {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-#guestList img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 10px;
+ul li {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 5px;
 }
