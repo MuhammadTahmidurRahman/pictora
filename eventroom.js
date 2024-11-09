@@ -14,27 +14,25 @@ const firebaseConfig = {
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
 // Load event room data
-async function loadEventRoom(eventCode) {
-    const roomRef = dbRef(database, `rooms/${eventCode}`);
-    const roomSnapshot = await get(roomRef);
+async function loadEventRoom() {
+  try {
+      const roomRef = dbRef(database, `rooms/${eventCode}`);
+      const snapshot = await get(roomRef);
+      if (snapshot.exists()) {
+          const roomData = snapshot.val();
+          roomNameElem.textContent = roomData.roomName || 'Event Room';
+          roomCodeElem.textContent = `Code: ${eventCode}`;
 
-    if (!roomSnapshot.exists()) {
-        alert("Room not found!");
-        return;
-    }
-
-    const roomData = roomSnapshot.val();
-    document.getElementById("roomNameSpan").textContent = roomData.roomName || "Unnamed Room";
-    document.getElementById("roomCodeSpan").textContent = eventCode;
-    
-    const hostData = Object.values(roomData.host || {})[0] || {};
-    document.getElementById("hostNameSpan").textContent = hostData.hostName || "Unknown Host";
-
-    if (hostData.hostPhotoUrl) {
-        document.getElementById("hostPhoto").src = hostData.hostPhotoUrl;
-    }
-
-    loadGuests(roomData.guests || {});
+          // Set host photo with error fallback
+          const hostPhotoUrl = roomData.hostPhotoUrl || '';
+          hostPhotoElem.src = hostPhotoUrl;
+          hostPhotoElem.onerror = () => { hostPhotoElem.src = 'default.png'; };
+      } else {
+          alert("Room does not exist.");
+      }
+  } catch (error) {
+      console.error("Error loading event room:", error);
+  }
 }
 
 // Load guests list
