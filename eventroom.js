@@ -28,7 +28,6 @@ auth.onAuthStateChanged((user) => {
 });
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
 const database = getDatabase(app); // Initialize the database reference
 
 // Load event room data
