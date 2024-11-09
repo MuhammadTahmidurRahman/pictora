@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Event Room</title>
-<link rel="stylesheet" href="eventroom.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Room</title>
+    <link rel="stylesheet" href="eventroom.css">
 </head>
 <body>
     <div class="container">
@@ -12,7 +12,7 @@
             <button id="backButton">&larr; Back</button>
             <h1 id="roomTitle">Event Room</h1>
         </div>
-        
+
         <div class="room-details">
             <h2 id="roomName">Room Name: <span id="roomNameSpan"></span></h2>
             <h3>Room Code: <span id="roomCodeSpan"></span></h3>
@@ -27,10 +27,12 @@
         <ul id="guestList"></ul>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js"></script>
+
     <script src="firebaseConfig.js"></script>
     <script src="eventroom.js"></script>
 </body>
