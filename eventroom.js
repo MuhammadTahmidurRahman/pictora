@@ -1,10 +1,9 @@
-// Import necessary Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { getDatabase, ref as dbRef, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getStorage, ref as storageRef, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-// Step 1: Define Firebase configuration
+// Firebase Initialization
 const firebaseConfig = {
   apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
   authDomain: "pictora-7f0ad.firebaseapp.com",
@@ -14,33 +13,36 @@ const firebaseConfig = {
   databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app",
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
-
-// Step 2: Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const database = getDatabase(app);
-const storage = getStorage(app);
+const auth = getAuth();
+const database = getDatabase();
+const storage = getStorage();
 
-// Elements from HTML (Ensure these IDs are defined in your HTML)
-const roomNameElem = document.getElementById("roomName");
-const roomCodeElem = document.getElementById("roomCode");
-const hostPhotoElem = document.getElementById("hostPhoto");
-
-// Load event room data
+// Fetch Room Data and Display
 async function loadEventRoom(eventCode) {
   try {
     const roomRef = dbRef(database, `rooms/${eventCode}`);
     const snapshot = await get(roomRef);
-
     if (snapshot.exists()) {
       const roomData = snapshot.val();
-      roomNameElem.textContent = roomData.roomName || "Event Room";
+      const roomNameElem = document.getElementById("roomName");
+      const roomCodeElem = document.getElementById("roomCode");
+      const hostPhotoElem = document.getElementById("hostPhoto");
+
+      roomNameElem.textContent = roomData.roomName || 'Event Room';
       roomCodeElem.textContent = `Code: ${eventCode}`;
 
-      // Set host photo with error fallback
-      const hostPhotoUrl = roomData.hostPhotoUrl || "";
-      hostPhotoElem.src = hostPhotoUrl;
-      hostPhotoElem.onerror = () => { hostPhotoElem.src = "default.png"; };
+      // Fetch Host Photo URL
+      const hostData = roomData.host && Object.values(roomData.host)[0];
+      if (hostData && hostData.hostPhotoUrl) {
+        // Display Host Image
+        hostPhotoElem.src = hostData.hostPhotoUrl;
+      } else {
+        hostPhotoElem.src = "fallback.png"; // Fallback image
+      }
+
+      // Load Guests List
+      loadGuests(roomData.guests);
     } else {
       alert("Room does not exist.");
     }
@@ -49,20 +51,33 @@ async function loadEventRoom(eventCode) {
   }
 }
 
-// Load guests list (Optional function, depending on your HTML structure)
+// Load Guests List
 function loadGuests(guestsData) {
-  const guestList = document.getElementById("guestList");
-  guestList.innerHTML = "";
+  const guestListElem = document.getElementById("guestList");
+  guestListElem.innerHTML = "";
 
   for (const guestKey in guestsData) {
     const guest = guestsData[guestKey];
     const guestItem = document.createElement("li");
-    guestItem.textContent = guest.guestName || "Unnamed Guest";
-    guestList.appendChild(guestItem);
+
+    // Display Guest Image
+    const guestPhoto = document.createElement("img");
+    guestPhoto.width = 40;
+    guestPhoto.height = 40;
+    guestPhoto.style.borderRadius = "50%";
+    guestPhoto.src = guest.guestPhotoUrl || "fallback.png";
+
+    // Guest Name
+    const guestName = document.createElement("span");
+    guestName.textContent = guest.guestName || "Unnamed Guest";
+
+    guestItem.appendChild(guestPhoto);
+    guestItem.appendChild(guestName);
+    guestListElem.appendChild(guestItem);
   }
 }
 
-// Upload photo functionality
+// Upload Photo
 document.getElementById("uploadPhotoButton").addEventListener("click", async () => {
   const user = auth.currentUser;
   if (!user) {
@@ -74,43 +89,32 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
   const picker = document.createElement("input");
   picker.type = "file";
   picker.accept = "image/*";
-  picker.multiple = true;
   picker.click();
 
   picker.onchange = async (event) => {
-    const files = event.target.files;
-    if (!files.length) return;
+    const file = event.target.files[0];
+    if (!file) return;
 
-    const folderName = `${user.uid}_uploads`;
-    for (let file of files) {
-      const fileName = `${Date.now()}_${file.name}`;
-      const fileRef = storageRef(storage, `rooms/${eventCode}/${folderName}/${fileName}`);
-      try {
-        await uploadBytes(fileRef, file);
-        alert(`Uploaded ${fileName}!`);
-      } catch (error) {
-        console.error("Error uploading file:", error);
-      }
-    }
+    const userId = user.uid;
+    const folderPath = `rooms/${eventCode}/${userId}/photos/`;
+    const fileName = `${Date.now()}_${file.name}`;
+    const fileRef = storageRef(storage, `${folderPath}${fileName}`);
+
+    // Upload Image
+    await uploadBytes(fileRef, file);
+
+    // Update the Database
+    const photoUrl = await getDownloadURL(fileRef);
+    const userRef = dbRef(database, `rooms/${eventCode}/guests/${userId}`);
+    await userRef.update({
+      guestPhotoUrl: photoUrl,
+    });
+
+    alert("Photo uploaded successfully!");
   };
 });
 
-// Delete room functionality
-document.getElementById("deleteRoomButton").addEventListener("click", async () => {
-  const confirmation = confirm("Are you sure?");
-  if (!confirmation) return;
-
-  const eventCode = new URLSearchParams(window.location.search).get("eventCode");
-  try {
-    await set(dbRef(database, `rooms/${eventCode}`), null);
-    alert("Room deleted!");
-    window.location.href = "index.html";
-  } catch (error) {
-    console.error("Error deleting room:", error);
-  }
-});
-
-// Load room on page load
+// Window onload
 window.onload = () => {
   const eventCode = new URLSearchParams(window.location.search).get("eventCode");
   if (eventCode) {
