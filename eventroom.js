@@ -1,10 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import { getDatabase, ref as dbRef, set, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getDatabase } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// Firebase configuration
-const app = initializeApp(firebaseConfig);
+// Step 1: Define Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
   authDomain: "pictora-7f0ad.firebaseapp.com",
@@ -14,18 +12,13 @@ const firebaseConfig = {
   databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app",
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
+
+// Step 2: Initialize Firebase app
+const app = initializeApp(firebaseConfig);
+
+// Step 3: Access Firebase services
 const auth = getAuth(app);
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    const eventCode = new URLSearchParams(window.location.search).get("eventCode");
-    if (eventCode) {
-        loadEventRoom(eventCode);
-    }
-  } else {
-    alert("You need to log in to access this room.");
-    window.location.href = "login.html";
-  }
-});
+const database = getDatabase(app);
 
 // Initialize Firebase
 const database = getDatabase(app); // Initialize the database reference
