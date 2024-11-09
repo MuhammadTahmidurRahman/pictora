@@ -12,17 +12,11 @@ const firebaseConfig = {
   databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app",
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
-
-// Step 2: Initialize Firebase app
-const app = initializeApp(firebaseConfig);
-
-// Step 3: Access Firebase services
-const auth = getAuth(app);
-const database = getDatabase(app);
-
 // Initialize Firebase
-const database = getDatabase(app); // Initialize the database reference
-
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const storage = getStorage();
+const database = getDatabase();
 // Load event room data
 async function loadEventRoom(eventCode) {
   try {
