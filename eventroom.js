@@ -70,29 +70,32 @@ function loadGuests(guestsData) {
 }
 
 // Detect User Type (Host or Guest)
-async function detectUserType(eventCode, userId) {
+async function detectUserType(eventCode, userId, userEmail, userDisplayName) {
   const roomRef = dbRef(database, `rooms/${eventCode}`);
   const snapshot = await get(roomRef);
 
   if (snapshot.exists()) {
     const roomData = snapshot.val();
+    const emailKeyPart = userEmail.replace(/\./g, '_'); // Replace `.` with `_`
+    const nameKeyPart = userDisplayName.replace(/ /g, '_');
+
+    // Construct potential keys for host and guests
+    const potentialHostKey = `${eventCode}_Test1_${emailKeyPart}_${nameKeyPart}`;
+    const potentialGuestKey = `${eventCode}_Test1_${emailKeyPart}_${nameKeyPart}`;
 
     // Check if the user is the host
-    for (const hostKey in roomData.host) {
-      if (roomData.host[hostKey]?.hostId === userId) {
-        return { type: "host", key: hostKey };
-      }
+    if (roomData.host[potentialHostKey]?.hostId === userId) {
+      return { type: "host", key: potentialHostKey };
     }
 
     // Check if the user is a guest
-    for (const guestKey in roomData.guests) {
-      if (roomData.guests[guestKey]?.guestId === userId) {
-        return { type: "guest", key: guestKey };
-      }
+    if (roomData.guests[potentialGuestKey]?.guestId === userId) {
+      return { type: "guest", key: potentialGuestKey };
     }
   }
   return null;
 }
+
 
 // Upload Photo and Update Database
 document.getElementById("uploadPhotoButton").addEventListener("click", async () => {
@@ -116,14 +119,18 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
     const userEmail = user.email.replace(/\./g, '_');
     const userDisplayName = user.displayName.replace(/ /g, '_') || "Guest";
 
-    // Detect user type
-    const userType = await detectUserType(eventCode, userId);
+    // Detect user type using the updated structure
+    const userType = await detectUserType(eventCode, userId, userEmail, userDisplayName);
     if (!userType) {
       alert("User is not part of this room!");
       return;
     }
 
-    const folderPath = `rooms/${eventCode}/${userType.type === 'host' ? 'host' : 'guests'}/${userDisplayName}/${userId}/photos/`;
+    // Determine folder path based on user type
+    const folderPath = userType.type === 'host' 
+      ? `rooms/${eventCode}/host/${userType.key}/photos/`
+      : `rooms/${eventCode}/guests/${userType.key}/photos/`;
+      
     const fileName = `${Date.now()}_${file.name}`;
     const fileRef = storageRef(storage, `${folderPath}${fileName}`);
 
