@@ -1,3 +1,4 @@
+// Import necessary Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getDatabase, ref as dbRef, update, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
@@ -19,26 +20,19 @@ const auth = getAuth();
 const database = getDatabase();
 const storage = getStorage();
 
-// Fetch Room Data and Display
+// Load Event Room and Data
 async function loadEventRoom(eventCode) {
   try {
     const roomRef = dbRef(database, `rooms/${eventCode}`);
     const snapshot = await get(roomRef);
     if (snapshot.exists()) {
       const roomData = snapshot.val();
-      const roomNameElem = document.getElementById("roomName");
-      const roomCodeElem = document.getElementById("roomCode");
-      const hostPhotoElem = document.getElementById("hostPhoto");
-
-      roomNameElem.textContent = roomData.roomName || 'Event Room';
-      roomCodeElem.textContent = `Code: ${eventCode}`;
-
-      // Host Data
-      const hostKey = Object.keys(roomData.host)[0];
-      const hostData = roomData.host[hostKey];
-      hostPhotoElem.src = hostData?.hostPhotoUrl || "fallback.png";
-
-      // Load Guests List
+      document.getElementById("roomName").textContent = roomData.roomName || 'Event Room';
+      document.getElementById("roomCode").textContent = `Code: ${eventCode}`;
+      
+      // Host information
+      const hostData = Object.values(roomData.host || {})[0];
+      document.getElementById("hostPhoto").src = hostData?.hostPhotoUrl || "fallback.png";
       loadGuests(roomData.guests);
     } else {
       alert("Room does not exist.");
@@ -48,31 +42,22 @@ async function loadEventRoom(eventCode) {
   }
 }
 
-// Load Guests List
+// Load Guest List
 function loadGuests(guestsData) {
   const guestListElem = document.getElementById("guestList");
   guestListElem.innerHTML = "";
 
-  for (const guestKey in guestsData) {
-    const guest = guestsData[guestKey];
+  Object.values(guestsData || {}).forEach((guest) => {
     const guestItem = document.createElement("li");
-
-    const guestPhoto = document.createElement("img");
-    guestPhoto.width = 40;
-    guestPhoto.height = 40;
-    guestPhoto.style.borderRadius = "50%";
-    guestPhoto.src = guest.guestPhotoUrl || "fallback.png";
-
-    const guestName = document.createElement("span");
-    guestName.textContent = guest.guestName || "Unnamed Guest";
-
-    guestItem.appendChild(guestPhoto);
-    guestItem.appendChild(guestName);
+    guestItem.innerHTML = `
+      <img src="${guest.guestPhotoUrl || 'fallback.png'}" width="40" height="40" style="border-radius: 50%;" alt="Guest Photo">
+      <span>${guest.guestName || "Unnamed Guest"}</span>
+    `;
     guestListElem.appendChild(guestItem);
-  }
+  });
 }
 
-// Detect User Type (Host or Guest)
+// Detect User Role (Host or Guest)
 async function detectUserType(eventCode, userId) {
   const roomRef = dbRef(database, `rooms/${eventCode}`);
   const snapshot = await get(roomRef);
@@ -80,14 +65,14 @@ async function detectUserType(eventCode, userId) {
   if (snapshot.exists()) {
     const roomData = snapshot.val();
 
-    // Check if the user is the host
+    // Check if user is host
     for (const hostKey in roomData.host) {
       if (roomData.host[hostKey]?.hostId === userId) {
         return { type: "host", key: hostKey };
       }
     }
 
-    // Check if the user is a guest
+    // Check if user is guest
     for (const guestKey in roomData.guests) {
       if (roomData.guests[guestKey]?.guestId === userId) {
         return { type: "guest", key: guestKey };
@@ -98,7 +83,7 @@ async function detectUserType(eventCode, userId) {
   return null;
 }
 
-// Upload Photo and Update Database
+// Upload Photo
 document.getElementById("uploadPhotoButton").addEventListener("click", async () => {
   const user = auth.currentUser;
   if (!user) {
@@ -117,32 +102,26 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
     if (!file) return;
 
     const userId = user.uid;
-    const userEmail = user.email.replace(/\./g, '_');
-    const userDisplayName = user.displayName.replace(/ /g, '_') || "Guest";
 
-    // Detect user type
+    // Detect user role (host/guest)
     const userType = await detectUserType(eventCode, userId);
     if (!userType) {
       alert("User is not part of this room!");
       return;
     }
 
-    const folderPath = `rooms/${eventCode}/${userType.type === 'host' ? 'host' : 'guests'}/${userType.key}/photos/`;
-    const fileName = `${Date.now()}_${file.name}`;
-    const fileRef = storageRef(storage, `${folderPath}${fileName}`);
+    const folderType = userType.type === 'host' ? 'host' : 'guests';
+    const storagePath = `rooms/${eventCode}/${folderType}/${userType.key}/photos/${Date.now()}_${file.name}`;
+    const fileRef = storageRef(storage, storagePath);
 
     try {
-      // Upload Image to Firebase Storage
       const snapshot = await uploadBytes(fileRef, file);
       const photoUrl = await getDownloadURL(snapshot.ref);
 
-      // Update the photo URL and uploaded folder path for the existing host or guest entry
-      const userRef = dbRef(database, `rooms/${eventCode}/${userType.type}/${userType.key}`);
-      
-      // Only update the relevant fields without adding new ones
+      const userRef = dbRef(database, `rooms/${eventCode}/${folderType}/${userType.key}`);
       await update(userRef, {
         [`${userType.type}PhotoUrl`]: photoUrl,
-        uploadedPhotoFolderPath: folderPath
+        uploadedPhotoFolderPath: `rooms/${eventCode}/${folderType}/${userType.key}/photos/`
       });
 
       alert("Photo uploaded successfully!");
