@@ -71,27 +71,38 @@ function loadGuests(guestsData) {
 
 // Detect User Type (Host or Guest)
 async function detectUserType(eventCode, userId, userEmail, userDisplayName) {
-  const roomRef = dbRef(database, `rooms/${eventCode}`);
-  const snapshot = await get(roomRef);
+  try {
+    const roomRef = dbRef(database, `rooms/${eventCode}`);
+    const snapshot = await get(roomRef);
 
-  if (snapshot.exists()) {
-    const roomData = snapshot.val();
-    const emailKeyPart = userEmail.replace(/\./g, '_'); // Replace `.` with `_`
-    const nameKeyPart = userDisplayName.replace(/ /g, '_');
+    if (snapshot.exists()) {
+      const roomData = snapshot.val();
+      console.log("Room Data Loaded:", roomData);
 
-    // Construct potential keys for host and guests
-    const potentialHostKey = `${eventCode}_Test1_${emailKeyPart}_${nameKeyPart}`;
-    const potentialGuestKey = `${eventCode}_Test1_${emailKeyPart}_${nameKeyPart}`;
+      const emailKeyPart = userEmail.replace(/\./g, '_'); // Replace `.` with `_`
+      const nameKeyPart = userDisplayName.replace(/ /g, '_');
 
-    // Check if the user is the host
-    if (roomData.host[potentialHostKey]?.hostId === userId) {
-      return { type: "host", key: potentialHostKey };
+      // Construct potential keys for host and guests
+      const potentialHostKey = `${eventCode}_Test1_${emailKeyPart}_${nameKeyPart}`;
+      const potentialGuestKey = `${eventCode}_Test1_${emailKeyPart}_${nameKeyPart}`;
+
+      console.log("Checking Host Key:", potentialHostKey);
+      console.log("Checking Guest Key:", potentialGuestKey);
+
+      // Check if the user is the host
+      if (roomData.host?.[potentialHostKey]?.hostId === userId) {
+        return { type: "host", key: potentialHostKey };
+      }
+
+      // Check if the user is a guest
+      if (roomData.guests?.[potentialGuestKey]?.guestId === userId) {
+        return { type: "guest", key: potentialGuestKey };
+      }
+    } else {
+      console.error("Room does not exist");
     }
-
-    // Check if the user is a guest
-    if (roomData.guests[potentialGuestKey]?.guestId === userId) {
-      return { type: "guest", key: potentialGuestKey };
-    }
+  } catch (error) {
+    console.error("Error detecting user type:", error);
   }
   return null;
 }
