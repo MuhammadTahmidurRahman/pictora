@@ -90,7 +90,7 @@ async function detectUserType(eventCode, userId, userEmail, userDisplayName) {
 
     // Check if the user is a guest
     if (roomData.guests[potentialGuestKey]?.guestId === userId) {
-      return { type: "guest", key: potentialGuestKey };
+      return { type: "guestS", key: potentialGuestKey };
     }
   }
   return null;
