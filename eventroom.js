@@ -33,7 +33,9 @@ async function loadEventRoom(eventCode) {
       roomNameElem.textContent = roomData.roomName || 'Event Room';
       roomCodeElem.textContent = `Code: ${eventCode}`;
 
-      const hostData = roomData.host && Object.values(roomData.host)[0];
+      // Host Data
+      const hostKey = Object.keys(roomData.host)[0];
+      const hostData = roomData.host[hostKey];
       if (hostData && hostData.hostPhotoUrl) {
         hostPhotoElem.src = hostData.hostPhotoUrl;
       } else {
@@ -93,7 +95,10 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
     if (!file) return;
 
     const userId = user.uid;
-    const folderPath = `rooms/${eventCode}/${userId}/photos/`;
+    const userEmail = user.email.replace(/\./g, '_');
+    const userDisplayName = user.displayName || "Guest";
+    const userRole = userId === Object.values((await get(dbRef(database, `rooms/${eventCode}/host`))).val())[0].hostId ? 'host' : 'guests';
+    const folderPath = `rooms/${eventCode}/${userRole}/${userDisplayName}/${userId}/photos/`;
     const fileName = `${Date.now()}_${file.name}`;
     const fileRef = storageRef(storage, `${folderPath}${fileName}`);
 
@@ -102,10 +107,15 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
       const snapshot = await uploadBytes(fileRef, file);
       const photoUrl = await getDownloadURL(snapshot.ref);
 
+      // Determine the correct database reference
+      const userRefPath = userRole === 'host'
+        ? `rooms/${eventCode}/host/${eventCode}_${userDisplayName}_${userEmail}`
+        : `rooms/${eventCode}/guests/${eventCode}_${userDisplayName}_${userEmail}`;
+      const userRef = dbRef(database, userRefPath);
+
       // Update Firebase Realtime Database
-      const userRef = dbRef(database, `rooms/${eventCode}/guests/${userId}`);
       await update(userRef, {
-        guestPhotoUrl: photoUrl,
+        [`${userRole === 'host' ? 'hostPhotoUrl' : 'guestPhotoUrl'}`]: photoUrl,
         uploadedPhotoFolderPath: `${folderPath}${fileName}`,
       });
 
