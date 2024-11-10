@@ -36,11 +36,7 @@ async function loadEventRoom(eventCode) {
       // Host Data
       const hostKey = Object.keys(roomData.host)[0];
       const hostData = roomData.host[hostKey];
-      if (hostData && hostData.hostPhotoUrl) {
-        hostPhotoElem.src = hostData.hostPhotoUrl;
-      } else {
-        hostPhotoElem.src = "fallback.png";
-      }
+      hostPhotoElem.src = hostData?.hostPhotoUrl || "fallback.png";
 
       // Load Guests List
       loadGuests(roomData.guests);
@@ -76,6 +72,32 @@ function loadGuests(guestsData) {
   }
 }
 
+// Detect User Type (Host or Guest)
+async function detectUserType(eventCode, userId) {
+  const roomRef = dbRef(database, `rooms/${eventCode}`);
+  const snapshot = await get(roomRef);
+
+  if (snapshot.exists()) {
+    const roomData = snapshot.val();
+
+    // Check if the user is the host
+    for (const hostKey in roomData.host) {
+      if (roomData.host[hostKey]?.hostId === userId) {
+        return { type: "host", key: hostKey };
+      }
+    }
+
+    // Check if the user is a guest
+    for (const guestKey in roomData.guests) {
+      if (roomData.guests[guestKey]?.guestId === userId) {
+        return { type: "guest", key: guestKey };
+      }
+    }
+  }
+
+  return null;
+}
+
 // Upload Photo and Update Database
 document.getElementById("uploadPhotoButton").addEventListener("click", async () => {
   const user = auth.currentUser;
@@ -96,9 +118,16 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
 
     const userId = user.uid;
     const userEmail = user.email.replace(/\./g, '_');
-    const userDisplayName = user.displayName || "Guest";
-    const userRole = userId === Object.values((await get(dbRef(database, `rooms/${eventCode}/host`))).val())[0].hostId ? 'host' : 'guests';
-    const folderPath = `rooms/${eventCode}/${userRole}/${userDisplayName}/${userId}/photos/`;
+    const userDisplayName = user.displayName.replace(/ /g, '_') || "Guest";
+
+    // Detect user type
+    const userType = await detectUserType(eventCode, userId);
+    if (!userType) {
+      alert("User is not part of this room!");
+      return;
+    }
+
+    const folderPath = `rooms/${eventCode}/${userType.type === 'host' ? 'host' : 'guests'}/${userDisplayName}/${userId}/photos/`;
     const fileName = `${Date.now()}_${file.name}`;
     const fileRef = storageRef(storage, `${folderPath}${fileName}`);
 
@@ -107,15 +136,10 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
       const snapshot = await uploadBytes(fileRef, file);
       const photoUrl = await getDownloadURL(snapshot.ref);
 
-      // Determine the correct database reference
-      const userRefPath = userRole === 'host'
-        ? `rooms/${eventCode}/host/${eventCode}_${userDisplayName}_${userEmail}`
-        : `rooms/${eventCode}/guests/${eventCode}_${userDisplayName}_${userEmail}`;
-      const userRef = dbRef(database, userRefPath);
-
-      // Update Firebase Realtime Database
+      // Update the correct user type data in the Realtime Database
+      const userRef = dbRef(database, `rooms/${eventCode}/${userType.type}/${userType.key}`);
       await update(userRef, {
-        [`${userRole === 'host' ? 'hostPhotoUrl' : 'guestPhotoUrl'}`]: photoUrl,
+        [`${userType.type}PhotoUrl`]: photoUrl,
         uploadedPhotoFolderPath: `${folderPath}${fileName}`,
       });
 
