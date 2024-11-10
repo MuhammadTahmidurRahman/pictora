@@ -136,14 +136,25 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
       const snapshot = await uploadBytes(fileRef, file);
       const photoUrl = await getDownloadURL(snapshot.ref);
 
-      // Update the photo URL and uploaded folder path for the existing host or guest entry
+      // Prepare data for update
+      const updateData = {
+        uploadedPhotoFolderPath: folderPath,
+      };
+
+      if (userType.type === 'host') {
+        updateData['hostPhotoUrl'] = photoUrl;
+      } else if (userType.type === 'guest') {
+        updateData['guestPhotoUrl'] = photoUrl;
+      }
+
       const userRef = dbRef(database, `rooms/${eventCode}/${userType.type}/${userType.key}`);
       
-      // Only update the relevant fields without adding new ones
-      await update(userRef, {
-        [`${userType.type}PhotoUrl`]: photoUrl,
-        uploadedPhotoFolderPath: folderPath
-      });
+      // Log path and data for debugging
+      console.log("userRef path:", userRef.toString());
+      console.log("updateData:", updateData);
+
+      // Update the existing guest or host node
+      await update(userRef, updateData);
 
       alert("Photo uploaded successfully!");
     } catch (error) {
