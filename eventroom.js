@@ -107,6 +107,11 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
   }
 
   const eventCode = new URLSearchParams(window.location.search).get("eventCode");
+  if (!eventCode) {
+    alert("Event code is missing!");
+    return;
+  }
+
   const picker = document.createElement("input");
   picker.type = "file";
   picker.accept = "image/*";
@@ -134,13 +139,12 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
       const snapshot = await uploadBytes(fileRef, file);
       const photoUrl = await getDownloadURL(snapshot.ref);
 
-      // Update the existing host or guest entry with the new photo URL and folder path
+      // Update the existing host or guest entry with the new photo URL
       const userRef = dbRef(database, `rooms/${eventCode}/${userType.type}/${userType.key}`);
 
       // Update only the relevant fields without overwriting other data
       await update(userRef, {
         [`${userType.type}PhotoUrl`]: photoUrl,
-        uploadedPhotoFolderPath: folderPath
       });
 
       alert("Photo uploaded successfully!");
