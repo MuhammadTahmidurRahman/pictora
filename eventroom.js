@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref as storageRef, uploadBytes } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import { getDatabase, ref as dbRef, set, update, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref as dbRef, update, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -20,7 +20,52 @@ const auth = getAuth();
 const storage = getStorage();
 const database = getDatabase();
 
-// Function to upload photo and update the database
+// Load event room data
+async function loadEventRoom(eventCode) {
+    try {
+        const roomRef = dbRef(database, `rooms/${eventCode}`);
+        const roomSnapshot = await get(roomRef);
+
+        if (!roomSnapshot.exists()) {
+            alert("Room not found!");
+            return;
+        }
+
+        const roomData = roomSnapshot.val();
+        // Display room details
+        document.getElementById("roomNameSpan").textContent = roomData.roomName || "Unnamed Room";
+        document.getElementById("roomCodeSpan").textContent = eventCode;
+
+        // Display host info
+        const hostData = roomData.host;
+        if (hostData) {
+            document.getElementById("hostNameSpan").textContent = hostData.hostName || "Unknown Host";
+            if (hostData.hostPhotoUrl) {
+                document.getElementById("hostPhoto").src = hostData.hostPhotoUrl;
+            }
+        }
+
+        // Load guests list
+        loadGuests(roomData.guests || {});
+    } catch (error) {
+        console.error("Error loading room data:", error);
+    }
+}
+
+// Load guests list
+function loadGuests(guestsData) {
+    const guestList = document.getElementById("guestList");
+    guestList.innerHTML = "";
+
+    for (const guestId in guestsData) {
+        const guest = guestsData[guestId];
+        const guestItem = document.createElement("li");
+        guestItem.textContent = guest.guestName || "Unnamed Guest";
+        guestList.appendChild(guestItem);
+    }
+}
+
+// Upload photo and update database
 document.getElementById("uploadPhotoButton").addEventListener("click", async () => {
     const user = auth.currentUser;
     if (!user) {
@@ -42,37 +87,38 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
         const folderPath = `rooms/${eventCode}/${user.uid}/photos/`;
         const fileRef = storageRef(storage, `${folderPath}${fileName}`);
 
-        // Upload the file to Firebase Storage
-        await uploadBytes(fileRef, file);
-        alert(`Uploaded ${fileName}!`);
+        try {
+            // Upload the file to Firebase Storage
+            await uploadBytes(fileRef, file);
+            alert(`Uploaded ${fileName}!`);
 
-        // Update the photo folder path in the database
-        const roomRef = dbRef(database, `rooms/${eventCode}`);
-        const roomSnapshot = await get(roomRef);
+            // Update the database with the uploaded photo folder path
+            const roomRef = dbRef(database, `rooms/${eventCode}`);
+            const roomSnapshot = await get(roomRef);
 
-        if (!roomSnapshot.exists()) {
-            alert("Room does not exist!");
-            return;
+            if (!roomSnapshot.exists()) {
+                alert("Room not found!");
+                return;
+            }
+
+            const roomData = roomSnapshot.val();
+            let updateData = {};
+
+            // Check if the user is the host or a guest
+            if (roomData.host && roomData.host.hostId === user.uid) {
+                updateData[`host/uploadedPhotoFolderPath`] = folderPath;
+            } else if (roomData.guests && roomData.guests[user.uid]) {
+                updateData[`guests/${user.uid}/uploadedPhotoFolderPath`] = folderPath;
+            } else {
+                alert("User not recognized in this event room!");
+                return;
+            }
+
+            await update(roomRef, updateData);
+            alert("Photo folder path updated successfully!");
+        } catch (error) {
+            console.error("Error uploading file:", error);
         }
-
-        const roomData = roomSnapshot.val();
-        let updateData = {};
-
-        // Check if the current user is the host or a guest
-        if (roomData.host && roomData.host.hostId === user.uid) {
-            // If the user is the host
-            updateData[`host/uploadedPhotoFolderPath`] = folderPath;
-        } else if (roomData.guests && roomData.guests[user.uid]) {
-            // If the user is a guest
-            updateData[`guests/${user.uid}/uploadedPhotoFolderPath`] = folderPath;
-        } else {
-            alert("User not recognized in this event room!");
-            return;
-        }
-
-        // Update the database with the new photo path
-        await update(roomRef, updateData);
-        alert("Photo path updated successfully!");
     };
 });
 
@@ -82,39 +128,3 @@ window.onload = async () => {
         await loadEventRoom(eventCode);
     }
 };
-
-// Function to load the event room details
-async function loadEventRoom(eventCode) {
-    const roomRef = dbRef(database, `rooms/${eventCode}`);
-    const roomSnapshot = await get(roomRef);
-
-    if (!roomSnapshot.exists()) {
-        alert("Room not found!");
-        return;
-    }
-
-    const roomData = roomSnapshot.val();
-    document.getElementById("roomNameSpan").textContent = roomData.roomName || "Unnamed Room";
-    document.getElementById("roomCodeSpan").textContent = eventCode;
-
-    const hostData = roomData.host;
-    document.getElementById("hostNameSpan").textContent = hostData.hostName || "Unknown Host";
-    if (hostData.hostPhotoUrl) {
-        document.getElementById("hostPhoto").src = hostData.hostPhotoUrl;
-    }
-
-    loadGuests(roomData.guests || {});
-}
-
-// Function to load guests list
-function loadGuests(guestsData) {
-    const guestList = document.getElementById("guestList");
-    guestList.innerHTML = "";
-
-    for (const guestKey in guestsData) {
-        const guest = guestsData[guestKey];
-        const guestItem = document.createElement("li");
-        guestItem.textContent = guest.guestName || "Unnamed Guest";
-        guestList.appendChild(guestItem);
-    }
-}
