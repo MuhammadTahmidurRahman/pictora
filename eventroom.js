@@ -19,6 +19,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const database = getDatabase();
 const storage = getStorage();
+
 // Fetch User Profile Picture from Realtime Database
 async function fetchUserProfilePicture(userKey) {
   try {
@@ -26,10 +27,7 @@ async function fetchUserProfilePicture(userKey) {
     const snapshot = await get(userRef);
 
     if (snapshot.exists()) {
-      // Get the photo URL from the database
       const userPhotoUrl = snapshot.val();
-
-      // Update the image source to display the user's profile picture
       document.getElementById("userProfilePicture").src = userPhotoUrl;
     } else {
       console.error("User data does not exist.");
@@ -38,24 +36,6 @@ async function fetchUserProfilePicture(userKey) {
     console.error("Error fetching user profile picture:", error);
   }
 }
-
-// Load user profile picture on window load
-window.onload = async () => {
-  const eventCode = new URLSearchParams(window.location.search).get("eventCode");
-  if (eventCode) {
-    loadEventRoom(eventCode);
-  }
-
-  // Get the currently authenticated user
-  const user = auth.currentUser;
-  if (user) {
-    // Fetch and display the profile picture based on the authenticated user's ID
-    fetchUserProfilePicture(user.uid);
-  } else {
-    console.error("No authenticated user found.");
-  }
-};
-
 
 // Load Event Room and Data
 async function loadEventRoom(eventCode) {
@@ -70,6 +50,8 @@ async function loadEventRoom(eventCode) {
       // Host information
       const hostData = Object.values(roomData.host || {})[0];
       document.getElementById("hostPhoto").src = hostData?.hostPhotoUrl || "fallback.png";
+
+      // Load the guest list
       loadGuests(roomData.guests);
     } else {
       alert("Room does not exist.");
@@ -79,17 +61,22 @@ async function loadEventRoom(eventCode) {
   }
 }
 
-// Load Guest List
+// Load Guest List with Dynamic Access to Profile Pictures
 function loadGuests(guestsData) {
   const guestListElem = document.getElementById("guestList");
-  guestListElem.innerHTML = "";
+  guestListElem.innerHTML = "";  // Clear the current guest list
 
-  Object.values(guestsData || {}).forEach((guest) => {
+  Object.entries(guestsData || {}).forEach(([guestKey, guest]) => {
     const guestItem = document.createElement("li");
+
+    const guestPhotoUrl = guest.guestPhotoUrl || "fallback.png";
+    const guestName = guest.guestName || "Unnamed Guest";
+
     guestItem.innerHTML = `
-      <img src="${guest.guestPhotoUrl || 'fallback.png'}" width="40" height="40" style="border-radius: 50%;" alt="Guest Photo">
-      <span>${guest.guestName || "Unnamed Guest"}</span>
+      <img src="${guestPhotoUrl}" width="40" height="40" style="border-radius: 50%;" alt="Guest Photo">
+      <span>${guestName}</span>
     `;
+
     guestListElem.appendChild(guestItem);
   });
 }
@@ -102,14 +89,12 @@ async function detectUserType(eventCode, userId) {
   if (snapshot.exists()) {
     const roomData = snapshot.val();
 
-    // Check if user is host
     for (const hostKey in roomData.host) {
       if (roomData.host[hostKey]?.hostId === userId) {
         return { type: "host", key: hostKey };
       }
     }
 
-    // Check if user is guest
     for (const guestKey in roomData.guests) {
       if (roomData.guests[guestKey]?.guestId === userId) {
         return { type: "guest", key: guestKey };
@@ -140,7 +125,6 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
 
     const userId = user.uid;
 
-    // Detect user role (host/guest)
     const userType = await detectUserType(eventCode, userId);
     if (!userType) {
       alert("User is not part of this room!");
