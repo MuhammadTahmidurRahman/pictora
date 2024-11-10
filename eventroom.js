@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref as dbRef, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref as dbRef, update, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { getStorage, ref as storageRef, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Firebase Initialization
@@ -13,6 +13,7 @@ const firebaseConfig = {
   databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app",
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const database = getDatabase();
@@ -32,13 +33,11 @@ async function loadEventRoom(eventCode) {
       roomNameElem.textContent = roomData.roomName || 'Event Room';
       roomCodeElem.textContent = `Code: ${eventCode}`;
 
-      // Fetch Host Photo URL
       const hostData = roomData.host && Object.values(roomData.host)[0];
       if (hostData && hostData.hostPhotoUrl) {
-        // Display Host Image
         hostPhotoElem.src = hostData.hostPhotoUrl;
       } else {
-        hostPhotoElem.src = "fallback.png"; // Fallback image
+        hostPhotoElem.src = "fallback.png";
       }
 
       // Load Guests List
@@ -60,14 +59,12 @@ function loadGuests(guestsData) {
     const guest = guestsData[guestKey];
     const guestItem = document.createElement("li");
 
-    // Display Guest Image
     const guestPhoto = document.createElement("img");
     guestPhoto.width = 40;
     guestPhoto.height = 40;
     guestPhoto.style.borderRadius = "50%";
     guestPhoto.src = guest.guestPhotoUrl || "fallback.png";
 
-    // Guest Name
     const guestName = document.createElement("span");
     guestName.textContent = guest.guestName || "Unnamed Guest";
 
@@ -77,7 +74,7 @@ function loadGuests(guestsData) {
   }
 }
 
-// Upload Photo
+// Upload Photo and Update Database
 document.getElementById("uploadPhotoButton").addEventListener("click", async () => {
   const user = auth.currentUser;
   if (!user) {
@@ -100,17 +97,23 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
     const fileName = `${Date.now()}_${file.name}`;
     const fileRef = storageRef(storage, `${folderPath}${fileName}`);
 
-    // Upload Image
-    await uploadBytes(fileRef, file);
+    try {
+      // Upload Image to Firebase Storage
+      const snapshot = await uploadBytes(fileRef, file);
+      const photoUrl = await getDownloadURL(snapshot.ref);
 
-    // Update the Database
-    const photoUrl = await getDownloadURL(fileRef);
-    const userRef = dbRef(database, `rooms/${eventCode}/guests/${userId}`);
-    await userRef.update({
-      guestPhotoUrl: photoUrl,
-    });
+      // Update Firebase Realtime Database
+      const userRef = dbRef(database, `rooms/${eventCode}/guests/${userId}`);
+      await update(userRef, {
+        guestPhotoUrl: photoUrl,
+        uploadedPhotoFolderPath: `${folderPath}${fileName}`,
+      });
 
-    alert("Photo uploaded successfully!");
+      alert("Photo uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+      alert("Failed to upload photo.");
+    }
   };
 });
 
