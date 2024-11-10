@@ -19,24 +19,21 @@ const auth = getAuth();
 const database = getDatabase();
 const storage = getStorage();
 
-// Fetch Room Data and Display
+// Load Event Room Data
 async function loadEventRoom(eventCode) {
   try {
     const roomRef = dbRef(database, `rooms/${eventCode}`);
     const snapshot = await get(roomRef);
+
     if (snapshot.exists()) {
       const roomData = snapshot.val();
-      const roomNameElem = document.getElementById("roomName");
-      const roomCodeElem = document.getElementById("roomCode");
-      const hostPhotoElem = document.getElementById("hostPhoto");
+      document.getElementById("roomName").textContent = roomData.roomName || 'Event Room';
+      document.getElementById("roomCode").textContent = `Code: ${eventCode}`;
 
-      roomNameElem.textContent = roomData.roomName || 'Event Room';
-      roomCodeElem.textContent = `Code: ${eventCode}`;
-
-      // Host Data
+      // Load Host Data
       const hostKey = Object.keys(roomData.host)[0];
       const hostData = roomData.host[hostKey];
-      hostPhotoElem.src = hostData?.hostPhotoUrl || "fallback.png";
+      document.getElementById("hostPhoto").src = hostData?.hostPhotoUrl || "fallback.png";
 
       // Load Guests List
       loadGuests(roomData.guests);
@@ -94,7 +91,6 @@ async function detectUserType(eventCode, userId) {
       }
     }
   }
-
   return null;
 }
 
@@ -132,16 +128,17 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
     const fileRef = storageRef(storage, `${folderPath}${fileName}`);
 
     try {
-      // Upload Image to Firebase Storage
+      // Upload Image
       const snapshot = await uploadBytes(fileRef, file);
       const photoUrl = await getDownloadURL(snapshot.ref);
 
-      // Update the correct user type data in the Realtime Database
+      // Update Database
       const userRef = dbRef(database, `rooms/${eventCode}/${userType.type}/${userType.key}`);
-      await update(userRef, {
+      const updates = {
         [`${userType.type}PhotoUrl`]: photoUrl,
         uploadedPhotoFolderPath: `${folderPath}${fileName}`,
-      });
+      };
+      await update(userRef, updates);
 
       alert("Photo uploaded successfully!");
     } catch (error) {
@@ -151,7 +148,7 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
   };
 });
 
-// Window onload
+// Initialize Page
 window.onload = () => {
   const eventCode = new URLSearchParams(window.location.search).get("eventCode");
   if (eventCode) {
