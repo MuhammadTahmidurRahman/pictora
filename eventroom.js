@@ -38,10 +38,6 @@ async function loadEventRoom(eventCode) {
       const hostData = roomData.host[hostKey];
       hostPhotoElem.src = hostData?.hostPhotoUrl || "fallback.png";
 
-
-
-
-
       // Load Guests List
       loadGuests(roomData.guests);
     } else {
@@ -143,13 +139,10 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
       // Update the correct user type data in the Realtime Database
       const userRef = dbRef(database, `rooms/${eventCode}/${userType.type}/${userType.key}`);
 
-
-
-
-
+      // Update the user type with the new photo URL and folder path
       await update(userRef, {
         [`${userType.type}PhotoUrl`]: photoUrl,
-        uploadedPhotoFolderPath: `${folderPath}${fileName}`,
+        uploadedPhotoFolderPath: `${folderPath}${fileName}`, // Keep the uploaded folder path
       });
 
       alert("Photo uploaded successfully!");
