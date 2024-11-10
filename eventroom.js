@@ -117,8 +117,6 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
     if (!file) return;
 
     const userId = user.uid;
-    const userEmail = user.email.replace(/\./g, '_');
-    const userDisplayName = user.displayName.replace(/ /g, '_') || "Guest";
 
     // Detect user type
     const userType = await detectUserType(eventCode, userId);
@@ -136,10 +134,10 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
       const snapshot = await uploadBytes(fileRef, file);
       const photoUrl = await getDownloadURL(snapshot.ref);
 
-      // Update the photo URL and uploaded folder path for the existing host or guest entry
+      // Update the existing host or guest entry with the new photo URL and folder path
       const userRef = dbRef(database, `rooms/${eventCode}/${userType.type}/${userType.key}`);
-      
-      // Only update the relevant fields without adding new ones
+
+      // Update only the relevant fields without overwriting other data
       await update(userRef, {
         [`${userType.type}PhotoUrl`]: photoUrl,
         uploadedPhotoFolderPath: folderPath
