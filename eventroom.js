@@ -127,7 +127,7 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
       return;
     }
 
-    const folderPath = `rooms/${eventCode}/${userType.type === 'host' ? 'host' : 'guests'}/${userDisplayName}/${userId}/photos/`;
+    const folderPath = `rooms/${eventCode}/${userType.type === 'host' ? 'host' : 'guests'}/${userType.key}/photos/`;
     const fileName = `${Date.now()}_${file.name}`;
     const fileRef = storageRef(storage, `${folderPath}${fileName}`);
 
@@ -136,13 +136,13 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
       const snapshot = await uploadBytes(fileRef, file);
       const photoUrl = await getDownloadURL(snapshot.ref);
 
-      // Update the correct user type data in the Realtime Database
+      // Update the photo URL and uploaded folder path for the existing host or guest entry
       const userRef = dbRef(database, `rooms/${eventCode}/${userType.type}/${userType.key}`);
-
-      // Update the user type with the new photo URL and folder path
+      
+      // Only update the relevant fields without adding new ones
       await update(userRef, {
         [`${userType.type}PhotoUrl`]: photoUrl,
-        uploadedPhotoFolderPath: `${folderPath}${fileName}`, // Keep the uploaded folder path
+        uploadedPhotoFolderPath: folderPath
       });
 
       alert("Photo uploaded successfully!");
