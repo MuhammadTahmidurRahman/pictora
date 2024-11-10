@@ -71,105 +71,30 @@ function loadGuests(guestsData) {
 
 // Detect User Type (Host or Guest)
 async function detectUserType(eventCode, userId, userEmail, userDisplayName) {
-  try {
-    const roomRef = dbRef(database, `rooms/${eventCode}`);
-    const snapshot = await get(roomRef);
+  const roomRef = dbRef(database, `rooms/${eventCode}`);
+  const snapshot = await get(roomRef);
 
-    if (snapshot.exists()) {
-      const roomData = snapshot.val();
-      console.log("Room Data Loaded:", roomData);
+  if (snapshot.exists()) {
+    const roomData = snapshot.val();
+    const emailKeyPart = userEmail.replace(/\./g, '_'); // Replace `.` with `_`
+    const nameKeyPart = userDisplayName.replace(/ /g, '_');
 
-      const emailKeyPart = userEmail.replace(/\./g, '_'); // Replace `.` with `_`
-      const nameKeyPart = userDisplayName.replace(/ /g, '_');
+    // Construct potential keys for host and guests
+    const potentialHostKey = `${eventCode}_Test1_${emailKeyPart}_${nameKeyPart}`;
+    const potentialGuestKey = `${eventCode}_Test1_${emailKeyPart}_${nameKeyPart}`;
 
-      // Construct potential keys for host and guests
-      const potentialHostKey = `${eventCode}_Test1_${emailKeyPart}_${nameKeyPart}`;
-      const potentialGuestKey = `${eventCode}_Test1_${emailKeyPart}_${nameKeyPart}`;
-
-      console.log("Potential Host Key:", potentialHostKey);
-      console.log("Potential Guest Key:", potentialGuestKey);
-
-      // Check if the user is the host
-      if (roomData.host?.[potentialHostKey]?.hostId === userId) {
-        return { type: "host", key: potentialHostKey };
-      }
-
-      // Check if the user is a guest
-      if (roomData.guests?.[potentialGuestKey]?.guestId === userId) {
-        return { type: "guest", key: potentialGuestKey };
-      }
+    // Check if the user is the host
+    if (roomData.host[potentialHostKey]?.hostId === userId) {
+      return { type: "host", key: potentialHostKey };
     }
-  } catch (error) {
-    console.error("Error detecting user type:", error);
+
+    // Check if the user is a guest
+    if (roomData.guests[potentialGuestKey]?.guestId === userId) {
+      return { type: "guest", key: potentialGuestKey };
+    }
   }
   return null;
 }
-
-// Upload Photo and Update Database
-document.getElementById("uploadPhotoButton").addEventListener("click", async () => {
-  const user = auth.currentUser;
-  if (!user) {
-    alert("You need to log in!");
-    return;
-  }
-
-  const eventCode = new URLSearchParams(window.location.search).get("eventCode");
-  const picker = document.createElement("input");
-  picker.type = "file";
-  picker.accept = "image/*";
-  picker.click();
-
-  picker.onchange = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const userId = user.uid;
-    const userEmail = user.email;
-    const userDisplayName = user.displayName || "Guest";
-
-    // Detect user type using the updated structure
-    const userType = await detectUserType(eventCode, userId, userEmail, userDisplayName);
-    if (!userType) {
-      alert("User is not part of this room!");
-      return;
-    }
-
-    // Determine folder path based on user type
-    const userKey = userType.key;
-    const folderPath = userType.type === 'host' 
-      ? `rooms/${eventCode}/host/${userKey}/photos/`
-      : `rooms/${eventCode}/guests/${userKey}/photos/`;
-
-    const fileName = `${Date.now()}_${file.name}`;
-    const fileRef = storageRef(storage, `${folderPath}${fileName}`);
-
-    try {
-      // Upload Image
-      const snapshot = await uploadBytes(fileRef, file);
-      const photoUrl = await getDownloadURL(snapshot.ref);
-
-      // Update Database
-      const userRefPath = userType.type === 'host'
-        ? `rooms/${eventCode}/host/${userKey}`
-        : `rooms/${eventCode}/guests/${userKey}`;
-
-      const userRef = dbRef(database, userRefPath);
-      const updates = {
-        [`${userType.type}PhotoUrl`]: photoUrl,
-        uploadedPhotoFolderPath: `${folderPath}${fileName}`,
-      };
-
-      await update(userRef, updates);
-      alert("Photo uploaded successfully!");
-
-      // Reload the room to show the new photo
-      loadEventRoom(eventCode);
-    } catch (error) {
-      console.error("Error uploading photo:", error);
-      alert("Failed to upload photo.");
-    }
-  };
-});
 
 
 // Upload Photo and Update Database
