@@ -69,32 +69,49 @@ function loadGuests(guestsData) {
   }
 }
 
-// Detect User Type (Host or Guest)
+/// Detect User Type (Host or Guest)
 async function detectUserType(eventCode, userId, userEmail, userDisplayName) {
-  const roomRef = dbRef(database, `rooms/${eventCode}`);
-  const snapshot = await get(roomRef);
+  try {
+    const roomRef = dbRef(database, `rooms/${eventCode}`);
+    const snapshot = await get(roomRef);
 
-  if (snapshot.exists()) {
-    const roomData = snapshot.val();
-    const emailKeyPart = userEmail.replace(/\./g, '_'); // Replace `.` with `_`
-    const nameKeyPart = userDisplayName.replace(/ /g, '_');
+    if (snapshot.exists()) {
+      const roomData = snapshot.val();
+      console.log("Room Data:", roomData);
 
-    // Construct potential keys for host and guests
-    const potentialHostKey = `${eventCode}_Test1_${emailKeyPart}_${nameKeyPart}`;
-    const potentialGuestKey = `${eventCode}_Test1_${emailKeyPart}_${nameKeyPart}`;
+      // Format email and display name for key generation
+      const emailKeyPart = userEmail.replace(/\./g, '_'); // Replace '.' with '_'
+      const nameKeyPart = userDisplayName.replace(/ /g, '_');
 
-    // Check if the user is the host
-    if (roomData.host[potentialHostKey]?.hostId === userId) {
-      return { type: "host", key: potentialHostKey };
+      // Construct potential keys for host and guests
+      const potentialHostKey = `${eventCode}_Test1_${emailKeyPart}_${nameKeyPart}`;
+      const potentialGuestKey = `${eventCode}_Test1_${emailKeyPart}_${nameKeyPart}`;
+
+      console.log("Potential Host Key:", potentialHostKey);
+      console.log("Potential Guest Key:", potentialGuestKey);
+
+      // Check if the user is the host
+      if (roomData.host && roomData.host[potentialHostKey]?.hostId === userId) {
+        console.log("User is a host.");
+        return { type: "host", key: potentialHostKey };
+      }
+
+      // Check if the user is a guest
+      if (roomData.guests && roomData.guests[potentialGuestKey]?.guestId === userId) {
+        console.log("User is a guest.");
+        return { type: "guest", key: potentialGuestKey };
+      }
+
+      console.log("User not found in host or guest list.");
+    } else {
+      console.log("Room does not exist.");
     }
-
-    // Check if the user is a guest
-    if (roomData.guests[potentialGuestKey]?.guestId === userId) {
-      return { type: "guest", key: potentialGuestKey };
-    }
+  } catch (error) {
+    console.error("Error detecting user type:", error);
   }
   return null;
 }
+
 
 
 // Upload Photo and Update Database
