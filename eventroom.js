@@ -19,6 +19,43 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const database = getDatabase();
 const storage = getStorage();
+// Fetch User Profile Picture from Realtime Database
+async function fetchUserProfilePicture(userKey) {
+  try {
+    const userRef = dbRef(database, `users/${userKey}/photo`);
+    const snapshot = await get(userRef);
+
+    if (snapshot.exists()) {
+      // Get the photo URL from the database
+      const userPhotoUrl = snapshot.val();
+
+      // Update the image source to display the user's profile picture
+      document.getElementById("userProfilePicture").src = userPhotoUrl;
+    } else {
+      console.error("User data does not exist.");
+    }
+  } catch (error) {
+    console.error("Error fetching user profile picture:", error);
+  }
+}
+
+// Load user profile picture on window load
+window.onload = async () => {
+  const eventCode = new URLSearchParams(window.location.search).get("eventCode");
+  if (eventCode) {
+    loadEventRoom(eventCode);
+  }
+
+  // Get the currently authenticated user
+  const user = auth.currentUser;
+  if (user) {
+    // Fetch and display the profile picture based on the authenticated user's ID
+    fetchUserProfilePicture(user.uid);
+  } else {
+    console.error("No authenticated user found.");
+  }
+};
+
 
 // Load Event Room and Data
 async function loadEventRoom(eventCode) {
