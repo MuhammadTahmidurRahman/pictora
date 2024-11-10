@@ -19,59 +19,6 @@ const auth = getAuth();
 const database = getDatabase();
 const storage = getStorage();
 
-// Fetch Room Data and Display
-async function loadEventRoom(eventCode) {
-  try {
-    const roomRef = dbRef(database, `rooms/${eventCode}`);
-    const snapshot = await get(roomRef);
-    if (snapshot.exists()) {
-      const roomData = snapshot.val();
-      const roomNameElem = document.getElementById("roomName");
-      const roomCodeElem = document.getElementById("roomCode");
-      const hostPhotoElem = document.getElementById("hostPhoto");
-
-      roomNameElem.textContent = roomData.roomName || 'Event Room';
-      roomCodeElem.textContent = `Code: ${eventCode}`;
-
-      // Host Data
-      const hostKey = Object.keys(roomData.host)[0];
-      const hostData = roomData.host[hostKey];
-      hostPhotoElem.src = hostData?.hostPhotoUrl || "fallback.png";
-
-      // Load Guests List
-      loadGuests(roomData.guests);
-    } else {
-      alert("Room does not exist.");
-    }
-  } catch (error) {
-    console.error("Error loading event room:", error);
-  }
-}
-
-// Load Guests List
-function loadGuests(guestsData) {
-  const guestListElem = document.getElementById("guestList");
-  guestListElem.innerHTML = "";
-
-  for (const guestKey in guestsData) {
-    const guest = guestsData[guestKey];
-    const guestItem = document.createElement("li");
-
-    const guestPhoto = document.createElement("img");
-    guestPhoto.width = 40;
-    guestPhoto.height = 40;
-    guestPhoto.style.borderRadius = "50%";
-    guestPhoto.src = guest.guestPhotoUrl || "fallback.png";
-
-    const guestName = document.createElement("span");
-    guestName.textContent = guest.guestName || "Unnamed Guest";
-
-    guestItem.appendChild(guestPhoto);
-    guestItem.appendChild(guestName);
-    guestListElem.appendChild(guestItem);
-  }
-}
-
 // Detect User Type (Host or Guest)
 async function detectUserType(eventCode, userId) {
   const roomRef = dbRef(database, `rooms/${eventCode}`);
@@ -136,10 +83,9 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
       const snapshot = await uploadBytes(fileRef, file);
       const photoUrl = await getDownloadURL(snapshot.ref);
 
-      // Update the photo URL and uploaded folder path for the existing host or guest entry
+      // Update only the specific fields without creating new fields
       const userRef = dbRef(database, `rooms/${eventCode}/${userType.type}/${userType.key}`);
       
-      // Only update the relevant fields without adding new ones
       await update(userRef, {
         [`${userType.type}PhotoUrl`]: photoUrl,
         uploadedPhotoFolderPath: folderPath
@@ -152,6 +98,59 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
     }
   };
 });
+
+// Load Event Room Data
+async function loadEventRoom(eventCode) {
+  try {
+    const roomRef = dbRef(database, `rooms/${eventCode}`);
+    const snapshot = await get(roomRef);
+    if (snapshot.exists()) {
+      const roomData = snapshot.val();
+      const roomNameElem = document.getElementById("roomName");
+      const roomCodeElem = document.getElementById("roomCode");
+      const hostPhotoElem = document.getElementById("hostPhoto");
+
+      roomNameElem.textContent = roomData.roomName || 'Event Room';
+      roomCodeElem.textContent = `Code: ${eventCode}`;
+
+      // Host Data
+      const hostKey = Object.keys(roomData.host)[0];
+      const hostData = roomData.host[hostKey];
+      hostPhotoElem.src = hostData?.hostPhotoUrl || "fallback.png";
+
+      // Load Guests List
+      loadGuests(roomData.guests);
+    } else {
+      alert("Room does not exist.");
+    }
+  } catch (error) {
+    console.error("Error loading event room:", error);
+  }
+}
+
+// Load Guests List
+function loadGuests(guestsData) {
+  const guestListElem = document.getElementById("guestList");
+  guestListElem.innerHTML = "";
+
+  for (const guestKey in guestsData) {
+    const guest = guestsData[guestKey];
+    const guestItem = document.createElement("li");
+
+    const guestPhoto = document.createElement("img");
+    guestPhoto.width = 40;
+    guestPhoto.height = 40;
+    guestPhoto.style.borderRadius = "50%";
+    guestPhoto.src = guest.guestPhotoUrl || "fallback.png";
+
+    const guestName = document.createElement("span");
+    guestName.textContent = guest.guestName || "Unnamed Guest";
+
+    guestItem.appendChild(guestPhoto);
+    guestItem.appendChild(guestName);
+    guestListElem.appendChild(guestItem);
+  }
+}
 
 // Window onload
 window.onload = () => {
