@@ -34,6 +34,7 @@ async function loadEventRoom(eventCode) {
       const hostData = Object.values(roomData.host || {})[0];
       if (hostData) {
         document.getElementById("hostPhoto").src = hostData.hostPhotoUrl || "fallback.png";
+        document.getElementById("hostName").textContent = hostData.hostName || "Host";
       }
 
       // Load Guest List
@@ -87,7 +88,7 @@ async function detectUserType(eventCode, userId) {
   return null;
 }
 
-// Upload Photo
+// Upload Multiple Photos
 document.getElementById("uploadPhotoButton").addEventListener("click", async () => {
   const user = auth.currentUser;
   if (!user) {
@@ -99,11 +100,12 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
   const picker = document.createElement("input");
   picker.type = "file";
   picker.accept = "image/*";
+  picker.multiple = true; // Allow multiple files
   picker.click();
 
   picker.onchange = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+    const files = event.target.files;
+    if (!files.length) return;
 
     const userId = user.uid;
 
@@ -115,24 +117,29 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
     }
 
     const folderType = userType.type === 'host' ? 'host' : 'guests';
-    const storagePath = `rooms/${eventCode}/${folderType}/${userType.key}/photos/${Date.now()}_${file.name}`;
-    const fileRef = storageRef(storage, storagePath);
+    const userKey = userType.key;
+    const uploadedPhotoUrls = [];
 
     try {
-      const snapshot = await uploadBytes(fileRef, file);
-      const photoUrl = await getDownloadURL(snapshot.ref);
+      for (const file of files) {
+        const storagePath = `rooms/${eventCode}/${folderType}/${userKey}/photos/${Date.now()}_${file.name}`;
+        const fileRef = storageRef(storage, storagePath);
+        const snapshot = await uploadBytes(fileRef, file);
+        const photoUrl = await getDownloadURL(snapshot.ref);
+        uploadedPhotoUrls.push(photoUrl);
+      }
 
-      const userRef = dbRef(database, `rooms/${eventCode}/${folderType}/${userType.key}`);
+      const userRef = dbRef(database, `rooms/${eventCode}/${folderType}/${userKey}`);
 
-      // Only update the uploadedPhotoFolderPath, not the profile photo URL
+      // Update the uploadedPhotoFolderPath with a reference to the uploaded photos
       await update(userRef, {
-        uploadedPhotoFolderPath: `rooms/${eventCode}/${folderType}/${userType.key}/photos/`
+        uploadedPhotoFolderPath: `rooms/${eventCode}/${folderType}/${userKey}/photos/`
       });
 
-      alert("Photo uploaded successfully!");
+      alert("Photos uploaded successfully!");
     } catch (error) {
-      console.error("Error uploading photo:", error);
-      alert("Failed to upload photo.");
+      console.error("Error uploading photos:", error);
+      alert("Failed to upload photos.");
     }
   };
 });
