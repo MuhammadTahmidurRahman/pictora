@@ -83,3 +83,16 @@ onAuthStateChanged(auth, (user) => {
     console.log("No user is logged in.");
   }
 });
+
+// Toggle password visibility
+function togglePassword(inputId) {
+  const passwordField = document.getElementById(inputId);
+  const type = passwordField.type === "password" ? "text" : "password";
+  passwordField.type = type;
+}
+
+// Add event listener for login button
+document.getElementById('login-button').addEventListener('click', loginUser);
+
+// Add event listener for Google sign-in button
+document.getElementById('googleSignInButton').addEventListener('click', loginWithGoogle);
