@@ -49,62 +49,71 @@ async function joinRoom(eventCode, roomName) {
   const compositeKey = `${eventCode}_${roomName}_${userEmailKey}_${userName}`;
 
   // Check if the user is the host based on composite key and user ID
-  const hostRef = ref(database, `rooms/${eventCode}/host`);
-  const hostSnapshot = await get(hostRef);
+  try {
+    const hostRef = ref(database, `rooms/${eventCode}/host/${compositeKey}`);
+    const hostSnapshot = await get(hostRef);
 
-  if (hostSnapshot.exists()) {
-    let isHost = false;
-
-    hostSnapshot.forEach((childSnapshot) => {
-      const hostData = childSnapshot.val();
-      const hostKey = childSnapshot.key;
-
-      // Check if hostKey and user data match composite key and user ID
-      if (hostKey === compositeKey && hostData.hostId === userId) {
-        isHost = true;
+    if (hostSnapshot.exists()) {
+      const hostData = hostSnapshot.val();
+      if (hostData.hostId === userId) {
+        alert("You are the host of this room.");
+        console.log("User identified as host:", userId);
+        window.location.href = `eventroom.html?eventCode=${eventCode}`;
+        return;
       }
-    });
-
-    if (isHost) {
-      alert("You are the host of this room.");
-      window.location.href = `eventroom.html?eventCode=${eventCode}`;
-      return;
     }
+  } catch (error) {
+    console.error("Error checking host status:", error);
   }
 
   // Check if the user is already listed as a guest with the same composite key and user ID
-  const guestRef = ref(database, `rooms/${eventCode}/guests/${compositeKey}`);
-  const guestSnapshot = await get(guestRef);
+  try {
+    const guestRef = ref(database, `rooms/${eventCode}/guests/${compositeKey}`);
+    const guestSnapshot = await get(guestRef);
 
-  if (guestSnapshot.exists() && guestSnapshot.val().guestId === userId) {
-    alert("You are already a guest in this room!");
-    window.location.href = `eventroom.html?eventCode=${eventCode}`;
-    return;
+    if (guestSnapshot.exists()) {
+      const guestData = guestSnapshot.val();
+      if (guestData.guestId === userId) {
+        alert("You are already a guest in this room!");
+        console.log("User identified as guest:", userId);
+        window.location.href = `eventroom.html?eventCode=${eventCode}`;
+        return;
+      }
+    }
+  } catch (error) {
+    console.error("Error checking guest status:", error);
   }
 
   // Fetch user data from Firebase Realtime Database to add as a new guest
-  const userRef = ref(database, `users/${userId}`);
-  const userSnapshot = await get(userRef);
+  try {
+    const userRef = ref(database, `users/${userId}`);
+    const userSnapshot = await get(userRef);
 
-  if (!userSnapshot.exists()) {
-    alert('User information not found!');
-    return;
+    if (!userSnapshot.exists()) {
+      alert('User information not found!');
+      console.log("User info not found for:", userId);
+      return;
+    }
+
+    // Prepare guest data object
+    const guestData = {
+      guestId: userId,
+      guestName: userSnapshot.val().name || userName,
+      guestEmail: userEmail,
+      guestPhotoUrl: userSnapshot.val().photo || userPhotoUrl,
+    };
+
+    // Add guest data to the room with composite key
+    const guestRef = ref(database, `rooms/${eventCode}/guests/${compositeKey}`);
+    await set(guestRef, guestData);
+
+    // Redirect to the event room page as a new guest
+    alert("You have joined as a new guest!");
+    console.log("User enrolled as new guest:", userId);
+    window.location.href = `eventroom.html?eventCode=${eventCode}`;
+  } catch (error) {
+    console.error("Error enrolling as new guest:", error);
   }
-
-  // Prepare guest data object
-  const guestData = {
-    guestId: userId,
-    guestName: userSnapshot.val().name || userName,
-    guestEmail: userEmail,
-    guestPhotoUrl: userSnapshot.val().photo || userPhotoUrl,
-  };
-
-  // Add guest data to the room with composite key
-  await set(guestRef, guestData);
-
-  // Redirect to the event room page as a new guest
-  alert("You have joined as a new guest!");
-  window.location.href = `eventroom.html?eventCode=${eventCode}`;
 }
 
 // Function to navigate to the event room after checking the code
