@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebas
 import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import { getDatabase, ref as dbRef, set, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -143,6 +144,17 @@ async function signInWithGoogle() {
     alert("Google Sign-In failed. Please try again.");
   }
 }
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // If user is already logged in, redirect to the join event page
+    console.log("User is already logged in, redirecting...");
+    window.location.href = "join_event.html"; // You can change this to any page you want logged-in users to be redirected to
+  } else {
+    console.log("User is not logged in, staying on signup page");
+    // Allow the user to stay on the signup page
+  }
+});
 
 // Expose functions to global scope for inline HTML event handlers
 window.togglePassword = togglePassword;
