@@ -1,6 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
-import { getDatabase, ref, get, set, update, remove } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
+import { getDatabase, ref, get, set, update, onValue } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -44,6 +44,7 @@ async function joinRoom(eventCode, roomName) {
     return;
   }
 
+  const userEmailKey = userEmail.replace(/\./g, '_');
   const userId = user.uid;
 
   // Check if the user is already listed as the host in the room
@@ -101,9 +102,46 @@ async function joinRoom(eventCode, roomName) {
     guestPhotoUrl,
   };
 
+  // Generate composite key in the format: eventCode_roomName__userEmailKey_guestName
+  const compositeKey = `${eventCode}_${roomName}__${userEmailKey}_${guestName}`;
+  const newGuestRef = ref(database, `rooms/${eventCode}/guests/${compositeKey}`);
+  
   // Add guest data to the room
-  const newGuestRef = ref(database, `rooms/${eventCode}/guests/${userId}`);
   await set(newGuestRef, guestData);
+
+  // Listen for changes in user data and update room guest data
+  onValue(userRef, async (snapshot) => {
+    if (snapshot.exists()) {
+      const updatedName = snapshot.val().name || guestName;
+      const updatedPhotoUrl = snapshot.val().photo || guestPhotoUrl;
+
+      if (updatedName !== guestName || updatedPhotoUrl !== guestPhotoUrl) {
+        // Update local variables
+        guestName = updatedName;
+        guestPhotoUrl = updatedPhotoUrl;
+
+        // Update guest data in the room
+        await update(newGuestRef, {
+          guestName: updatedName,
+          guestPhotoUrl: updatedPhotoUrl,
+        });
+
+        // Create a new composite key if the guest name has changed
+        const newCompositeKey = `${eventCode}_${roomName}__${userEmailKey}_${updatedName}`;
+        if (newCompositeKey !== compositeKey) {
+          const updatedGuestRef = ref(database, `rooms/${eventCode}/guests/${newCompositeKey}`);
+
+          // Remove old entry and add new entry with updated composite key
+          await set(updatedGuestRef, guestData);
+          await update(updatedGuestRef, {
+            guestName: updatedName,
+            guestPhotoUrl: updatedPhotoUrl,
+          });
+          await ref(database, `rooms/${eventCode}/guests/${compositeKey}`).remove();
+        }
+      }
+    }
+  });
 
   // Redirect to the event room page
   window.location.href = `eventroom.html?eventCode=${eventCode}`;
