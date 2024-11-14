@@ -49,13 +49,23 @@ async function joinRoom(eventCode, roomName) {
   const compositeKey = `${eventCode}_${roomName}_${userEmailKey}_${userName}`;
 
   // Check if the user is the host based on composite key and user ID
-  const hostRef = ref(database, `rooms/${eventCode}/host/${compositeKey}`);
+  const hostRef = ref(database, `rooms/${eventCode}/host`);
   const hostSnapshot = await get(hostRef);
 
   if (hostSnapshot.exists()) {
-    const hostData = hostSnapshot.val();
-    if (hostData.hostId === userId) {
-      // If the composite key and user ID match the host, redirect as host
+    let isHost = false;
+
+    hostSnapshot.forEach((childSnapshot) => {
+      const hostData = childSnapshot.val();
+      const hostKey = childSnapshot.key;
+
+      // Check if hostKey and user data match composite key and user ID
+      if (hostKey === compositeKey && hostData.hostId === userId) {
+        isHost = true;
+      }
+    });
+
+    if (isHost) {
       alert("You are the host of this room.");
       window.location.href = `eventroom.html?eventCode=${eventCode}`;
       return;
@@ -66,14 +76,10 @@ async function joinRoom(eventCode, roomName) {
   const guestRef = ref(database, `rooms/${eventCode}/guests/${compositeKey}`);
   const guestSnapshot = await get(guestRef);
 
-  if (guestSnapshot.exists()) {
-    const guestData = guestSnapshot.val();
-    if (guestData.guestId === userId) {
-      // If the composite key and user ID match an existing guest, redirect as guest
-      alert("You are already a guest in this room!");
-      window.location.href = `eventroom.html?eventCode=${eventCode}`;
-      return;
-    }
+  if (guestSnapshot.exists() && guestSnapshot.val().guestId === userId) {
+    alert("You are already a guest in this room!");
+    window.location.href = `eventroom.html?eventCode=${eventCode}`;
+    return;
   }
 
   // Fetch user data from Firebase Realtime Database to add as a new guest
