@@ -44,18 +44,8 @@ window.displayImage = function (input) {
   uploadText.textContent = input.files && input.files[0] ? "Photo selected" : "Upload your photo here";
 };
 
-window.registerUser = async function () {
-  console.log("Register button clicked.");
-  // Your registration logic here...
-};
-
-window.signInWithGoogle = async function () {
-  console.log("Google Sign-In button clicked.");
-  // Your Google sign-in logic here...
-};
-
 // Register user with email and password and upload profile image
-async function registerUser() {
+window.registerUser = async function () {
   const name = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -87,15 +77,7 @@ async function registerUser() {
       return;
     }
 
-    // 2. Check if the email is already registered in Realtime Database
-    const userQuery = query(dbRef(database, "users"), orderByChild("email"), equalTo(email));
-    const userSnapshot = await get(userQuery);
-    if (userSnapshot.exists()) {
-      alert("This email is already registered in the database. Please log in instead.");
-      return;
-    }
-
-    // Create user with email and password
+    // 2. Create user with email and password
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
@@ -117,10 +99,10 @@ async function registerUser() {
     console.error("Error creating user:", error);
     alert("Failed to register user. Please try again.");
   }
-}
+};
 
 // Google Sign-In with image upload validation
-async function signInWithGoogle() {
+window.signInWithGoogle = async function () {
   const provider = new GoogleAuthProvider();
   const imageFile = document.getElementById("image").files[0];
 
@@ -141,10 +123,6 @@ async function signInWithGoogle() {
       return;
     }
 
-    function goBack() {
-      window.history.back();
-    }    
-
     // Upload profile image to Firebase Storage
     const storageRef = ref(storage, `uploads/${user.uid}`);
     await uploadBytes(storageRef, imageFile);
@@ -163,21 +141,4 @@ async function signInWithGoogle() {
     console.error("Error with Google Sign-In:", error);
     alert("Google Sign-In failed. Please try again.");
   }
-}
-
-
-onAuthStateChanged(auth, (user) => {
-  // If the user is logged in, redirect them to the join event page
-  if (user) {
-    console.log("User is already logged in, redirecting to join event...");
-    window.location.href = 'join_event.html'; // Redirect to event page
-  }
-  // Else, stay on the signup page
-});
-
-// Expose functions to global scope for inline HTML event handlers
-window.togglePassword = togglePassword;
-window.showImagePicker = showImagePicker;
-window.displayImage = displayImage;
-window.registerUser = registerUser;
-window.signInWithGoogle = signInWithGoogle;
+};
