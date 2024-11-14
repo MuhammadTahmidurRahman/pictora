@@ -56,16 +56,21 @@ window.loginWithGoogle = async function () {
 };
 
 // Handle authentication state changes
+// Handle authentication state changes
 onAuthStateChanged(auth, (user) => {
   if (user) {
     // User is signed in
     console.log("User is signed in:", user);
-    // Redirect to the create or join room page
-    window.location.href = 'join_event.html';
+    // Check if the current page is not 'join_event.html' before redirecting
+    if (window.location.pathname !== '/join_event.html') {
+      window.location.href = 'join_event.html';
+    }
   } else {
     // User is signed out
     console.log("User is signed out");
-    // Redirect to the sign-up page
-    window.location.href = 'signup.html';
+    // Check if the current page is not 'signup.html' before redirecting
+    if (window.location.pathname !== '/signup.html') {
+      window.location.href = 'signup.html';
+    }
   }
 });
