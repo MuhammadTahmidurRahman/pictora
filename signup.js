@@ -141,6 +141,10 @@ async function signInWithGoogle() {
       return;
     }
 
+    function goBack() {
+      window.history.back();
+    }    
+
     // Upload profile image to Firebase Storage
     const storageRef = ref(storage, `uploads/${user.uid}`);
     await uploadBytes(storageRef, imageFile);
