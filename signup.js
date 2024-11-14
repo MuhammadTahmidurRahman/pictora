@@ -1,8 +1,8 @@
 // Ensure no duplicate imports and only import necessary functions once
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithPopup, fetchSignInMethodsForEmail, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithPopup, fetchSignInMethodsForEmail, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import { getDatabase, ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref as dbRef, set, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -21,15 +21,28 @@ const auth = getAuth();
 const storage = getStorage();
 const database = getDatabase();
 
-// Function to show the image picker when clicked
-function showImagePicker() {
-  const fileInput = document.getElementById("image");
-  if (fileInput) {
-    fileInput.click(); // Trigger file input click to open the file picker dialog
-  } else {
-    alert("Image input field not found.");
+// Check auth state and handle redirection
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    console.log("User is logged in, redirecting to join event...");
+    window.location.href = 'join_event.html';
   }
-}
+});
+
+// Function declarations
+window.togglePassword = function (fieldId) {
+  const field = document.getElementById(fieldId);
+  field.type = field.type === "password" ? "text" : "password";
+};
+
+window.showImagePicker = function () {
+  document.getElementById("image").click();
+};
+
+window.displayImage = function (input) {
+  const uploadText = document.getElementById("upload-text");
+  uploadText.textContent = input.files && input.files[0] ? "Photo selected" : "Upload your photo here";
+};
 
 // Register user with email and password and upload profile image
 window.registerUser = async function () {
@@ -81,7 +94,7 @@ window.registerUser = async function () {
     });
 
     alert("User registered successfully with image uploaded!");
-    // No automatic login or redirection here, you can manually log in later
+    window.location.href = "join_event.html";
   } catch (error) {
     console.error("Error creating user:", error);
     alert("Failed to register user. Please try again.");
@@ -123,65 +136,9 @@ window.signInWithGoogle = async function () {
     });
 
     alert("Google Sign-In successful and image uploaded!");
-    // No automatic login or redirection here, you can manually log in later
+    window.location.href = "join_event.html";
   } catch (error) {
     console.error("Error with Google Sign-In:", error);
     alert("Google Sign-In failed. Please try again.");
   }
 };
-
-// Function to handle Google login and check if user exists
-window.loginWithGoogle = async function () {
-  try {
-    // Initiate Google Sign-In
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-
-    // Check if the user exists in Firestore
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    if (userDoc.exists()) {
-      // If user exists, proceed to the next step
-      alert("Google sign-in successful");
-
-      // Redirect to the create or join room page
-      window.location.href = 'join_event.html';
-    } else {
-      // If user does not exist, sign out and redirect to signup page
-      await signOut(auth);
-      alert("User not registered. Redirecting to sign-up page.");
-      window.location.href = 'signup.html';
-    }
-  } catch (error) {
-    console.error("Google sign-in failed:", error);
-    alert("Failed to sign in with Google. Redirecting to sign-up page.");
-    window.location.href = 'signup.html';
-  }
-};
-
-// Single onAuthStateChanged listener
-async function loginUser() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    console.log("User logged in:", userCredential.user);
-    window.location.href = "join_event.html";  // Redirect to event page on successful login
-  } catch (error) {
-    console.error("Error logging in:", error);
-    alert("Login failed. Please check your credentials.");
-  }
-}
-
-// Check if user is logged in on page load
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log("User is logged in.");
-    // Redirect user to the join event page if already logged in
-    window.location.href = "join_event.html";
-  } else {
-    console.log("No user is logged in.");
-    // Stay on login page if no user is logged in
-  }
-});
