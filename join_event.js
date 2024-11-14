@@ -48,47 +48,30 @@ async function joinRoom(eventCode, roomName) {
   const userId = user.uid;
   const compositeKey = `${eventCode}_${roomName}_${userEmailKey}_${userName}`;
 
-  // Check if the user is already the host in the room
-  const hostRef = ref(database, `rooms/${eventCode}/host`);
+  // Reference to the room in the database
+  const roomRef = ref(database, `rooms/${eventCode}`);
+
+  // Check if the user is the host based on composite key and user ID
+  const hostRef = ref(database, `rooms/${eventCode}/host/${compositeKey}`);
   const hostSnapshot = await get(hostRef);
 
-  let isHost = false;
-  if (hostSnapshot.exists()) {
-    hostSnapshot.forEach((childSnapshot) => {
-      const hostData = childSnapshot.val();
-      // Verify if hostId matches the userId of the current user
-      if (hostData.hostId === userId) {
-        isHost = true;
-      }
-    });
-  }
-
-  // If the user is confirmed as the host, redirect and exit function
-  if (isHost) {
+  if (hostSnapshot.exists() && hostSnapshot.val().hostId === userId) {
     alert("You are the host of this room.");
     window.location.href = `eventroom.html?eventCode=${eventCode}`;
     return;
   }
 
-  // Check if the user is already listed as a guest in the room
-  const guestRef = ref(database, `rooms/${eventCode}/guests`);
+  // Check if the user is already listed as a guest with the same composite key and user ID
+  const guestRef = ref(database, `rooms/${eventCode}/guests/${compositeKey}`);
   const guestSnapshot = await get(guestRef);
 
-  let isGuest = false;
-  guestSnapshot.forEach((childSnapshot) => {
-    const guestData = childSnapshot.val();
-    if (guestData.guestId === userId) {
-      isGuest = true;
-    }
-  });
-
-  if (isGuest) {
+  if (guestSnapshot.exists() && guestSnapshot.val().guestId === userId) {
     alert("You are already a guest in this room!");
     window.location.href = `eventroom.html?eventCode=${eventCode}`;
     return;
   }
 
-  // Fetch user data from Firebase Realtime Database
+  // Fetch user data from Firebase Realtime Database to add as a new guest
   const userRef = ref(database, `users/${userId}`);
   const userSnapshot = await get(userRef);
 
@@ -97,21 +80,16 @@ async function joinRoom(eventCode, roomName) {
     return;
   }
 
-  // Extract guest details from the user snapshot
-  const guestName = userSnapshot.val().name || userName;
-  const guestPhotoUrl = userSnapshot.val().photo || userPhotoUrl;
-
   // Prepare guest data object
   const guestData = {
     guestId: userId,
-    guestName,
+    guestName: userSnapshot.val().name || userName,
     guestEmail: userEmail,
-    guestPhotoUrl,
+    guestPhotoUrl: userSnapshot.val().photo || userPhotoUrl,
   };
 
   // Add guest data to the room with composite key
-  const newGuestRef = ref(database, `rooms/${eventCode}/guests/${compositeKey}`);
-  await set(newGuestRef, guestData);
+  await set(guestRef, guestData);
 
   // Redirect to the event room page
   window.location.href = `eventroom.html?eventCode=${eventCode}`;
