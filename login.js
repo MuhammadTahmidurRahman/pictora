@@ -78,3 +78,24 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
+// Handle authentication state changes
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // User is signed in
+    console.log("User is signed in:", user);
+
+    // Redirect only if not already on 'join_event.html'
+    if (window.location.pathname !== '/join_event.html') {
+      window.location.href = 'join_event.html';
+    }
+  } else {
+    // User is signed out
+    console.log("User is signed out");
+
+    // Redirect to 'signup.html' only if not on 'signup.html' or 'login.html'
+    if (window.location.pathname !== '/signup.html' && window.location.pathname !== '/login.html') {
+      window.location.href = 'signup.html';
+    }
+  }
+});
+
