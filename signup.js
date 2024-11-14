@@ -146,16 +146,13 @@ async function signInWithGoogle() {
 }
 
 onAuthStateChanged(auth, (user) => {
+  // If the user is logged in, redirect them to the join event page
   if (user) {
-    // If user is already logged in, redirect to the join event page
-    console.log("User is already logged in, redirecting...");
-    window.location.href = "join_event.html"; // You can change this to any page you want logged-in users to be redirected to
-  } else {
-    console.log("User is not logged in, staying on signup page");
-    // Allow the user to stay on the signup page
+    console.log("User is already logged in, redirecting to join event...");
+    window.location.href = 'join_event.html'; // Redirect to event page
   }
+  // Else, stay on the signup page
 });
-
 // Expose functions to global scope for inline HTML event handlers
 window.togglePassword = togglePassword;
 window.showImagePicker = showImagePicker;
