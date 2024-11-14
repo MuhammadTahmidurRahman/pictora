@@ -9,6 +9,8 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+//const auth = getAuth();
 
 // Firebase configuration
 const firebaseConfig = {
@@ -64,20 +66,29 @@ window.loginWithGoogle = async function () {
 };
 
 // Single onAuthStateChanged listener
+
+async function loginUser() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    console.log("User logged in:", userCredential.user);
+    window.location.href = "join_event.html";  // Redirect to event page on successful login
+  } catch (error) {
+    console.error("Error logging in:", error);
+    alert("Login failed. Please check your credentials.");
+  }
+}
+
+// Check if user is logged in on page load
 onAuthStateChanged(auth, (user) => {
-  console.log("Auth state changed. Checking user status...");
-  console.log("Current path:", window.location.pathname);
   if (user) {
-    console.log("User is logged in:", user);
-    // Redirect to join_event if logged in and not already there
-    if (window.location.pathname === '/login.html') {
-      window.location.href = 'join_event.html';
-    }
+    console.log("User is logged in.");
+    // Redirect user to the join event page if already logged in
+    window.location.href = "join_event.html";
   } else {
-    console.log("User is not logged in.");
-    // Redirect to signup if user is not logged in and not on login or signup pages
-    if (window.location.pathname !== '/signup.html' && window.location.pathname !== '/login.html') {
-      window.location.href = 'signup.html';
-    }
+    console.log("No user is logged in.");
+    // Stay on login page if no user is logged in
   }
 });

@@ -1,8 +1,8 @@
 // Ensure no duplicate imports and only import necessary functions once
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithPopup, fetchSignInMethodsForEmail, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithPopup, fetchSignInMethodsForEmail, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import { getDatabase, ref as dbRef, set, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref as dbRef, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -20,29 +20,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const storage = getStorage();
 const database = getDatabase();
-
-// Check auth state and handle redirection
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log("User is logged in, redirecting to join event...");
-    window.location.href = 'join_event.html';
-  }
-});
-
-// Function declarations
-window.togglePassword = function (fieldId) {
-  const field = document.getElementById(fieldId);
-  field.type = field.type === "password" ? "text" : "password";
-};
-
-window.showImagePicker = function () {
-  document.getElementById("image").click();
-};
-
-window.displayImage = function (input) {
-  const uploadText = document.getElementById("upload-text");
-  uploadText.textContent = input.files && input.files[0] ? "Photo selected" : "Upload your photo here";
-};
 
 // Register user with email and password and upload profile image
 window.registerUser = async function () {
@@ -94,7 +71,7 @@ window.registerUser = async function () {
     });
 
     alert("User registered successfully with image uploaded!");
-    window.location.href = "join_event.html";
+    // No automatic login or redirection here, you can manually log in later
   } catch (error) {
     console.error("Error creating user:", error);
     alert("Failed to register user. Please try again.");
@@ -136,7 +113,7 @@ window.signInWithGoogle = async function () {
     });
 
     alert("Google Sign-In successful and image uploaded!");
-    window.location.href = "join_event.html";
+    // No automatic login or redirection here, you can manually log in later
   } catch (error) {
     console.error("Error with Google Sign-In:", error);
     alert("Google Sign-In failed. Please try again.");
