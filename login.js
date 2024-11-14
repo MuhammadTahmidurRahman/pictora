@@ -1,5 +1,16 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithPopup, fetchSignInMethodsForEmail, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  signInWithPopup, 
+  fetchSignInMethodsForEmail, 
+  GoogleAuthProvider, 
+  signInWithEmailAndPassword, 
+  onAuthStateChanged, 
+  setPersistence, 
+  browserLocalPersistence, 
+  signOut 
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import { getDatabase, ref as dbRef, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
