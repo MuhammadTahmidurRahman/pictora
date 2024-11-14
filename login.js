@@ -32,6 +32,7 @@ const firebaseConfig = {
   appId: "1:155732133141:web:c5646717494a496a6dd51c"
 };
 
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -167,3 +168,9 @@ document.getElementById("image-upload-button").addEventListener("click", async (
     alert("Image selected successfully.");
   }
 });
+
+document.getElementById('yourButtonId').addEventListener('click', function() {
+  console.log("Button clicked");
+});
+
+
