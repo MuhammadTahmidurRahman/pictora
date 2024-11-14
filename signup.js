@@ -3,8 +3,9 @@ import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWith
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import { getDatabase, ref as dbRef, set, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
-import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+const auth = getAuth();
 
 onAuthStateChanged(auth, (user) => {
   console.log("Auth state changed. Checking user status...");
@@ -29,15 +30,31 @@ const firebaseConfig = {
   projectId: "pictora-7f0ad",
   storageBucket: "pictora-7f0ad.appspot.com",
   messagingSenderId: "155732133141",
-  databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app",
+  databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app/",
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth();
+//const auth = getAuth();
 const storage = getStorage();
 const database = getDatabase();
+onAuthStateChanged(auth, (user) => {
+  console.log("Auth state changed. Checking user status...");
+  if (user) {
+    console.log("User is already logged in:", user);
+    // If user is logged in, redirect to join_event
+    if (window.location.pathname === '/signup.html') {
+      console.log("Redirecting to join_event...");
+      window.location.href = 'join_event.html'; // Redirect to event page
+    }
+  } else {
+    console.log("User is not logged in. Staying on signup page.");
+    // If the user is not logged in, do not redirect.
+  }
+});
+
+
 
 // Toggle password visibility
 function togglePassword(fieldId) {
