@@ -48,27 +48,45 @@ async function joinRoom(eventCode, roomName) {
   const userId = user.uid;
   const compositeKey = `${eventCode}_${roomName}_${userEmailKey}_${userName}`;
 
+  console.log(`Starting room join process for user ${userId} with compositeKey: ${compositeKey}`);
+
   try {
     // Check if the user is the host based on composite key and user ID
     const hostRef = ref(database, `rooms/${eventCode}/host/${compositeKey}`);
     const hostSnapshot = await get(hostRef);
 
-    if (hostSnapshot.exists() && hostSnapshot.val().hostId === userId) {
-      alert("You are the host of this room.");
-      console.log("User identified as host:", userId);
-      window.location.href = `eventroom.html?eventCode=${eventCode}`;
-      return;
+    if (hostSnapshot.exists()) {
+      const hostData = hostSnapshot.val();
+      console.log("Host data found:", hostData);
+
+      if (hostData.hostId === userId) {
+        alert("You are the host of this room.");
+        console.log("Confirmed as host, redirecting:", userId);
+        window.location.href = `eventroom.html?eventCode=${eventCode}`;
+        return;
+      } else {
+        console.log("Host ID does not match user ID:", userId);
+      }
+    } else {
+      console.log("No host entry found for this composite key.");
     }
 
     // Check if the user is already listed as a guest with the same composite key and user ID
     const guestRef = ref(database, `rooms/${eventCode}/guests/${compositeKey}`);
     const guestSnapshot = await get(guestRef);
 
-    if (guestSnapshot.exists() && guestSnapshot.val().guestId === userId) {
-      alert("You are already a guest in this room!");
-      console.log("User identified as guest:", userId);
-      window.location.href = `eventroom.html?eventCode=${eventCode}`;
-      return;
+    if (guestSnapshot.exists()) {
+      const guestData = guestSnapshot.val();
+      console.log("Guest data found:", guestData);
+
+      if (guestData.guestId === userId) {
+        alert("You are already a guest in this room!");
+        console.log("Confirmed as guest, redirecting:", userId);
+        window.location.href = `eventroom.html?eventCode=${eventCode}`;
+        return;
+      }
+    } else {
+      console.log("No guest entry found for this composite key.");
     }
 
     // If the user is neither the host nor an existing guest, add them as a new guest
