@@ -37,15 +37,49 @@ onAuthStateChanged(auth, (currentUser) => {
   }
 });
 
-// Function to join the room as a guest
-async function joinRoomAsGuest(eventCode, roomName) {
+// Function to join the room, checking if the user is already a host or guest
+async function joinRoom(eventCode, roomName) {
   if (!user) {
     alert('Please log in to join the room!');
     return;
   }
 
   const userEmailKey = userEmail.replace(/\./g, '_');
+
+  // Check if the user is already a host
+  const hostRef = ref(database, `rooms/${eventCode}/host`);
+  const hostSnapshot = await get(hostRef);
   
+  let isHost = false;
+  hostSnapshot.forEach((child) => {
+    if (child.val().hostId === user.uid) {
+      isHost = true;
+    }
+  });
+
+  if (isHost) {
+    alert("You are the host of this room.");
+    window.location.href = `eventroom.html?eventCode=${eventCode}`;
+    return;
+  }
+
+  // Check if the user is already a guest
+  const guestRef = ref(database, `rooms/${eventCode}/guests`);
+  const guestSnapshot = await get(guestRef);
+
+  let isGuest = false;
+  guestSnapshot.forEach((child) => {
+    if (child.val().guestId === user.uid) {
+      isGuest = true;
+    }
+  });
+
+  if (isGuest) {
+    alert("You are already a guest in this room!");
+    window.location.href = `eventroom.html?eventCode=${eventCode}`;
+    return;
+  }
+
   // Fetch user data from Firebase Realtime Database
   const userRef = ref(database, `users/${user.uid}`);
   const userSnapshot = await get(userRef);
@@ -69,15 +103,10 @@ async function joinRoomAsGuest(eventCode, roomName) {
 
   // Generate composite key in the format: eventCode_roomName__userEmailKey_guestName
   let compositeKey = `${eventCode}_${roomName}__${userEmailKey}_${guestName}`;
-  const guestRef = ref(database, `rooms/${eventCode}/guests/${compositeKey}`);
-  const guestSnapshot = await get(guestRef);
-
-  if (!guestSnapshot.exists()) {
-    // Add guest data to the room if not already exists
-    await set(guestRef, guestData);
-  } else {
-    alert('You have already joined this room!');
-  }
+  const newGuestRef = ref(database, `rooms/${eventCode}/guests/${compositeKey}`);
+  
+  // Add guest data to the room
+  await set(newGuestRef, guestData);
 
   // Listen for changes in user data and update room guest data
   onValue(userRef, async (snapshot) => {
@@ -91,7 +120,7 @@ async function joinRoomAsGuest(eventCode, roomName) {
         guestPhotoUrl = updatedPhotoUrl;
 
         // Update guest data in the room
-        await update(guestRef, {
+        await update(newGuestRef, {
           guestName: updatedName,
           guestPhotoUrl: updatedPhotoUrl,
         });
@@ -99,11 +128,11 @@ async function joinRoomAsGuest(eventCode, roomName) {
         // Create a new composite key if the guest name has changed
         const newCompositeKey = `${eventCode}_${roomName}__${userEmailKey}_${updatedName}`;
         if (newCompositeKey !== compositeKey) {
-          const newGuestRef = ref(database, `rooms/${eventCode}/guests/${newCompositeKey}`);
+          const updatedGuestRef = ref(database, `rooms/${eventCode}/guests/${newCompositeKey}`);
 
           // Remove old entry and add new entry with updated composite key
-          await set(newGuestRef, guestData);
-          await update(newGuestRef, {
+          await set(updatedGuestRef, guestData);
+          await update(updatedGuestRef, {
             guestName: updatedName,
             guestPhotoUrl: updatedPhotoUrl,
           });
@@ -135,8 +164,8 @@ async function navigateToEventRoom() {
       const roomData = roomSnapshot.val();
       const roomName = roomData.roomName || 'No Room Name';
 
-      // Join the room as a guest
-      await joinRoomAsGuest(eventCode, roomName);
+      // Join the room as a guest or confirm host status
+      await joinRoom(eventCode, roomName);
     } else {
       alert('Room does not exist!');
     }
