@@ -37,7 +37,7 @@ onAuthStateChanged(auth, (currentUser) => {
   }
 });
 
-// Function to join the room, checking if the user is already the host or a guest
+// Main function to join the room, with checks for host and guest roles
 async function joinRoom(eventCode, roomName) {
   if (!user) {
     alert('Please log in to join the room!');
@@ -48,44 +48,30 @@ async function joinRoom(eventCode, roomName) {
   const userId = user.uid;
   const compositeKey = `${eventCode}_${roomName}_${userEmailKey}_${userName}`;
 
-  // Check if the user is the host based on composite key and user ID
   try {
+    // Check if the user is the host based on composite key and user ID
     const hostRef = ref(database, `rooms/${eventCode}/host/${compositeKey}`);
     const hostSnapshot = await get(hostRef);
 
-    if (hostSnapshot.exists()) {
-      const hostData = hostSnapshot.val();
-      if (hostData.hostId === userId) {
-        alert("You are the host of this room.");
-        console.log("User identified as host:", userId);
-        window.location.href = `eventroom.html?eventCode=${eventCode}`;
-        return;
-      }
+    if (hostSnapshot.exists() && hostSnapshot.val().hostId === userId) {
+      alert("You are the host of this room.");
+      console.log("User identified as host:", userId);
+      window.location.href = `eventroom.html?eventCode=${eventCode}`;
+      return;
     }
-  } catch (error) {
-    console.error("Error checking host status:", error);
-  }
 
-  // Check if the user is already listed as a guest with the same composite key and user ID
-  try {
+    // Check if the user is already listed as a guest with the same composite key and user ID
     const guestRef = ref(database, `rooms/${eventCode}/guests/${compositeKey}`);
     const guestSnapshot = await get(guestRef);
 
-    if (guestSnapshot.exists()) {
-      const guestData = guestSnapshot.val();
-      if (guestData.guestId === userId) {
-        alert("You are already a guest in this room!");
-        console.log("User identified as guest:", userId);
-        window.location.href = `eventroom.html?eventCode=${eventCode}`;
-        return;
-      }
+    if (guestSnapshot.exists() && guestSnapshot.val().guestId === userId) {
+      alert("You are already a guest in this room!");
+      console.log("User identified as guest:", userId);
+      window.location.href = `eventroom.html?eventCode=${eventCode}`;
+      return;
     }
-  } catch (error) {
-    console.error("Error checking guest status:", error);
-  }
 
-  // Fetch user data from Firebase Realtime Database to add as a new guest
-  try {
+    // If the user is neither the host nor an existing guest, add them as a new guest
     const userRef = ref(database, `users/${userId}`);
     const userSnapshot = await get(userRef);
 
@@ -104,7 +90,6 @@ async function joinRoom(eventCode, roomName) {
     };
 
     // Add guest data to the room with composite key
-    const guestRef = ref(database, `rooms/${eventCode}/guests/${compositeKey}`);
     await set(guestRef, guestData);
 
     // Redirect to the event room page as a new guest
@@ -112,7 +97,7 @@ async function joinRoom(eventCode, roomName) {
     console.log("User enrolled as new guest:", userId);
     window.location.href = `eventroom.html?eventCode=${eventCode}`;
   } catch (error) {
-    console.error("Error enrolling as new guest:", error);
+    console.error("Error processing room join:", error);
   }
 }
 
