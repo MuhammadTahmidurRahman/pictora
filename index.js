@@ -3,3 +3,4 @@ setTimeout(() => {
     window.location.href = "welcome.html";  // Change to the appropriate page
   }, 3000);
   
+  //hello I'm Anika 
