@@ -4,8 +4,6 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstati
 import { getDatabase, ref as dbRef, set, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-const auth = getAuth();
-
 onAuthStateChanged(auth, (user) => {
   console.log("Auth state changed. Checking user status...");
   if (user) {
@@ -35,7 +33,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-//const auth = getAuth();
+const auth = getAuth();
 const storage = getStorage();
 const database = getDatabase();
 
