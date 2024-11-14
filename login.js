@@ -12,7 +12,7 @@ import {
   signOut 
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import { getDatabase, ref as dbRef, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -48,9 +48,9 @@ window.loginWithGoogle = async function () {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Check if the user exists in Firestore
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    if (userDoc.exists()) {
+    // Check if the user exists in the Realtime Database
+    const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
+    if (userSnapshot.exists()) {
       // If user exists, proceed to the next step
       alert("Google sign-in successful");
 
