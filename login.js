@@ -1,25 +1,26 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-
-const auth = getAuth();
-
-onAuthStateChanged(auth, (user) => {
-  console.log("Auth state changed. Checking user status...");
-  if (user) {
-    console.log("User is logged in:", user);
-    // If user is logged in, we should be redirected to join_event
-    if (window.location.pathname === '/login.html') {
-      console.log("Redirecting to join_event...");
-      window.location.href = 'join_event.html'; // Redirect to event page
-    }
-  } else {
-    console.log("User is not logged in. Staying on login page.");
-    // If the user is not logged in, do not redirect.
-  }
-});
-
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  createUserWithEmailAndPassword, 
+  signInWithCredential, 
+  onAuthStateChanged,
+  sendEmailVerification
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { 
+  getFirestore, 
+  doc, 
+  setDoc, 
+  getDoc 
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { 
+  getStorage, 
+  ref, 
+  uploadBytes, 
+  getDownloadURL 
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { getPermissions, requestPermission } from './permissions.js'; // Assuming permissions.js handles camera/storage permissions
 
 // Firebase configuration
 const firebaseConfig = {
@@ -28,85 +29,141 @@ const firebaseConfig = {
   projectId: "pictora-7f0ad",
   storageBucket: "pictora-7f0ad.appspot.com",
   messagingSenderId: "155732133141",
-  appId: "1:155732133141:web:c5646717494a496a6dd51c",
+  appId: "1:155732133141:web:c5646717494a496a6dd51c"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-//const auth = getAuth(app);
+const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
-// Set persistence to local
-setPersistence(auth, browserLocalPersistence)
-  .then(() => {
-    console.log("Persistence set to local");
-  })
-  .catch((error) => {
-    console.error("Error setting persistence:", error);
-  });
-
-// Function to handle Google login and check if user exists
-window.loginWithGoogle = async function () {
+// Image picker - get image URL from either camera or gallery
+async function pickImage(source) {
   try {
-    // Initiate Google Sign-In
+    const permission = source === 'camera' ? 'camera' : 'storage'; // Adjust based on source
+    await requestPermission(permission);
+
+    const imageFile = await getImageFromSource(source); // A function to pick image either from camera or gallery
+    if (!imageFile) {
+      throw new Error('No image selected.');
+    }
+    return imageFile;
+  } catch (error) {
+    console.error("Image picking failed:", error);
+    alert("Failed to select image.");
+    return null;
+  }
+}
+
+// Function to upload image to Firebase Storage
+async function uploadImage(imageFile) {
+  try {
+    const fileName = Date.now().toString();
+    const imageRef = ref(storage, 'uploads/' + fileName);
+    const uploadResult = await uploadBytes(imageRef, imageFile);
+    const downloadUrl = await getDownloadURL(uploadResult.ref);
+    return downloadUrl;
+  } catch (error) {
+    console.error("Upload failed:", error);
+    alert("Failed to upload image.");
+    return null;
+  }
+}
+
+// Handle registration with email and password
+async function registerUser(email, password, confirmPassword, name, imageFile) {
+  if (!email || !password || !confirmPassword || !name) {
+    alert("Please fill up all the information box properly.");
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    alert("Passwords do not match.");
+    return;
+  }
+
+  if (password.length < 6) {
+    alert("Password must be at least 6 characters long.");
+    return;
+  }
+
+  if (!imageFile) {
+    alert("Please upload your photo.");
+    return;
+  }
+
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const imageUrl = await uploadImage(imageFile);
+
+    // Save user information to Firestore
+    const user = userCredential.user;
+    await setDoc(doc(db, "users", user.uid), {
+      name: name,
+      email: email,
+      photo: imageUrl || ''
+    });
+
+    // Redirect user after successful registration
+    alert("User registered successfully!");
+    window.location.href = 'create_or_join_room.html'; // Adjust as needed
+  } catch (error) {
+    console.error("Registration failed:", error);
+    alert("Registration failed: " + error.message);
+  }
+}
+
+// Handle Google login
+async function signInWithGoogle() {
+  try {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Check if the user exists in Firestore
     const userDoc = await getDoc(doc(db, "users", user.uid));
     if (userDoc.exists()) {
-      // If user exists, proceed to the next step
       alert("Google sign-in successful");
-
-      // Redirect to the create or join room page
-      window.location.href = 'join_event.html';
+      window.location.href = 'create_or_join_room.html'; // Adjust as needed
     } else {
-      // If user does not exist, sign out and redirect to signup page
-      await signOut(auth);
       alert("User not registered. Redirecting to sign-up page.");
+      await signOut(auth);
       window.location.href = 'signup.html';
     }
   } catch (error) {
     console.error("Google sign-in failed:", error);
-    alert("Failed to sign in with Google. Redirecting to sign-up page.");
-    window.location.href = 'signup.html';
+    alert("Failed to sign in with Google: " + error.message);
   }
-};
+}
 
+// Handle onAuthStateChanged
 onAuthStateChanged(auth, (user) => {
-  console.log("Current path:", window.location.pathname);
-  console.log("User object:", user);
-
   if (user) {
-    console.log("User is signed in:", user);
-    if (window.location.pathname !== '/join_event.html') {
-      window.location.href = 'join_event.html';
-    }
-  } else {
-    console.log("User is signed out");
-    if (window.location.pathname !== '/signup.html' && window.location.pathname !== '/login.html') {
-      window.location.href = 'signup.html';
+    if (window.location.pathname === '/login.html') {
+      window.location.href = 'join_event.html'; // Redirect to event page after login
     }
   }
 });
 
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // User is signed in
-    console.log("User is signed in:", user);
+// Event listeners for actions (form submission, Google sign-in, etc.)
+document.getElementById("signup-button").addEventListener("click", () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
+  const name = document.getElementById("name").value;
+  const imageFile = document.getElementById("imageInput").files[0]; // Assuming an input field with ID "imageInput"
 
-    // Only redirect if not already on 'join_event.html'
-    if (window.location.pathname !== '/join_event.html') {
-      window.location.href = 'join_event.html';
-    }
-  } else {
-    // User is signed out
-    console.log("User is signed out");
+  registerUser(email, password, confirmPassword, name, imageFile);
+});
 
-    // Redirect to 'signup.html' only if not on 'signup.html' or 'login.html'
-    if (window.location.pathname !== '/signup.html' && window.location.pathname !== '/login.html') {
-      window.location.href = 'signup.html';
-    }
+document.getElementById("google-login-button").addEventListener("click", () => {
+  signInWithGoogle();
+});
+
+document.getElementById("image-upload-button").addEventListener("click", async () => {
+  const source = prompt("Choose image source (camera/gallery):");
+  const imageFile = await pickImage(source);
+  if (imageFile) {
+    alert("Image selected successfully.");
   }
 });
