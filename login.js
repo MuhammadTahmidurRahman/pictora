@@ -55,9 +55,23 @@ window.loginWithGoogle = async function () {
   }
 };
 
-// Handle authentication state changes
-// Handle authentication state changes
-// Handle authentication state changes
+onAuthStateChanged(auth, (user) => {
+  console.log("Current path:", window.location.pathname);
+  console.log("User object:", user);
+
+  if (user) {
+    console.log("User is signed in:", user);
+    if (window.location.pathname !== '/join_event.html') {
+      window.location.href = 'join_event.html';
+    }
+  } else {
+    console.log("User is signed out");
+    if (window.location.pathname !== '/signup.html' && window.location.pathname !== '/login.html') {
+      window.location.href = 'signup.html';
+    }
+  }
+});
+
 onAuthStateChanged(auth, (user) => {
   if (user) {
     // User is signed in
@@ -71,31 +85,9 @@ onAuthStateChanged(auth, (user) => {
     // User is signed out
     console.log("User is signed out");
 
-    // Only redirect if not already on 'signup.html' or 'login.html'
-    if (window.location.pathname !== '/signup.html' && window.location.pathname !== '/login.html') {
-      window.location.href = 'signup.html';
-    }
-  }
-});
-
-// Handle authentication state changes
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // User is signed in
-    console.log("User is signed in:", user);
-
-    // Redirect only if not already on 'join_event.html'
-    if (window.location.pathname !== '/join_event.html') {
-      window.location.href = 'join_event.html';
-    }
-  } else {
-    // User is signed out
-    console.log("User is signed out");
-
     // Redirect to 'signup.html' only if not on 'signup.html' or 'login.html'
     if (window.location.pathname !== '/signup.html' && window.location.pathname !== '/login.html') {
       window.location.href = 'signup.html';
     }
   }
 });
-
