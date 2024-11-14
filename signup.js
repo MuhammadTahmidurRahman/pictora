@@ -1,27 +1,8 @@
+// Ensure no duplicate imports and only import necessary functions once
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithPopup, fetchSignInMethodsForEmail, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import { getDatabase, ref as dbRef, set, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-
-const auth = getAuth();
-
-onAuthStateChanged(auth, (user) => {
-  console.log("Auth state changed. Checking user status...");
-  if (user) {
-    console.log("User is already logged in:", user);
-    // If user is logged in, redirect to join_event
-    if (window.location.pathname === '/signup.html') {
-      console.log("Redirecting to join_event...");
-      window.location.href = 'join_event.html'; // Redirect to event page
-    }
-  } else {
-    console.log("User is not logged in. Staying on signup page.");
-    // If the user is not logged in, do not redirect.
-  }
-});
-
 
 // Firebase configuration
 const firebaseConfig = {
@@ -36,42 +17,42 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-//const auth = getAuth();
+const auth = getAuth();
 const storage = getStorage();
 const database = getDatabase();
+
+// Check auth state and handle redirection
 onAuthStateChanged(auth, (user) => {
-  console.log("Auth state changed. Checking user status...");
   if (user) {
-    console.log("User is already logged in:", user);
-    // If user is logged in, redirect to join_event
-    if (window.location.pathname === '/signup.html') {
-      console.log("Redirecting to join_event...");
-      window.location.href = 'join_event.html'; // Redirect to event page
-    }
-  } else {
-    console.log("User is not logged in. Staying on signup page.");
-    // If the user is not logged in, do not redirect.
+    console.log("User is logged in, redirecting to join event...");
+    window.location.href = 'join_event.html';
   }
 });
 
-
-
-// Toggle password visibility
-function togglePassword(fieldId) {
+// Function declarations
+window.togglePassword = function (fieldId) {
   const field = document.getElementById(fieldId);
   field.type = field.type === "password" ? "text" : "password";
-}
+};
 
-// Show image picker
-function showImagePicker() {
+window.showImagePicker = function () {
   document.getElementById("image").click();
-}
+};
 
-// Display selected image status
-function displayImage(input) {
+window.displayImage = function (input) {
   const uploadText = document.getElementById("upload-text");
   uploadText.textContent = input.files && input.files[0] ? "Photo selected" : "Upload your photo here";
-}
+};
+
+window.registerUser = async function () {
+  console.log("Register button clicked.");
+  // Your registration logic here...
+};
+
+window.signInWithGoogle = async function () {
+  console.log("Google Sign-In button clicked.");
+  // Your Google sign-in logic here...
+};
 
 // Register user with email and password and upload profile image
 async function registerUser() {
