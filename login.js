@@ -31,7 +31,7 @@ const auth = getAuth();
 const storage = getStorage();
 const database = getDatabase();
 
-// Set persistence to local
+// Set persistence to local before any auth calls
 setPersistence(auth, browserLocalPersistence)
   .then(() => {
     console.log("Persistence set to local");
@@ -43,7 +43,6 @@ setPersistence(auth, browserLocalPersistence)
 // Function to handle Google login and check if user exists
 window.loginWithGoogle = async function () {
   try {
-    // Initiate Google Sign-In
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
@@ -51,9 +50,7 @@ window.loginWithGoogle = async function () {
     // Check if the user exists in the Realtime Database
     const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
     if (userSnapshot.exists()) {
-      // If user exists, proceed to the next step
       alert("Google sign-in successful");
-
       // Redirect to the create or join room page
       window.location.href = 'join_event.html';
     } else {
@@ -69,8 +66,7 @@ window.loginWithGoogle = async function () {
   }
 };
 
-// Single onAuthStateChanged listener
-
+// Function to login with email and password
 async function loginUser() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -85,7 +81,7 @@ async function loginUser() {
   }
 }
 
-// Check if user is logged in on page load
+// Listen to authentication state changes
 onAuthStateChanged(auth, (user) => {
   if (user) {
     console.log("User is logged in.");
@@ -96,4 +92,3 @@ onAuthStateChanged(auth, (user) => {
     // Stay on login page if no user is logged in
   }
 });
-//hhh
