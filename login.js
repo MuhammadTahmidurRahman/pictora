@@ -64,20 +64,22 @@ window.loginWithGoogle = async function () {
 };
 
 // Single onAuthStateChanged listener
+// Single onAuthStateChanged listener
 onAuthStateChanged(auth, (user) => {
   console.log("Auth state changed. Checking user status...");
   console.log("Current path:", window.location.pathname);
   if (user) {
     console.log("User is logged in:", user);
-    // Redirect to join_event if logged in and not already there
+    // Only redirect if the user is on the login page
     if (window.location.pathname === '/login.html') {
       window.location.href = 'join_event.html';
     }
   } else {
     console.log("User is not logged in.");
-    // Redirect to signup if user is not logged in and not on login or signup pages
+    // Redirect to signup page if user is not logged in and not on login or signup pages
     if (window.location.pathname !== '/signup.html' && window.location.pathname !== '/login.html') {
       window.location.href = 'signup.html';
     }
   }
 });
+
