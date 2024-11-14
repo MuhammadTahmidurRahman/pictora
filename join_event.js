@@ -46,7 +46,7 @@ async function joinRoom(eventCode, roomName) {
 
   const userEmailKey = userEmail.replace(/\./g, '_');
   const userId = user.uid;
-  const compositeKey = `${eventCode}_${roomName}__${userEmailKey}_${userName}`;
+  const compositeKey = `${eventCode}_${roomName}_${userEmailKey}_${userName}`;
 
   // Check if the user is already the host in the room
   const hostRef = ref(database, `rooms/${eventCode}/host`);
