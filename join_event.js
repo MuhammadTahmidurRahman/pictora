@@ -48,17 +48,22 @@ async function joinRoom(eventCode, roomName) {
   const userId = user.uid;
   const compositeKey = `${eventCode}_${roomName}__${userEmailKey}_${userName}`;
 
-  // Check if the user is already listed as the host in the room using composite key
+  // Check if the user is already the host in the room
   const hostRef = ref(database, `rooms/${eventCode}/host`);
   const hostSnapshot = await get(hostRef);
 
   let isHost = false;
-  hostSnapshot.forEach((childSnapshot) => {
-    if (childSnapshot.key === compositeKey && childSnapshot.val().hostId === userId) {
-      isHost = true;
-    }
-  });
+  if (hostSnapshot.exists()) {
+    hostSnapshot.forEach((childSnapshot) => {
+      const hostData = childSnapshot.val();
+      // Verify if hostId matches the userId of the current user
+      if (hostData.hostId === userId) {
+        isHost = true;
+      }
+    });
+  }
 
+  // If the user is confirmed as the host, redirect and exit function
   if (isHost) {
     alert("You are the host of this room.");
     window.location.href = `eventroom.html?eventCode=${eventCode}`;
@@ -71,7 +76,8 @@ async function joinRoom(eventCode, roomName) {
 
   let isGuest = false;
   guestSnapshot.forEach((childSnapshot) => {
-    if (childSnapshot.key === compositeKey && childSnapshot.val().guestId === userId) {
+    const guestData = childSnapshot.val();
+    if (guestData.guestId === userId) {
       isGuest = true;
     }
   });
