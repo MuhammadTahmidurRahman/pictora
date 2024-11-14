@@ -1,6 +1,25 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+const auth = getAuth();
+
+onAuthStateChanged(auth, (user) => {
+  console.log("Auth state changed. Checking user status...");
+  if (user) {
+    console.log("User is logged in:", user);
+    // If user is logged in, we should be redirected to join_event
+    if (window.location.pathname === '/login.html') {
+      console.log("Redirecting to join_event...");
+      window.location.href = 'join_event.html'; // Redirect to event page
+    }
+  } else {
+    console.log("User is not logged in. Staying on login page.");
+    // If the user is not logged in, do not redirect.
+  }
+});
+
 
 // Firebase configuration
 const firebaseConfig = {
@@ -14,7 +33,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+//const auth = getAuth(app);
 const db = getFirestore(app);
 
 // Set persistence to local

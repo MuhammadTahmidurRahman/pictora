@@ -3,6 +3,25 @@ import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWith
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import { getDatabase, ref as dbRef, set, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+const auth = getAuth();
+
+onAuthStateChanged(auth, (user) => {
+  console.log("Auth state changed. Checking user status...");
+  if (user) {
+    console.log("User is already logged in:", user);
+    // If user is logged in, redirect to join_event
+    if (window.location.pathname === '/signup.html') {
+      console.log("Redirecting to join_event...");
+      window.location.href = 'join_event.html'; // Redirect to event page
+    }
+  } else {
+    console.log("User is not logged in. Staying on signup page.");
+    // If the user is not logged in, do not redirect.
+  }
+});
+
 
 // Firebase configuration
 const firebaseConfig = {
@@ -17,7 +36,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth();
+//const auth = getAuth();
 const storage = getStorage();
 const database = getDatabase();
 
@@ -144,6 +163,7 @@ async function signInWithGoogle() {
     alert("Google Sign-In failed. Please try again.");
   }
 }
+
 
 onAuthStateChanged(auth, (user) => {
   // If the user is logged in, redirect them to the join event page
