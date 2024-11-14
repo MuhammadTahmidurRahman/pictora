@@ -125,3 +125,18 @@ button.google-button::before {
   font-size: 18px;
   cursor: pointer;
 }
+
+.forgot-password {
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+.forgot-password a {
+  color: #4285F4;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.forgot-password a:hover {
+  text-decoration: underline;
+}
