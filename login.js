@@ -27,18 +27,25 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const storage = getStorage();
-const database = getDatabase();
+const auth = getAuth(app);
+const storage = getStorage(app);
+const database = getDatabase(app);
 
-// Set persistence to local before any auth calls
-setPersistence(auth, browserLocalPersistence)
-  .then(() => {
-    console.log("Persistence set to local");
-  })
-  .catch((error) => {
-    console.error("Error setting persistence:", error);
-  });
+// Set persistence to local inside the login function
+async function loginUser() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  try {
+    await setPersistence(auth, browserLocalPersistence);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    console.log("User logged in:", userCredential.user);
+    window.location.href = "join_event.html";  // Redirect to event page on successful login
+  } catch (error) {
+    console.error("Login error:", error.message);
+    alert("Login failed. Please check your credentials.");
+  }
+}
 
 // Function to handle Google login and check if user exists
 window.loginWithGoogle = async function () {
@@ -51,7 +58,6 @@ window.loginWithGoogle = async function () {
     const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
     if (userSnapshot.exists()) {
       alert("Google sign-in successful");
-      // Redirect to the create or join room page
       window.location.href = 'join_event.html';
     } else {
       // If user does not exist, sign out and redirect to signup page
@@ -60,35 +66,20 @@ window.loginWithGoogle = async function () {
       window.location.href = 'signup.html';
     }
   } catch (error) {
-    console.error("Google sign-in failed:", error);
+    console.error("Google sign-in failed:", error.message);
     alert("Failed to sign in with Google. Redirecting to sign-up page.");
     window.location.href = 'signup.html';
   }
 };
 
-// Function to login with email and password
-async function loginUser() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    console.log("User logged in:", userCredential.user);
-    window.location.href = "join_event.html";  // Redirect to event page on successful login
-  } catch (error) {
-    console.error("Error logging in:", error);
-    alert("Login failed. Please check your credentials.");
-  }
-}
-
 // Listen to authentication state changes
 onAuthStateChanged(auth, (user) => {
   if (user) {
     console.log("User is logged in.");
-    // Redirect user to the join event page if already logged in
-    window.location.href = "join_event.html";
+    if (window.location.pathname !== "/join_event.html") {
+      window.location.href = "join_event.html"; // Redirect only if not already on the target page
+    }
   } else {
     console.log("No user is logged in.");
-    // Stay on login page if no user is logged in
   }
 });
