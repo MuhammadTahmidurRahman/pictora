@@ -1,13 +1,11 @@
 <!DOCTYPE html>
-<button id="googleSignInButton">Sign in with Google</button>
-<script src="yourScript.js" defer></script>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login to PicTora</title>
     <link rel="stylesheet" href="login.css">
-    <script type="module" src="login.js"></script>
+    <script type="module" src="login.js" defer></script>
 </head>
 <body>
     <div class="background">
@@ -28,14 +26,15 @@
             <button class="forgot-password" onclick="navigateToForgotPassword()">Forgot Password?</button>
 
             <!-- Login Button -->
-            <button class="login-button" onclick="loginWithEmailPassword()">Log in</button>
+            <button class="login-button" id="login-button">Log in</button>
 
             <!-- Google Sign-In Button -->
-            <button class="google-button" onclick="loginWithGoogle()">Sign in with Google</button>
+            <button class="google-button" id="googleSignInButton">Sign in with Google</button>
 
             <!-- Register Option -->
             <button class="register-button" onclick="navigateToRegister()">Don't have an account? Register</button>
         </div>
     </div>
+    <script type="module" src="login.js" defer></script> <!-- Corrected script placement -->
 </body>
 </html>

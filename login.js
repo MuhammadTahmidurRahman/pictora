@@ -6,7 +6,9 @@ import {
   createUserWithEmailAndPassword, 
   signInWithCredential, 
   onAuthStateChanged,
-  sendEmailVerification
+  sendEmailVerification,
+  signOut,
+  signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { 
   getFirestore, 
@@ -31,7 +33,6 @@ const firebaseConfig = {
   messagingSenderId: "155732133141",
   appId: "1:155732133141:web:c5646717494a496a6dd51c"
 };
-
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -147,30 +148,32 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // Event listeners for actions (form submission, Google sign-in, etc.)
-document.getElementById("signup-button").addEventListener("click", () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  const confirmPassword = document.getElementById("confirmPassword").value;
-  const name = document.getElementById("name").value;
-  const imageFile = document.getElementById("imageInput").files[0]; // Assuming an input field with ID "imageInput"
+document.addEventListener("DOMContentLoaded", function () {
+  // Attach event listeners after DOM content is loaded
+  document.getElementById("signup-button").addEventListener("click", () => {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    const name = document.getElementById("name").value;
+    const imageFile = document.getElementById("imageInput").files[0]; // Assuming an input field with ID "imageInput"
 
-  registerUser(email, password, confirmPassword, name, imageFile);
-});
+    registerUser(email, password, confirmPassword, name, imageFile);
+  });
 
-document.getElementById("google-login-button").addEventListener("click", () => {
-  signInWithGoogle();
-});
+  document.getElementById("googleSignInButton").addEventListener("click", () => {
+    signInWithGoogle();
+  });
 
-document.getElementById("image-upload-button").addEventListener("click", async () => {
-  const source = prompt("Choose image source (camera/gallery):");
-  const imageFile = await pickImage(source);
-  if (imageFile) {
-    alert("Image selected successfully.");
-  }
+  document.getElementById("image-upload-button").addEventListener("click", async () => {
+    const source = prompt("Choose image source (camera/gallery):");
+    const imageFile = await pickImage(source);
+    if (imageFile) {
+      alert("Image selected successfully.");
+    }
+  });
 });
 
 document.getElementById('yourButtonId').addEventListener('click', function() {
   console.log("Button clicked");
 });
-
 
