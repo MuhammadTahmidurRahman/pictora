@@ -1,4 +1,4 @@
-/* General Styling */
+/* General reset */
 * {
   margin: 0;
   padding: 0;
@@ -13,7 +13,7 @@ body, html {
 }
 
 .background {
-  background-color: #000; /* Ensure it matches the signup page */
+  background-color: #000; /* Matches the signup page */
   position: relative;
   display: flex;
   justify-content: center;
@@ -27,18 +27,9 @@ body, html {
   width: 90%;
   max-width: 400px;
   padding: 20px;
-  background-color: rgba(0, 0, 0, 0.7); /* Match with signup */
+  background-color: rgba(0, 0, 0, 0.7); /* Matches signup */
   border-radius: 10px;
   color: white;
-}
-
-.back-button {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 18px;
-  cursor: pointer;
-  margin-bottom: 15px;
 }
 
 h1 {
@@ -79,20 +70,8 @@ input[type="password"] {
   cursor: pointer;
 }
 
-.forgot-password {
-  background: none;
-  color: white;
-  border: none;
-  margin-top: -15px;
-  cursor: pointer;
-  font-size: 14px;
-  display: block;
-  text-align: right;
-}
-
 button.login-button,
-button.google-button,
-button.register-button {
+button.google-button {
   width: 100%;
   padding: 12px;
   border: none;
@@ -100,9 +79,6 @@ button.register-button {
   margin-top: 20px;
   font-size: 16px;
   cursor: pointer;
-}
-
-button.login-button {
   background-color: black;
   color: white;
 }
@@ -113,13 +89,14 @@ button.google-button {
   justify-content: center;
   align-items: center;
   gap: 10px;
-  color: white;
 }
 
-button.register-button {
-  background-color: none;
-  color: #4285F4;
+button.back-button {
+  background: none;
   border: none;
-  margin-top: 10px;
-  text-decoration: underline;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  margin-bottom: 15px;
+  text-align: left;
 }

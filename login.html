@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login to PicTora</title>
     <link rel="stylesheet" href="login.css">
+    <script type="module" src="login.js" defer></script>
 </head>
 <body>
     <div class="background">
@@ -22,8 +23,6 @@
                 <button class="toggle-password" onclick="togglePasswordVisibility()">👁</button>
             </div>
 
-            <button class="forgot-password" onclick="navigateToForgotPassword()">Forgot Password?</button>
-
             <!-- Login Button -->
             <button class="login-button" id="login-button">Log in</button>
 
@@ -31,11 +30,7 @@
             <button class="google-button" id="googleSignInButton">
                 <img src="google-logo.png" alt="Google logo" width="20"> Sign in with Google
             </button>
-
-            <!-- Register Option -->
-            <button class="register-button" onclick="navigateToRegister()">Don't have an account? Register</button>
         </div>
     </div>
-    <script type="module" src="login.js" defer></script>
 </body>
 </html>
