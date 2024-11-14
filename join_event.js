@@ -1,6 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
-import { getDatabase, ref, get, set, update, onValue } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
+import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -48,27 +48,32 @@ async function joinRoom(eventCode, roomName) {
   const userId = user.uid;
   const compositeKey = `${eventCode}_${roomName}_${userEmailKey}_${userName}`;
 
-  // Reference to the room in the database
-  const roomRef = ref(database, `rooms/${eventCode}`);
-
   // Check if the user is the host based on composite key and user ID
   const hostRef = ref(database, `rooms/${eventCode}/host/${compositeKey}`);
   const hostSnapshot = await get(hostRef);
 
-  if (hostSnapshot.exists() && hostSnapshot.val().hostId === userId) {
-    alert("You are the host of this room.");
-    window.location.href = `eventroom.html?eventCode=${eventCode}`;
-    return;
+  if (hostSnapshot.exists()) {
+    const hostData = hostSnapshot.val();
+    if (hostData.hostId === userId) {
+      // If the composite key and user ID match the host, redirect as host
+      alert("You are the host of this room.");
+      window.location.href = `eventroom.html?eventCode=${eventCode}`;
+      return;
+    }
   }
 
   // Check if the user is already listed as a guest with the same composite key and user ID
   const guestRef = ref(database, `rooms/${eventCode}/guests/${compositeKey}`);
   const guestSnapshot = await get(guestRef);
 
-  if (guestSnapshot.exists() && guestSnapshot.val().guestId === userId) {
-    alert("You are already a guest in this room!");
-    window.location.href = `eventroom.html?eventCode=${eventCode}`;
-    return;
+  if (guestSnapshot.exists()) {
+    const guestData = guestSnapshot.val();
+    if (guestData.guestId === userId) {
+      // If the composite key and user ID match an existing guest, redirect as guest
+      alert("You are already a guest in this room!");
+      window.location.href = `eventroom.html?eventCode=${eventCode}`;
+      return;
+    }
   }
 
   // Fetch user data from Firebase Realtime Database to add as a new guest
@@ -91,7 +96,8 @@ async function joinRoom(eventCode, roomName) {
   // Add guest data to the room with composite key
   await set(guestRef, guestData);
 
-  // Redirect to the event room page
+  // Redirect to the event room page as a new guest
+  alert("You have joined as a new guest!");
   window.location.href = `eventroom.html?eventCode=${eventCode}`;
 }
 
