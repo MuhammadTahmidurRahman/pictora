@@ -116,10 +116,10 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
     if (files.length === 0) return;
 
     try {
-      // Create folder structure in Firebase Storage by uploading a dummy file
-      const dummyFile = new Blob([""], { type: "text/plain" });  // Empty text file as dummy
-      const dummyFileRef = storageRef(storage, `${folderPath}/.placeholder.txt`);
-      await uploadBytes(dummyFileRef, dummyFile);  // Upload dummy file to initialize the folder
+      // Temporary folder initialization with a placeholder image (can be a 1x1 pixel image)
+      const placeholderImage = new Blob([""], { type: "image/jpeg" });  // Empty image as placeholder (or use a small image file)
+      const placeholderImageRef = storageRef(storage, `${folderPath}/.placeholder.jpg`);
+      await uploadBytes(placeholderImageRef, placeholderImage);  // Upload placeholder to create the folder
 
       // Now upload the actual photos
       for (const file of files) {
@@ -213,12 +213,6 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
   const storagePath = `uploads/${participantId}`;
 
   try {
-    // Create the folder structure in Firebase Storage by uploading a dummy file (e.g., .txt file)
-    const dummyFile = new Blob([""], { type: "text/plain" });  // Empty text file as dummy
-    const dummyFileRef = storageRef(storage, `${folderPath}/.placeholder.txt`);
-    await uploadBytes(dummyFileRef, dummyFile);  // Upload dummy file to initialize the folder
-
-    // Upload the guest photo
     const fileRef = storageRef(storage, storagePath);
     await uploadBytes(fileRef, guestPhoto);
     const photoUrl = await getDownloadURL(fileRef);
@@ -238,5 +232,54 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
   } catch (error) {
     console.error("Error adding guest:", error);
     alert("Failed to add guest.");
+  }
+});
+
+// Delete Manual Guest
+async function deleteManualGuest(eventCode, guestId, folderPath) {
+  try {
+    const guestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${guestId}`);
+    await remove(guestRef);
+
+    const folderRef = storageRef(storage, folderPath);
+    const listResult = await listAll(folderRef);
+    for (const itemRef of listResult.items) {
+      await deleteObject(itemRef);
+    }
+
+    alert("Guest deleted successfully.");
+    loadEventRoom(eventCode);
+  } catch (error) {
+    console.error("Error deleting guest:", error);
+    alert("Failed to delete guest.");
+  }
+}
+
+// Toggle Add Guest Dialog
+function toggleDialog(show) {
+  const dialog = document.getElementById("addGuestDialog");
+  dialog.classList.toggle("hidden", !show);
+
+  // Clear previous inputs
+  if (show) {
+    document.getElementById("guestName").value = "";
+    document.getElementById("guestEmail").value = "";
+    document.getElementById("guestPhoto").value = null;
+  }
+}
+
+// Check Authentication and Load Event Room
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    const eventCode = new URLSearchParams(window.location.search).get("eventCode");
+    if (eventCode) {
+      loadEventRoom(eventCode);
+    } else {
+      alert("Event Code is missing!");
+      window.location.href = "join_event.html";
+    }
+  } else {
+    alert("Please log in to access the event room.");
+    window.location.href = "login.html";
   }
 });
