@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithPopup, fetchSignInMethodsForEmail, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import { getDatabase, ref as dbRef, set, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -29,24 +29,24 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// Function declarations
+// Function to toggle password visibility
 window.togglePassword = function (fieldId) {
   const field = document.getElementById(fieldId);
   field.type = field.type === "password" ? "text" : "password";
 };
 
+// Function to show the file picker
 window.showImagePicker = function () {
   document.getElementById("image").click();
 };
 
+// Function to display selected image message
 window.displayImage = function (input) {
   const uploadText = document.getElementById("upload-text");
   uploadText.textContent = input.files && input.files[0] ? "Photo selected" : "Upload your photo here";
 };
 
-// Register user with email and password and upload profile image
-// Register user with email and password and upload profile image
-// Upload profile image to Firebase Storage
+// Function to register a user and upload the profile image
 window.registerUser = async function () {
   const name = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
@@ -104,39 +104,7 @@ window.registerUser = async function () {
   }
 };
 
-
-  try {
-    // 1. Check if the email is already registered in Firebase Authentication
-    const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-    if (signInMethods.length > 0) {
-      alert("This email is already registered. Please log in instead.");
-      return;
-    }
-
-    // 2. Create user with email and password
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-
-    // Upload profile image to Firebase Storage
-    const storageRef = ref(storage, `uploads/${user.uid}`);
-    await uploadBytes(storageRef, imageFile);
-    const imageUrl = await getDownloadURL(storageRef);
-
-    // Store user data in Realtime Database
-    await set(dbRef(database, `users/${user.uid}`), {
-      email: email,
-      name: name,
-      photo: imageUrl,
-    });
-
-    alert("User registered successfully with image uploaded!");
-    window.location.href = "join_event.html";
-  } catch (error) {
-    console.error("Error creating user:", error);
-    alert("Failed to register user. Please try again.");
-  };
-
-// Google Sign-In with image upload validation
+// Google Sign-In function with image upload validation
 window.signInWithGoogle = async function () {
   const provider = new GoogleAuthProvider();
   const imageFile = document.getElementById("image").files[0];
