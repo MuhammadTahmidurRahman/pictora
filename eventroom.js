@@ -49,12 +49,19 @@ async function loadEventRoom(eventCode) {
           const hostFolderIcon = document.createElement("button");
           hostFolderIcon.textContent = "📁"; // Folder icon
           hostFolderIcon.classList.add("folder-icon");
-          hostFolderIcon.addEventListener("click", () => {
-            // Navigate to photogallery.html with host's folder
-            window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
-              eventCode
-            )}&folderName=${encodeURIComponent(roomData.hostUploadedPhotoFolderPath)}&userId=${encodeURIComponent(hostId)}`;
-          });
+
+          // Only the host can click the host's folder
+          if (user.uid === hostId) {
+            hostFolderIcon.addEventListener("click", () => {
+              // Navigate to photogallery.html with host's folder
+              window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
+                eventCode
+              )}&folderName=${encodeURIComponent(roomData.hostUploadedPhotoFolderPath)}&userId=${encodeURIComponent(hostId)}`;
+            });
+          } else {
+            hostFolderIcon.disabled = true; // Disable for guests
+          }
+
           document.getElementById("hostInfo").appendChild(hostFolderIcon);
         }
       }
@@ -91,7 +98,9 @@ function loadGuests(guests, currentUserId, hostId, eventCode) {
       folderIcon.textContent = "📁"; // Folder icon
       folderIcon.classList.add("folder-icon");
 
-      // Folder icon is clickable only if the current user is the host or the guest themselves
+      // Folder icon is clickable only if:
+      // - Host (currentUserId === hostId)
+      // - Guest themselves (currentUserId === guestId)
       if (currentUserId === hostId || currentUserId === guestId) {
         folderIcon.addEventListener("click", () => {
           // Navigate to photogallery.html with guest's folder
