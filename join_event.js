@@ -23,19 +23,16 @@ async function joinRoom() {
   const roomCode = document.getElementById("eventCodeInput").value.trim();
   const user = auth.currentUser;
 
-  // Ensure user is logged in
   if (!user) {
     displayMessage("Please log in to join the room!");
     return;
   }
 
-  // Validate room code
   if (roomCode === "") {
     displayMessage("Please enter a room code!");
     return;
   }
 
-  // Fetch room data from Firebase
   const roomRef = ref(database, `rooms/${roomCode}`);
   const roomSnapshot = await get(roomRef);
 
@@ -46,14 +43,12 @@ async function joinRoom() {
 
   const roomData = roomSnapshot.val();
 
-  // Check if the user is the host
   if (roomData.hostId === user.uid) {
     displayMessage("You are the host of this room!");
     window.location.href = `/eventroom.html?eventCode=${roomCode}`;
     return;
   }
 
-  // Check if the user is already a participant
   const participantRef = ref(database, `rooms/${roomCode}/participants/${user.uid}`);
   const participantSnapshot = await get(participantRef);
 
@@ -63,8 +58,6 @@ async function joinRoom() {
     return;
   }
 
-  // If user is neither host nor participant, add as new participant
-  const sanitizedEmail = user.email.replace(/\./g, '_');
   const participantData = {
     name: user.displayName || "Guest",
     email: user.email,
@@ -76,12 +69,26 @@ async function joinRoom() {
   window.location.href = `/eventroom.html?eventCode=${roomCode}`;
 }
 
-// Function to display messages to the user
+// Function to display messages
 function displayMessage(message) {
-  document.getElementById("message").innerText = message;
+  const messageElement = document.createElement("p");
+  messageElement.innerText = message;
+  messageElement.style.color = "red";
+  const container = document.querySelector(".container");
+  container.appendChild(messageElement);
+
+  setTimeout(() => {
+    messageElement.remove();
+  }, 3000);
 }
 
-// Function to listen for user profile changes and update participant data
+// Listen for "Go to EventRoom" button click
+document.addEventListener("DOMContentLoaded", () => {
+  const joinButton = document.getElementById("joinEventBtn");
+  joinButton.addEventListener("click", joinRoom);
+});
+
+// Listen for user profile changes
 function listenForUserProfileChanges() {
   const user = auth.currentUser;
   const userRef = ref(database, `users/${user.uid}`);
@@ -90,7 +97,6 @@ function listenForUserProfileChanges() {
     const updatedName = snapshot.val().name || user.displayName || "Guest";
     const updatedPhotoUrl = snapshot.val().photo || user.photoURL || "";
 
-    // Update participant data in all rooms where this user is a participant
     const roomsSnapshot = await get(ref(database, 'rooms'));
     roomsSnapshot.forEach((room) => {
       const eventCode = room.key;
@@ -108,7 +114,7 @@ function listenForUserProfileChanges() {
   });
 }
 
-// Initialize listener for profile changes after login
+// Initialize listener for profile changes
 onAuthStateChanged(auth, (user) => {
   if (user) {
     listenForUserProfileChanges();
