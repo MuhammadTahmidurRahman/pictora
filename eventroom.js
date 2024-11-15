@@ -50,19 +50,20 @@ async function loadEventRoom(eventCode) {
           hostFolderIcon.textContent = "📁"; // Folder icon
           hostFolderIcon.classList.add("folder-icon");
           hostFolderIcon.addEventListener("click", () => {
-            openPhotoGallery(roomData.hostUploadedPhotoFolderPath);
+            // Navigate to photogallery.html with host's folder
+            window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
+              eventCode
+            )}&folderName=${encodeURIComponent(roomData.hostUploadedPhotoFolderPath)}&userId=${encodeURIComponent(hostId)}`;
           });
           document.getElementById("hostInfo").appendChild(hostFolderIcon);
         }
-      } else {
-        console.warn("Host data not found!");
       }
 
       // Load guests list
       const participants = roomData.participants || {};
       const guests = Object.entries(participants).filter(([key]) => key !== hostId);
 
-      loadGuests(guests, user.uid, hostId);
+      loadGuests(guests, user.uid, hostId, eventCode);
     } else {
       alert("Room does not exist.");
     }
@@ -72,13 +73,13 @@ async function loadEventRoom(eventCode) {
 }
 
 // Load Guests and Display Their Profile Pictures and Folder Icons
-function loadGuests(guests, currentUserId, hostId) {
+function loadGuests(guests, currentUserId, hostId, eventCode) {
   const guestListElem = document.getElementById("guestList");
   guestListElem.innerHTML = "";
 
   guests.forEach(([guestId, guestData]) => {
     const guestItem = document.createElement("li");
-    guestItem.classList.add("guest-item"); // Add a CSS class for styling
+    guestItem.classList.add("guest-item");
     guestItem.innerHTML = `
       <img class="guest-photo" src="${guestData.photoUrl || 'fallback.png'}" alt="Guest Photo" />
       <span class="guest-name">${guestData.name || "Unnamed Guest"}</span>
@@ -93,7 +94,10 @@ function loadGuests(guests, currentUserId, hostId) {
       // Folder icon is clickable only if the current user is the host or the guest themselves
       if (currentUserId === hostId || currentUserId === guestId) {
         folderIcon.addEventListener("click", () => {
-          openPhotoGallery(guestData.folderPath);
+          // Navigate to photogallery.html with guest's folder
+          window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
+            eventCode
+          )}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)}`;
         });
       } else {
         folderIcon.disabled = true; // Disable for other users
@@ -104,12 +108,6 @@ function loadGuests(guests, currentUserId, hostId) {
 
     guestListElem.appendChild(guestItem);
   });
-}
-
-// Open Photo Gallery
-function openPhotoGallery(folderPath) {
-  alert(`Opening gallery for folder: ${folderPath}`);
-  // Implement your photo gallery navigation logic here
 }
 
 // Check Authentication and Load Event Room
