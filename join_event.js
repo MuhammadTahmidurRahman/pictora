@@ -60,7 +60,7 @@ async function joinRoom() {
     return;
   }
 
-  // Fetch the user's profile photo from Firebase Storage (uploads folder)
+  // Fetch the user's profile photo from Firebase Storage
   const photoUrl = await fetchUserProfilePhoto(user.uid);
 
   // Create participant data without uploading photo folder path
@@ -143,6 +143,6 @@ function listenForUserProfileChanges() {
 // Initialize listener for profile changes
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    listenForUserProfileChanges();
+    listenForUserProfileChanges();  // Start listening for profile changes
   }
 });
