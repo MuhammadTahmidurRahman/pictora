@@ -1,6 +1,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
 import { getDatabase, ref, get, set, update, onValue } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
+import { getStorage, ref as storageRef, getDownloadURL } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -17,6 +18,7 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const database = getDatabase(firebaseApp);
+const storage = getStorage(firebaseApp);
 
 // Join Room function
 async function joinRoom() {
@@ -58,13 +60,26 @@ async function joinRoom() {
     return;
   }
 
+  // Get the user's photo URL from Firebase Storage if available
+  let photoUrl = user.photoURL || "";
+  
+  if (!photoUrl) {
+    // If the user doesn't have a photo URL, attempt to fetch from Firebase Storage
+    const userPhotoRef = storageRef(storage, `uploads/${user.uid}/profile.jpg`);
+    try {
+      photoUrl = await getDownloadURL(userPhotoRef);
+    } catch (error) {
+      console.error("Error fetching profile photo from storage:", error);
+    }
+  }
+
+  // Create participant data without uploading photo folder path
   const participantData = {
     name: user.displayName || "Guest",
     email: user.email,
-    photoUrl: user.photoURL || "",  // Store the user's photo URL directly
+    photoUrl: photoUrl,  // Store the user's photo URL
   };
 
-  // Only set the participant data without the uploadedPhotoFolderPath
   await set(participantRef, participantData);
   window.location.href = `/eventroom.html?eventCode=${roomCode}`;
 }
@@ -95,7 +110,17 @@ function listenForUserProfileChanges() {
 
   onValue(userRef, async (snapshot) => {
     const updatedName = snapshot.val().name || user.displayName || "Guest";
-    const updatedPhotoUrl = snapshot.val().photo || user.photoURL || "";
+    let updatedPhotoUrl = snapshot.val().photo || user.photoURL || "";
+
+    // Fetch the user's profile photo from storage if it is not set
+    if (!updatedPhotoUrl) {
+      const userPhotoRef = storageRef(storage, `uploads/${user.uid}/profile.jpg`);
+      try {
+        updatedPhotoUrl = await getDownloadURL(userPhotoRef);
+      } catch (error) {
+        console.error("Error fetching updated profile photo:", error);
+      }
+    }
 
     const roomsSnapshot = await get(ref(database, 'rooms'));
     roomsSnapshot.forEach((room) => {
