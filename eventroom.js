@@ -1,7 +1,8 @@
 // Import necessary Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref as dbRef, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref as dbRef, push, update, get, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getStorage, ref as storageRef, uploadBytes, deleteObject } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Firebase Initialization
 const firebaseConfig = {
@@ -17,10 +18,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const database = getDatabase();
+const storage = getStorage();
 
 // Back button functionality
 document.getElementById("backButton").addEventListener("click", () => {
-  window.location.href = "join_event.html"; // Navigate to join_event.html
+  window.location.href = "join_event.html";
 });
 
 // Load Event Room and Data
@@ -47,22 +49,30 @@ async function loadEventRoom(eventCode) {
         // Add folder icon for host if they have uploaded photos
         if (roomData.hostUploadedPhotoFolderPath) {
           const hostFolderIcon = document.createElement("button");
-          hostFolderIcon.textContent = "📁"; // Folder icon
+          hostFolderIcon.textContent = "📁";
           hostFolderIcon.classList.add("folder-icon");
 
           // Only the host can click the host's folder
           if (user.uid === hostId) {
             hostFolderIcon.addEventListener("click", () => {
-              // Navigate to photogallery.html with host's folder
               window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
                 eventCode
               )}&folderName=${encodeURIComponent(roomData.hostUploadedPhotoFolderPath)}&userId=${encodeURIComponent(hostId)}`;
             });
           } else {
-            hostFolderIcon.disabled = true; // Disable for guests
+            hostFolderIcon.disabled = true;
           }
 
-          document.getElementById("hostInfo").appendChild(hostFolderIcon);
+          document.getElementById("hostActions").appendChild(hostFolderIcon);
+        }
+
+        // Add "Add Member" button for the host
+        if (user.uid === hostId) {
+          const addMemberButton = document.createElement("button");
+          addMemberButton.textContent = "Add Member";
+          addMemberButton.classList.add("add-member-button");
+          addMemberButton.addEventListener("click", () => toggleDialog(true));
+          document.getElementById("hostActions").appendChild(addMemberButton);
         }
       }
 
@@ -71,6 +81,10 @@ async function loadEventRoom(eventCode) {
       const guests = Object.entries(participants).filter(([key]) => key !== hostId);
 
       loadGuests(guests, user.uid, hostId, eventCode);
+
+      // Load manual guests
+      const manualGuests = roomData.manualParticipants || {};
+      loadManualGuests(Object.entries(manualGuests), user.uid, hostId, eventCode);
     } else {
       alert("Room does not exist.");
     }
@@ -85,53 +99,139 @@ function loadGuests(guests, currentUserId, hostId, eventCode) {
   guestListElem.innerHTML = "";
 
   guests.forEach(([guestId, guestData]) => {
-    const guestItem = document.createElement("li");
-    guestItem.classList.add("guest-item");
-    guestItem.innerHTML = `
-      <img class="guest-photo" src="${guestData.photoUrl || 'fallback.png'}" alt="Guest Photo" />
-      <span class="guest-name">${guestData.name || "Unnamed Guest"}</span>
-    `;
-
-    // Add folder icon if the guest has uploaded photos
-    if (guestData.folderPath) {
-      const folderIcon = document.createElement("button");
-      folderIcon.textContent = "📁"; // Folder icon
-      folderIcon.classList.add("folder-icon");
-
-      // Folder icon is clickable only if:
-      // - Host (currentUserId === hostId)
-      // - Guest themselves (currentUserId === guestId)
-      if (currentUserId === hostId || currentUserId === guestId) {
-        folderIcon.addEventListener("click", () => {
-          // Navigate to photogallery.html with guest's folder
-          window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
-            eventCode
-          )}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)}`;
-        });
-      } else {
-        folderIcon.disabled = true; // Disable for other users
-      }
-
-      guestItem.appendChild(folderIcon);
-    }
-
+    const guestItem = createGuestItem(guestId, guestData, currentUserId, hostId, eventCode);
     guestListElem.appendChild(guestItem);
   });
+}
+
+// Load Manual Guests
+function loadManualGuests(manualGuests, currentUserId, hostId, eventCode) {
+  const guestListElem = document.getElementById("guestList");
+  manualGuests.forEach(([guestId, guestData]) => {
+    const guestItem = createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, true);
+    guestListElem.appendChild(guestItem);
+  });
+}
+
+// Create a Guest or Manual Guest List Item
+function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, isManual = false) {
+  const guestItem = document.createElement("li");
+  guestItem.classList.add("guest-item");
+  guestItem.innerHTML = `
+    <img class="guest-photo" src="${guestData.photoUrl || guestData.referencePhotoUrl || 'fallback.png'}" alt="Guest Photo" />
+    <span class="guest-name">${guestData.name || "Unnamed Guest"}</span>
+  `;
+
+  // Add folder icon if the guest has a folder
+  if (guestData.folderPath) {
+    const folderIcon = document.createElement("button");
+    folderIcon.textContent = "📁";
+    folderIcon.classList.add("folder-icon");
+
+    if (currentUserId === hostId) {
+      folderIcon.addEventListener("click", () => {
+        window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
+          eventCode
+        )}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)}`;
+      });
+    } else {
+      folderIcon.disabled = true;
+    }
+
+    guestItem.appendChild(folderIcon);
+  }
+
+  // Add "Delete Guest" button for manual guests
+  if (isManual && currentUserId === hostId) {
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete Guest";
+    deleteButton.classList.add("delete-guest-button");
+    deleteButton.addEventListener("click", async () => {
+      await deleteManualGuest(eventCode, guestId, guestData.folderPath);
+    });
+    guestItem.appendChild(deleteButton);
+  }
+
+  return guestItem;
+}
+
+// Toggle Add Guest Dialog
+function toggleDialog(show) {
+  const dialog = document.getElementById("addGuestDialog");
+  dialog.classList.toggle("hidden", !show);
+}
+
+// Add Member Button Logic
+document.getElementById("addGuestButton").addEventListener("click", async () => {
+  const guestName = document.getElementById("guestName").value;
+  const guestEmail = document.getElementById("guestEmail").value;
+  const guestPhoto = document.getElementById("guestPhoto").files[0];
+  const eventCode = new URLSearchParams(window.location.search).get("eventCode");
+
+  if (!guestName || !guestEmail || !guestPhoto) {
+    alert("All fields are required.");
+    return;
+  }
+
+  const folderPath = `rooms/${eventCode}/manualParticipants/${eventCode}_${Date.now()}`;
+  const storagePath = `uploads/${eventCode}_${Date.now()}`;
+
+  try {
+    const fileRef = storageRef(storage, storagePath);
+    await uploadBytes(fileRef, guestPhoto);
+    const photoUrl = await fileRef.getDownloadURL();
+
+    const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${eventCode}_${Date.now()}`);
+    await update(manualGuestRef, {
+      name: guestName,
+      email: guestEmail,
+      referencePhotoUrl: photoUrl,
+      folderPath,
+    });
+
+    alert("Guest added successfully.");
+    toggleDialog(false); // Close the dialog
+    loadEventRoom(eventCode); // Reload the room to show new guest
+  } catch (error) {
+    console.error("Error adding guest:", error);
+    alert("Failed to add guest.");
+  }
+});
+
+// Close Dialog Logic
+document.getElementById("closeDialogButton").addEventListener("click", () => {
+  toggleDialog(false);
+});
+
+// Delete Manual Guest
+async function deleteManualGuest(eventCode, guestId, folderPath) {
+  try {
+    const guestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${guestId}`);
+    await remove(guestRef);
+
+    const folderRef = storageRef(storage, folderPath);
+    await deleteObject(folderRef);
+
+    alert("Guest deleted successfully.");
+    loadEventRoom(eventCode);
+  } catch (error) {
+    console.error("Error deleting guest:", error);
+    alert("Failed to delete guest.");
+  }
 }
 
 // Check Authentication and Load Event Room
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    // Get the event code from URL parameters
     const eventCode = new URLSearchParams(window.location.search).get("eventCode");
     if (eventCode) {
-      loadEventRoom(eventCode); // Load the event room
+      loadEventRoom(eventCode);
     } else {
       alert("Event Code is missing!");
-      window.location.href = "join_event.html"; // Redirect to join_event.html
+      window.location.href = "join_event.html";
     }
   } else {
     alert("Please log in to access the event room.");
-    window.location.href = "login.html"; // Redirect to login page
+    window.location.href = "login.html";
   }
 });

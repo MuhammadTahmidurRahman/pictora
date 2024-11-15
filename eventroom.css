@@ -1,26 +1,25 @@
-/* General body styling */
+/* General styling */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f4f4f9;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
     margin: 0;
-}
-
-#eventRoomContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  #eventRoomContainer {
     width: 90%;
     max-width: 600px;
-    background: #ffffff;
+    background: #fff;
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
-}
-
-/* Button styling */
-button {
+    overflow-y: auto; /* Enable scrolling */
+  }
+  
+  button {
     width: 100%;
     padding: 10px;
     margin: 10px 0;
@@ -29,73 +28,87 @@ button {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-}
-
-button:hover {
+  }
+  
+  button:hover {
     background: #555;
-}
-
-/* Host photo styling */
-#hostPhoto {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin: 10px auto;
-    display: block;
-}
-
-#hostActions {
-    text-align: center;
-    margin-top: 10px;
-}
-
-/* Guest list styling */
-#guestList {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-#guestList li {
-    display: flex; /* Aligns content in a row */
-    align-items: center; /* Centers items vertically */
-    margin: 10px 0;
-    padding: 10px;
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-}
-
-/* Guest photo styling */
-.guest-photo {
+  }
+  
+  .guest-photo {
     width: 50px;
     height: 50px;
-    border-radius: 50%; /* Makes the photo circular */
-    margin-right: 10px; /* Adds spacing between photo and name */
-    object-fit: cover; /* Ensures the image fits within the boundary */
-}
-
-/* Guest name styling */
-.guest-name {
-    font-size: 16px;
-    font-weight: bold;
-}
-
-/* Folder icon styling */
-.folder-icon {
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
+  }
+  
+  .folder-icon {
     margin-left: 10px;
     cursor: pointer;
     background: none;
     border: none;
     font-size: 18px;
-}
-.folder-icon:disabled {
+  }
+  
+  .folder-icon:disabled {
     cursor: not-allowed;
     color: #ccc;
-}
-
-/* Center align text for Host Actions */
-#hostActions button {
+  }
+  
+  .add-member-button {
+    background-color: #007BFF;
+    color: white;
+    font-size: 16px;
     margin-top: 10px;
-    font-size: 18px;
-}
+  }
+  
+  .delete-guest-button {
+    background-color: #ff4c4c;
+    color: white;
+    font-size: 14px;
+    margin-left: 10px;
+  }
+  
+  .dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .dialog.hidden {
+    display: none;
+  }
+  
+  .dialog-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+  }
+  
+  .dialog-content input {
+    width: 90%;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  .dialog-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  
+  .dialog-buttons button {
+    width: 45%;
+  }
+  
