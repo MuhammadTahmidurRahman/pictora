@@ -1,28 +1,29 @@
 // Import necessary Firebase modules
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref as dbRef, get, set, update, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
+import { getDatabase, ref, get, set, update, remove } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
 import { getStorage, ref as storageRef, uploadBytes } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-// Firebase Initialization
+// Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  databaseURL: "YOUR_DATABASE_URL",
-  appId: "YOUR_APP_ID",
+  apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
+  authDomain: "pictora-7f0ad.firebaseapp.com",
+  projectId: "pictora-7f0ad",
+  storageBucket: "pictora-7f0ad.appspot.com",
+  messagingSenderId: "155732133141",
+  databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app",
+  appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const database = getDatabase();
-const storage = getStorage();
+// Initialize Firebase
+const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
+const database = getDatabase(firebaseApp);
+const storage = getStorage(firebaseApp);
 
 // Load Event Room Details
 async function loadEventRoom(eventCode) {
-  const roomRef = dbRef(database, `rooms/${eventCode}`);
+  const roomRef = ref(database, `rooms/${eventCode}`);
   const roomSnapshot = await get(roomRef);
 
   if (!roomSnapshot.exists()) {
@@ -40,7 +41,7 @@ async function loadEventRoom(eventCode) {
 
 // Load Host Information
 async function loadHostInfo(hostId, eventCode) {
-  const hostRef = dbRef(database, `rooms/${eventCode}/participants/${hostId}`);
+  const hostRef = ref(database, `rooms/${eventCode}/participants/${hostId}`);
   const hostSnapshot = await get(hostRef);
 
   if (hostSnapshot.exists()) {
@@ -112,7 +113,7 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
       await uploadBytes(fileRef, file);
     }
 
-    const participantRef = dbRef(database, `rooms/${eventCode}/participants/${userId}`);
+    const participantRef = ref(database, `rooms/${eventCode}/participants/${userId}`);
     await update(participantRef, { folderPath });
 
     alert(`${files.length} photo(s) uploaded successfully!`);
@@ -126,7 +127,7 @@ document.getElementById("deleteRoomButton").addEventListener("click", async () =
   const confirmation = confirm("Are you sure you want to delete this room?");
 
   if (confirmation) {
-    await remove(dbRef(database, `rooms/${eventCode}`));
+    await remove(ref(database, `rooms/${eventCode}`));
     alert("Room deleted successfully.");
     window.location.href = "createorjoinroom.html";
   }
