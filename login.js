@@ -49,6 +49,7 @@ async function loginUser() {
 
 // Function to handle Google login and check if user exists
 // Function to handle Google login and check if user exists
+// Function to handle Google login and check if user exists
 window.loginWithGoogle = async function () {
   try {
     const provider = new GoogleAuthProvider();
@@ -57,14 +58,16 @@ window.loginWithGoogle = async function () {
 
     // Check if the user exists in the Realtime Database
     const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
-    
+
     if (userSnapshot.exists()) {
+      // If user exists in database, allow sign-in and redirect
       alert("Google sign-in successful");
       window.location.href = 'join_event.html';  // Redirect to the event page
     } else {
-      // If user does not exist, show error and prompt to sign up
+      // If user does not exist, prompt to sign up
       alert("Please sign up first before using Google sign-in.");
       await signOut(auth);  // Sign out the user to avoid confusion
+      window.location.href = 'signup.html';  // Redirect to the signup page
     }
   } catch (error) {
     console.error("Google sign-in failed:", error.message);
