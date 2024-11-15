@@ -7,21 +7,14 @@
   <link rel="stylesheet" href="profile.css">
 </head>
 <body>
-  <div class="container">
-    <div class="profile-header">
-      <img id="profileImage" class="profile-image" alt="Profile Image">
-      <h2 id="profileName"></h2>
-      <p id="profileEmail"></p>
-    </div>
-    <button id="editButton">Edit Profile</button>
-    <button id="deleteButton">Delete Account</button>
-    <button id="logoutButton">Logout</button>
+  <div class="profile-container">
+    <img id="profileImage" class="profile-image" src="default-avatar.png" alt="Profile Picture">
+    <div id="profileName" class="profile-field"></div>
+    <div id="profileEmail" class="profile-field"></div>
+    <button id="editButton" class="button">Edit</button>
+    <button id="deleteButton" class="button">Delete Account</button>
+    <button id="logoutButton" class="button">Log Out</button>
   </div>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js"></script>
-  <script src="firebase-config.js"></script> <!-- Add your Firebase config file -->
-  <script src="profile.js"></script>
+  <script src="profile.js" type="module"></script>
 </body>
 </html>
