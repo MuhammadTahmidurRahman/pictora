@@ -55,26 +55,11 @@ function fetchUserProfile() {
       .then((snapshot) => {
         if (snapshot.exists()) {
           const userData = snapshot.val();
-          console.log("User data from database:", userData); // Debugging line
-          
+          profileImage.src = userData.photo || 'default_profile.png'; // Use a default image if not available
           nameField.textContent = userData.name || 'No Name';
           emailField.textContent = user.email || 'No Email';
-
-          // Display profile picture if it exists, or use a default image
-          if (userData.photo) {
-            getDownloadURL(storageRef(storage, userData.photo))
-              .then((url) => {
-                profileImage.src = url;
-              })
-              .catch((error) => {
-                console.error("Error fetching profile image:", error);
-                profileImage.src = 'default-avatar.png'; // Fallback image
-              });
-          } else {
-            profileImage.src = 'default-avatar.png'; // Fallback image
-          }
         } else {
-          console.error("No data available for this user in the database.");
+          console.error("No data available");
         }
       })
       .catch((error) => {
@@ -82,14 +67,12 @@ function fetchUserProfile() {
       });
   } else {
     console.error("User not authenticated");
-    window.location.href = "login.html"; // Redirect to login if not authenticated
   }
 }
 
 // Listen for auth state changes and fetch profile data if logged in
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    console.log("User is logged in:", user); // Debugging line
     fetchUserProfile();
   } else {
     console.error("User not logged in");

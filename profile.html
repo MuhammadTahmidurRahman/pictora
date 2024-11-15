@@ -3,18 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profile Page</title>
+  <title>Profile</title>
   <link rel="stylesheet" href="profile.css">
 </head>
 <body>
   <div class="profile-container">
-    <img id="profileImage" class="profile-image" src="default-avatar.png" alt="Profile Picture">
-    <div id="profileName" class="profile-field"></div>
-    <div id="profileEmail" class="profile-field"></div>
-    <button id="editButton" class="button">Edit</button>
-    <button id="deleteButton" class="button">Delete Account</button>
-    <button id="logoutButton" class="button">Log Out</button>
+    <div class="profile-card">
+      <img id="profileImage" class="profile-image" alt="Profile Picture">
+      <div class="profile-info">
+        <div id="profileName" class="profile-field">Name</div>
+        <div id="profileEmail" class="profile-field">Email</div>
+      </div>
+      <div class="profile-actions">
+        <button id="editButton" class="profile-button">Edit</button>
+        <button id="logoutButton" class="profile-button">Logout</button>
+      </div>
+    </div>
   </div>
-  <script src="profile.js" type="module"></script>
+  <script src="profile.js"></script>
 </body>
 </html>
