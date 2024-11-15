@@ -1,7 +1,7 @@
 // Import necessary Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref as dbRef, update, push, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref as dbRef, update, get, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytes } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Firebase Initialization
@@ -19,6 +19,11 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const database = getDatabase();
 const storage = getStorage();
+
+// Back button functionality
+document.getElementById("backButton").addEventListener("click", () => {
+  window.location.href = "join_event.html"; // Navigate to join_event.html
+});
 
 // Toggle Add Guest Dialog
 function toggleDialog(show) {
@@ -39,17 +44,14 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
   }
 
   try {
-    // Generate a unique participant ID
     const participantId = `${eventCode}_${Date.now()}`;
     const folderPath = `rooms/${eventCode}/manualParticipants/${participantId}`;
     const storagePath = `uploads/${participantId}`;
 
     // Upload guest photo to Firebase Storage
     const fileRef = storageRef(storage, storagePath);
-    const uploadResult = await uploadBytes(fileRef, guestPhoto);
+    await uploadBytes(fileRef, guestPhoto);
     const photoUrl = await fileRef.getDownloadURL();
-
-    console.log(`Photo uploaded to: ${photoUrl}`);
 
     // Save guest details in Firebase Realtime Database
     const guestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${participantId}`);
@@ -125,8 +127,9 @@ async function loadEventRoom(eventCode) {
     }
   } catch (error) {
     console.error("Error loading event room:", error);
+    alert("Failed to load room.");
   }
-});
+}
 
 // Load Manual Guests
 function loadManualGuests(manualGuests, currentUserId, hostId, eventCode) {
