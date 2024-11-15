@@ -120,3 +120,4 @@ onAuthStateChanged(auth, (user) => {
     listenForUserProfileChanges();
   }
 });
+
