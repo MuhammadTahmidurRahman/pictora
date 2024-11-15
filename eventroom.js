@@ -6,13 +6,13 @@ import { getStorage, ref as storageRef, uploadBytes } from "https://www.gstatic.
 
 // Firebase Initialization
 const firebaseConfig = {
-  apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
-  authDomain: "pictora-7f0ad.firebaseapp.com",
-  projectId: "pictora-7f0ad",
-  storageBucket: "pictora-7f0ad.appspot.com",
-  messagingSenderId: "155732133141",
-  databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app",
-  appId: "1:155732133141:web:c5646717494a496a6dd51c",
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  databaseURL: "YOUR_DATABASE_URL",
+  appId: "YOUR_APP_ID",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -50,15 +50,25 @@ async function loadHostInfo(hostId, eventCode) {
   }
 }
 
-// Load Guest List
+// Load Guest List with Profile Photos
 function loadGuestList(participants, hostId) {
   const guestListElement = document.getElementById("guestList");
   guestListElement.innerHTML = ""; // Clear the guest list
 
   for (const [participantId, participantData] of Object.entries(participants || {})) {
-    if (participantId !== hostId) {
+    if (participantId !== hostId) { // Only display guests, not the host
       const listItem = document.createElement("li");
-      listItem.textContent = participantData.name || "Unknown Guest";
+      listItem.classList.add("guest-item");
+
+      // Create image element for profile photo
+      const profileImage = document.createElement("img");
+      profileImage.src = participantData.photoUrl || "default-photo.jpg"; // Use a default image if photoUrl doesn't exist
+      profileImage.alt = `${participantData.name || "Guest"}'s profile photo`;
+      profileImage.classList.add("guest-photo"); // CSS class for styling the image
+
+      // Create span for the guest's name
+      const nameSpan = document.createElement("span");
+      nameSpan.textContent = participantData.name || "Unknown Guest";
 
       // Add folder icon if photo folder exists
       if (participantData.folderPath) {
@@ -67,6 +77,11 @@ function loadGuestList(participants, hostId) {
         folderIcon.onclick = () => viewGuestPhotos(eventCode, participantId);
         listItem.appendChild(folderIcon);
       }
+
+      // Append profile image and name to the list item
+      listItem.appendChild(profileImage);
+      listItem.appendChild(nameSpan);
+
       guestListElement.appendChild(listItem);
     }
   }
