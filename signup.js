@@ -45,6 +45,8 @@ window.displayImage = function (input) {
 };
 
 // Register user with email and password and upload profile image
+// Register user with email and password and upload profile image
+// Upload profile image to Firebase Storage
 window.registerUser = async function () {
   const name = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
@@ -56,18 +58,52 @@ window.registerUser = async function () {
     alert("Please fill up all the information boxes.");
     return;
   }
-  if (password !== confirmPassword) {
-    alert("Passwords do not match.");
+  if (password.length < 8) {
+    alert("The password must be 8 characters long.");
     return;
   }
-  if (password.length < 6) {
-    alert("Password must be at least 6 characters long.");
+  if (password !== confirmPassword) {
+    alert("Passwords do not match.");
     return;
   }
   if (!imageFile) {
     alert("Please upload a profile image.");
     return;
   }
+
+  try {
+    const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+    if (signInMethods.length > 0) {
+      alert("This email is already registered. Please log in instead.");
+      return;
+    }
+
+    // Create user and upload photo
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    console.log("Uploading image...");
+    const storageRef = ref(storage, `uploads/${user.uid}`);
+    await uploadBytes(storageRef, imageFile);
+    console.log("Image uploaded successfully.");
+    const imageUrl = await getDownloadURL(storageRef);
+    console.log("Image URL:", imageUrl);
+
+    // Store user data in Realtime Database
+    await set(dbRef(database, `users/${user.uid}`), {
+      email: email,
+      name: name,
+      photo: imageUrl,
+    });
+
+    alert("User registered successfully with image uploaded!");
+    window.location.href = "join_event.html";
+  } catch (error) {
+    console.error("Error creating user:", error);
+    alert("Failed to register user. Please try again.");
+  }
+};
+
 
   try {
     // 1. Check if the email is already registered in Firebase Authentication
@@ -98,8 +134,7 @@ window.registerUser = async function () {
   } catch (error) {
     console.error("Error creating user:", error);
     alert("Failed to register user. Please try again.");
-  }
-};
+  };
 
 // Google Sign-In with image upload validation
 window.signInWithGoogle = async function () {
