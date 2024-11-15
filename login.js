@@ -102,3 +102,5 @@ document.getElementById('login-button').addEventListener('click', loginUser);
 
 // Add event listener for Google sign-in button
 document.getElementById('googleSignInButton').addEventListener('click', loginWithGoogle);
+
+//new
