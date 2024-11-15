@@ -1,10 +1,10 @@
 // Import necessary Firebase modules
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
-import { getDatabase, ref, get, set, update, remove } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getDatabase, ref as dbRef, get, set, update, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytes } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-// Firebase configuration
+// Firebase Initialization
 const firebaseConfig = {
   apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
   authDomain: "pictora-7f0ad.firebaseapp.com",
@@ -15,15 +15,14 @@ const firebaseConfig = {
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
 
-// Initialize Firebase
-const firebaseApp = initializeApp(firebaseConfig);
-const auth = getAuth(firebaseApp);
-const database = getDatabase(firebaseApp);
-const storage = getStorage(firebaseApp);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const database = getDatabase();
+const storage = getStorage();
 
 // Load Event Room Details
 async function loadEventRoom(eventCode) {
-  const roomRef = ref(database, `rooms/${eventCode}`);
+  const roomRef = dbRef(database, `rooms/${eventCode}`);
   const roomSnapshot = await get(roomRef);
 
   if (!roomSnapshot.exists()) {
@@ -41,7 +40,7 @@ async function loadEventRoom(eventCode) {
 
 // Load Host Information
 async function loadHostInfo(hostId, eventCode) {
-  const hostRef = ref(database, `rooms/${eventCode}/participants/${hostId}`);
+  const hostRef = dbRef(database, `rooms/${eventCode}/participants/${hostId}`);
   const hostSnapshot = await get(hostRef);
 
   if (hostSnapshot.exists()) {
@@ -51,25 +50,15 @@ async function loadHostInfo(hostId, eventCode) {
   }
 }
 
-// Load Guest List with Profile Photos
+// Load Guest List
 function loadGuestList(participants, hostId) {
   const guestListElement = document.getElementById("guestList");
   guestListElement.innerHTML = ""; // Clear the guest list
 
   for (const [participantId, participantData] of Object.entries(participants || {})) {
-    if (participantId !== hostId) { // Only display guests, not the host
+    if (participantId !== hostId) {
       const listItem = document.createElement("li");
-      listItem.classList.add("guest-item");
-
-      // Create image element for profile photo
-      const profileImage = document.createElement("img");
-      profileImage.src = participantData.photoUrl || "default-photo.jpg"; // Use a default image if photoUrl doesn't exist
-      profileImage.alt = `${participantData.name || "Guest"}'s profile photo`;
-      profileImage.classList.add("guest-photo"); // CSS class for styling the image
-
-      // Create span for the guest's name
-      const nameSpan = document.createElement("span");
-      nameSpan.textContent = participantData.name || "Unknown Guest";
+      listItem.textContent = participantData.name || "Unknown Guest";
 
       // Add folder icon if photo folder exists
       if (participantData.folderPath) {
@@ -78,11 +67,6 @@ function loadGuestList(participants, hostId) {
         folderIcon.onclick = () => viewGuestPhotos(eventCode, participantId);
         listItem.appendChild(folderIcon);
       }
-
-      // Append profile image and name to the list item
-      listItem.appendChild(profileImage);
-      listItem.appendChild(nameSpan);
-
       guestListElement.appendChild(listItem);
     }
   }
@@ -113,7 +97,7 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
       await uploadBytes(fileRef, file);
     }
 
-    const participantRef = ref(database, `rooms/${eventCode}/participants/${userId}`);
+    const participantRef = dbRef(database, `rooms/${eventCode}/participants/${userId}`);
     await update(participantRef, { folderPath });
 
     alert(`${files.length} photo(s) uploaded successfully!`);
@@ -127,7 +111,7 @@ document.getElementById("deleteRoomButton").addEventListener("click", async () =
   const confirmation = confirm("Are you sure you want to delete this room?");
 
   if (confirmation) {
-    await remove(ref(database, `rooms/${eventCode}`));
+    await remove(dbRef(database, `rooms/${eventCode}`));
     alert("Room deleted successfully.");
     window.location.href = "createorjoinroom.html";
   }
