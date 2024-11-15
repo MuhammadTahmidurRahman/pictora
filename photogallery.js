@@ -1,7 +1,6 @@
 // Import necessary Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref as dbRef, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref as storageRef, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Firebase Initialization
@@ -17,41 +16,41 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
-const database = getDatabase();
 const storage = getStorage();
 
 // Fetch images and populate the gallery
-async function fetchImages(eventCode, folderName, userId) {
-  const user = auth.currentUser;
-
-  if (!user) {
-    alert("Please sign in to view photos.");
-    return;
-  }
-
+async function fetchImages(folderName) {
   try {
-    // Fetch images from Firebase Storage
+    console.log("Fetching images from folder:", folderName); // Debug folder path
+
+    // Reference to the folder in Firebase Storage
     const folderRef = storageRef(storage, folderName);
+
+    // List all items in the folder
     const result = await listAll(folderRef);
-    const urls = await Promise.all(result.items.map((item) => getDownloadURL(item)));
+    console.log("Storage items:", result.items); // Debug storage items
 
-    // Populate the gallery
-    const photoGrid = document.getElementById("photoGrid");
-    const emptyMessage = document.getElementById("emptyMessage");
-
-    if (urls.length === 0) {
-      emptyMessage.textContent = "No photos uploaded.";
-    } else {
-      emptyMessage.style.display = "none";
-      urls.forEach((url) => {
-        const img = document.createElement("img");
-        img.src = url;
-        photoGrid.appendChild(img);
-      });
+    // If no images are found, display a message
+    if (result.items.length === 0) {
+      document.getElementById("emptyMessage").textContent = "No photos uploaded.";
+      return;
     }
+
+    // Fetch URLs for all images
+    const photoGrid = document.getElementById("photoGrid");
+    const urls = await Promise.all(result.items.map((item) => getDownloadURL(item)));
+    console.log("Fetched URLs:", urls); // Debug fetched URLs
+
+    // Populate the gallery with images
+    document.getElementById("emptyMessage").style.display = "none";
+    urls.forEach((url) => {
+      const img = document.createElement("img");
+      img.src = url;
+      photoGrid.appendChild(img);
+    });
   } catch (error) {
-    console.error("Error loading photos:", error);
-    alert("Error loading photos.");
+    console.error("Error loading photos:", error); // Debug any errors
+    alert("Error loading photos. Please try again.");
   }
 }
 
@@ -60,14 +59,27 @@ document.getElementById("backButton").addEventListener("click", () => {
   window.history.back(); // Navigate back to the previous page
 });
 
-// Get query parameters and initialize the gallery
-const urlParams = new URLSearchParams(window.location.search);
-const eventCode = urlParams.get("eventCode");
-const folderName = urlParams.get("folderName");
-const userId = urlParams.get("userId");
+// Ensure user is authenticated before loading photos
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    console.log("User authenticated:", user.uid); // Debug authenticated user ID
 
-if (eventCode && folderName && userId) {
-  fetchImages(eventCode, folderName, userId); // Fetch images for the folder
-} else {
-  alert("Missing required parameters.");
-}
+    // Get query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const folderName = urlParams.get("folderName");
+
+    // Validate folder path
+    if (!folderName) {
+      alert("Missing folder path. Unable to load photos.");
+      window.history.back();
+      return;
+    }
+
+    // Fetch and display images
+    fetchImages(folderName);
+  } else {
+    console.log("User is not authenticated."); // Debug unauthenticated state
+    alert("You must be signed in to view photos.");
+    window.location.href = "login.html"; // Redirect to login page
+  }
+});
