@@ -1,47 +1,26 @@
+/* General styling */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f4f4f9;
+    margin: 0;
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     height: 100vh;
-}
-
-#eventRoomContainer {
+  }
+  
+  #eventRoomContainer {
     width: 90%;
     max-width: 600px;
-    background: #ffffff;
+    background: #fff;
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
-}
-
-button {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    background: #333;
-    color: #fff;body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f4f9;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-}
-
-#eventRoomContainer {
-    width: 90%;
-    max-width: 600px;
-    background: #ffffff;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-}
-
-button {
+    overflow-y: auto; /* Enable scrolling */
+  }
+  
+  /* Button styles */
+  button {
     width: 100%;
     padding: 10px;
     margin: 10px 0;
@@ -50,27 +29,44 @@ button {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-}
-
-button:hover {
+  }
+  
+  button:hover {
     background: #555;
-}
-
-#hostPhoto {
+  }
+  
+  /* Host photo styles */
+  #hostPhoto {
     width: 100px;
     height: 100px;
     border-radius: 50%;
     margin: 10px auto;
     display: block;
-}
-
-#guestList {
+    object-fit: cover; /* Ensure proper scaling */
+  }
+  
+  /* Folder icon styles */
+  .folder-icon {
+    margin-left: 10px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 18px;
+  }
+  
+  .folder-icon:disabled {
+    cursor: not-allowed;
+    color: #ccc;
+  }
+  
+  /* Guest list styles */
+  #guestList {
     list-style-type: none;
     padding: 0;
     margin: 0;
-}
-
-#guestList li {
+  }
+  
+  #guestList li {
     display: flex; /* Aligns content in a row */
     align-items: center; /* Centers items vertically */
     margin: 10px 0;
@@ -78,47 +74,73 @@ button:hover {
     background: #f9f9f9;
     border: 1px solid #ddd;
     border-radius: 8px;
-}
-
-
-/#guestList li img {
+  }
+  
+  /* Guest photo styles */
+  .guest-photo {
     width: 50px;
     height: 50px;
     border-radius: 50%;
     margin-right: 10px;
-    object-fit: cover; /* Ensures the image fits within the boundary */
-    display: inline-block; /* Ensures proper alignment*/
-}
-
-/* Styles for guest profile photos */
-/*.guest-photo {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%; // Makes it circular 
-    margin-right: 10px; // Adds spacing from the text
-    object-fit: cover; // Ensures the image fits within the boundary 
-    display: inline-block; // Ensures proper alignment
-}*/
-
-
-#guestList li span {
-    font-size: 16px;
-    font-weight: bold;
-}
-
-    border: none;
+    object-fit: cover; /* Ensure proper scaling */
+  }
+  
+  /* Dialog styles */
+  .dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .dialog.hidden {
+    display: none;
+  }
+  
+  .dialog-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+  }
+  
+  .dialog-content input {
+    width: 90%;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
     border-radius: 5px;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #555;
-}
-
-#hostPhoto {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin: 10px auto;
-    display: block;
-}
+  }
+  
+  /* Buttons in the dialog */
+  .dialog-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  
+  .dialog-buttons button {
+    width: 45%;
+  }
+  
+  .add-member-button {
+    background-color: #007BFF;
+    color: white;
+    font-size: 16px;
+    margin-top: 10px;
+  }
+  
+  .delete-guest-button {
+    background-color: #ff4c4c;
+    color: white;
+    font-size: 14px;
+    margin-left: 10px;
+  }
+  
