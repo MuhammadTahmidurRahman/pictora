@@ -1,8 +1,8 @@
 // Import necessary Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref as dbRef, push, update, get, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { getDatabase, ref as dbRef, update, get, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Firebase Initialization
 const firebaseConfig = {
@@ -52,7 +52,6 @@ async function loadEventRoom(eventCode) {
           hostFolderIcon.textContent = "📁";
           hostFolderIcon.classList.add("folder-icon");
 
-          // Only the host can click the host's folder
           if (user.uid === hostId) {
             hostFolderIcon.addEventListener("click", () => {
               window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
@@ -92,6 +91,41 @@ async function loadEventRoom(eventCode) {
     console.error("Error loading event room:", error);
   }
 }
+
+// Add functionality to the Upload Photos button
+document.getElementById("uploadPhotoButton").addEventListener("click", async () => {
+  const user = auth.currentUser;
+  if (!user) {
+    alert("Please log in to upload photos.");
+    return;
+  }
+
+  const eventCode = new URLSearchParams(window.location.search).get("eventCode");
+  const folderPath = `rooms/${eventCode}/${user.uid}`;
+
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.multiple = true;
+
+  input.addEventListener("change", async () => {
+    const files = input.files;
+    if (files.length === 0) return;
+
+    try {
+      for (const file of files) {
+        const fileRef = storageRef(storage, `${folderPath}/${file.name}`);
+        await uploadBytes(fileRef, file);
+      }
+      alert("Photos uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading photos:", error);
+      alert("Failed to upload photos.");
+    }
+  });
+
+  input.click();
+});
 
 // Load Guests and Display Their Profile Pictures and Folder Icons
 function loadGuests(guests, currentUserId, hostId, eventCode) {
@@ -202,7 +236,10 @@ async function deleteManualGuest(eventCode, guestId, folderPath) {
     await remove(guestRef);
 
     const folderRef = storageRef(storage, folderPath);
-    await deleteObject(folderRef);
+    const listResult = await listAll(folderRef);
+    for (const itemRef of listResult.items) {
+      await deleteObject(itemRef);
+    }
 
     alert("Guest deleted successfully.");
     loadEventRoom(eventCode);
