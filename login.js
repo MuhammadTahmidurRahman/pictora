@@ -55,7 +55,7 @@ window.loginWithGoogle = async function () {
     const user = result.user;
 
     // Check if the user exists in the Realtime Database
-    const userSnapshot = await get(dbRef(database, users/${user.uid}));
+    const userSnapshot = await get(dbRef(database, users,$user.uid));
     if (userSnapshot.exists()) {
       alert("Google sign-in successful");
       window.location.href = 'join_event.html';
