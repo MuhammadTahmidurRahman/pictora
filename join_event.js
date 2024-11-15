@@ -1,6 +1,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
 import { getDatabase, ref, get, set, update, onValue } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
+import { getStorage, ref as storageRef, getDownloadURL } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -17,6 +18,23 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const database = getDatabase(firebaseApp);
+const storage = getStorage(firebaseApp);
+
+// Fetch the user's profile photo from Firebase Storage
+async function fetchUserProfilePhoto(uid) {
+  let photoUrl = "";
+  const userPhotoRef = storageRef(storage, `uploads/${uid}/profile.jpg`);
+
+  try {
+    photoUrl = await getDownloadURL(userPhotoRef);
+  } catch (error) {
+    console.error("Error fetching profile photo from storage:", error);
+    // If the profile image isn't found, you could use a default image or leave it blank
+    photoUrl = "default_image_url.jpg"; // Optional: Replace with your fallback image URL
+  }
+
+  return photoUrl;
+}
 
 // Join Room function
 async function joinRoom() {
@@ -58,13 +76,16 @@ async function joinRoom() {
     return;
   }
 
+  // Fetch the user's profile photo from Firebase Storage (the uploaded photo)
+  const photoUrl = await fetchUserProfilePhoto(user.uid);
+
+  // Create participant data and store the user's uploaded profile photo URL
   const participantData = {
     name: user.displayName || "Guest",
     email: user.email,
-    photoUrl: user.photoURL || "",  // Store the user's photo URL directly
+    photoUrl: photoUrl,  // Use the photo URL from Firebase Storage
   };
 
-  // Only set the participant data without the uploadedPhotoFolderPath
   await set(participantRef, participantData);
   window.location.href = `/eventroom.html?eventCode=${roomCode}`;
 }
@@ -95,7 +116,12 @@ function listenForUserProfileChanges() {
 
   onValue(userRef, async (snapshot) => {
     const updatedName = snapshot.val().name || user.displayName || "Guest";
-    const updatedPhotoUrl = snapshot.val().photo || user.photoURL || "";
+    let updatedPhotoUrl = snapshot.val().photo || "";  // You can also store this in the database
+
+    // Fetch the updated user profile photo from Firebase Storage (uploads folder)
+    if (!updatedPhotoUrl) {
+      updatedPhotoUrl = await fetchUserProfilePhoto(user.uid);
+    }
 
     const roomsSnapshot = await get(ref(database, 'rooms'));
     roomsSnapshot.forEach((room) => {
@@ -117,6 +143,6 @@ function listenForUserProfileChanges() {
 // Initialize listener for profile changes
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    listenForUserProfileChanges();
+    listenForUserProfileChanges();  // Start listening for profile changes
   }
 });
