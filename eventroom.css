@@ -100,7 +100,18 @@ button:hover {
     display: inline-block; // Ensures proper alignment
 }*/
 
-
+.folder-icon {
+    margin-left: 10px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 18px;
+  }
+  .folder-icon:disabled {
+    cursor: not-allowed;
+    color: #ccc;
+  }
+  
 #guestList li span {
     font-size: 16px;
     font-weight: bold;
