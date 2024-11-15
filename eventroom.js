@@ -50,6 +50,9 @@ async function loadEventRoom(eventCode) {
         document.getElementById("hostName").textContent = hostData.name || "Host";
         document.getElementById("hostPhoto").src = hostData.photoUrl || "fallback.png";
 
+        // Fix: Create folder path for host with roomName and host image
+        const hostFolderPath = `rooms/${roomData.roomName}/${hostId}/${hostData.photoUrl.split('/').pop()}`;
+
         // Add folder icon for host if they have uploaded photos
         if (hostData.folderPath) {
           const hostFolderIcon = document.createElement("button");
@@ -220,11 +223,11 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
     await update(manualGuestRef, {
       name: guestName,
       email: guestEmail,
-      photoUrl,
-      folderPath,
+      photoUrl: photoUrl,
+      folderPath: folderPath,
     });
 
-    alert("Guest added successfully.");
+    alert("Guest added successfully!");
     toggleDialog(false);
     loadEventRoom(eventCode);
   } catch (error) {
@@ -233,51 +236,17 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
   }
 });
 
-// Delete Manual Guest
-async function deleteManualGuest(eventCode, guestId, folderPath) {
-  try {
-    const guestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${guestId}`);
-    await remove(guestRef);
-
-    const folderRef = storageRef(storage, folderPath);
-    const listResult = await listAll(folderRef);
-    for (const itemRef of listResult.items) {
-      await deleteObject(itemRef);
-    }
-
-    alert("Guest deleted successfully.");
-    loadEventRoom(eventCode);
-  } catch (error) {
-    console.error("Error deleting guest:", error);
-    alert("Failed to delete guest.");
-  }
-}
-
-// Toggle Add Guest Dialog
-function toggleDialog(show) {
-  const dialog = document.getElementById("addGuestDialog");
-  dialog.classList.toggle("hidden", !show);
-
-  // Clear previous inputs
-  if (show) {
-    document.getElementById("guestName").value = "";
-    document.getElementById("guestEmail").value = "";
-    document.getElementById("guestPhoto").value = null;
-  }
-}
-
-// Check Authentication and Load Event Room
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    const eventCode = new URLSearchParams(window.location.search).get("eventCode");
-    if (eventCode) {
-      loadEventRoom(eventCode);
-    } else {
-      alert("Event Code is missing!");
-      window.location.href = "join_event.html";
-    }
-  } else {
-    alert("Please log in to access the event room.");
-    window.location.href = "login.html";
-  }
+// Cancel Button Logic (Fix)
+document.getElementById("cancelButton").addEventListener("click", () => {
+  toggleDialog(false); // Hide the dialog
+  // Clear input fields
+  document.getElementById("guestName").value = "";
+  document.getElementById("guestEmail").value = "";
+  document.getElementById("guestPhoto").value = null;
 });
+
+// Toggle Dialog Visibility
+function toggleDialog(isVisible) {
+  const dialog = document.getElementById("guestDialog");
+  dialog.style.display = isVisible ? "block" : "none";
+}
