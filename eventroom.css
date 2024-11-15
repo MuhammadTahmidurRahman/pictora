@@ -1,3 +1,4 @@
+/* General body styling */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f4f4f9;
@@ -6,6 +7,7 @@ body {
     align-items: center;
     justify-content: center;
     height: 100vh;
+    margin: 0;
 }
 
 #eventRoomContainer {
@@ -17,30 +19,7 @@ body {
     border-radius: 10px;
 }
 
-button {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    background: #333;
-    color: #fff;body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f4f9;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-}
-
-#eventRoomContainer {
-    width: 90%;
-    max-width: 600px;
-    background: #ffffff;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-}
-
+/* Button styling */
 button {
     width: 100%;
     padding: 10px;
@@ -56,6 +35,7 @@ button:hover {
     background: #555;
 }
 
+/* Host photo styling */
 #hostPhoto {
     width: 100px;
     height: 100px;
@@ -64,6 +44,12 @@ button:hover {
     display: block;
 }
 
+#hostActions {
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* Guest list styling */
 #guestList {
     list-style-type: none;
     padding: 0;
@@ -80,56 +66,36 @@ button:hover {
     border-radius: 8px;
 }
 
-
-/#guestList li img {
+/* Guest photo styling */
+.guest-photo {
     width: 50px;
     height: 50px;
-    border-radius: 50%;
-    margin-right: 10px;
+    border-radius: 50%; /* Makes the photo circular */
+    margin-right: 10px; /* Adds spacing between photo and name */
     object-fit: cover; /* Ensures the image fits within the boundary */
-    display: inline-block; /* Ensures proper alignment*/
 }
 
-/* Styles for guest profile photos */
-/*.guest-photo {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%; // Makes it circular 
-    margin-right: 10px; // Adds spacing from the text
-    object-fit: cover; // Ensures the image fits within the boundary 
-    display: inline-block; // Ensures proper alignment
-}*/
+/* Guest name styling */
+.guest-name {
+    font-size: 16px;
+    font-weight: bold;
+}
 
+/* Folder icon styling */
 .folder-icon {
     margin-left: 10px;
     cursor: pointer;
     background: none;
     border: none;
     font-size: 18px;
-  }
-  .folder-icon:disabled {
+}
+.folder-icon:disabled {
     cursor: not-allowed;
     color: #ccc;
-  }
-  
-#guestList li span {
-    font-size: 16px;
-    font-weight: bold;
 }
 
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #555;
-}
-
-#hostPhoto {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin: 10px auto;
-    display: block;
+/* Center align text for Host Actions */
+#hostActions button {
+    margin-top: 10px;
+    font-size: 18px;
 }

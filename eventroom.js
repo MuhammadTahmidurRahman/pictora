@@ -54,11 +54,13 @@ async function loadEventRoom(eventCode) {
           });
           document.getElementById("hostInfo").appendChild(hostFolderIcon);
         }
+      } else {
+        console.warn("Host data not found!");
       }
 
       // Load guests list
       const participants = roomData.participants || {};
-      const guests = Object.entries(participants).filter(([key, data]) => key !== hostId);
+      const guests = Object.entries(participants).filter(([key]) => key !== hostId);
 
       loadGuests(guests, user.uid, hostId);
     } else {
@@ -76,9 +78,10 @@ function loadGuests(guests, currentUserId, hostId) {
 
   guests.forEach(([guestId, guestData]) => {
     const guestItem = document.createElement("li");
+    guestItem.classList.add("guest-item"); // Add a CSS class for styling
     guestItem.innerHTML = `
-      <img src="${guestData.photoUrl || 'fallback.png'}" alt="Guest Photo" />
-      <span>${guestData.name || "Unnamed Guest"}</span>
+      <img class="guest-photo" src="${guestData.photoUrl || 'fallback.png'}" alt="Guest Photo" />
+      <span class="guest-name">${guestData.name || "Unnamed Guest"}</span>
     `;
 
     // Add folder icon if the guest has uploaded photos
