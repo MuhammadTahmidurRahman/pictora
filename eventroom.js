@@ -39,6 +39,10 @@ async function loadEventRoom(eventCode) {
 
       const user = auth.currentUser;
 
+      // Reset host actions
+      const hostActions = document.getElementById("hostActions");
+      hostActions.innerHTML = "";
+
       // Load host information
       const hostId = roomData.hostId;
       const hostData = roomData.participants[hostId];
@@ -62,7 +66,7 @@ async function loadEventRoom(eventCode) {
             hostFolderIcon.disabled = true;
           }
 
-          document.getElementById("hostActions").appendChild(hostFolderIcon);
+          hostActions.appendChild(hostFolderIcon);
         }
 
         // Add "Add Member" button for the host
@@ -70,8 +74,10 @@ async function loadEventRoom(eventCode) {
           const addMemberButton = document.createElement("button");
           addMemberButton.textContent = "Add Member";
           addMemberButton.classList.add("add-member-button");
-          addMemberButton.addEventListener("click", () => toggleDialog(true));
-          document.getElementById("hostActions").appendChild(addMemberButton);
+          addMemberButton.addEventListener("click", () => {
+            toggleDialog(true);
+          });
+          hostActions.appendChild(addMemberButton);
         }
       }
 
@@ -158,7 +164,6 @@ function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, i
     <span class="guest-name">${guestData.name}</span>
   `;
 
-  // Add folder icon if the guest has a folder
   if (guestData.folderPath) {
     const folderIcon = document.createElement("button");
     folderIcon.textContent = "📁";
@@ -177,7 +182,6 @@ function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, i
     guestItem.appendChild(folderIcon);
   }
 
-  // Add "Delete Guest" button for manual guests
   if (isManual && currentUserId === hostId) {
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete Guest";
@@ -253,6 +257,13 @@ async function deleteManualGuest(eventCode, guestId, folderPath) {
 function toggleDialog(show) {
   const dialog = document.getElementById("addGuestDialog");
   dialog.classList.toggle("hidden", !show);
+
+  // Clear previous inputs
+  if (show) {
+    document.getElementById("guestName").value = "";
+    document.getElementById("guestEmail").value = "";
+    document.getElementById("guestPhoto").value = null;
+  }
 }
 
 // Check Authentication and Load Event Room
