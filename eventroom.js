@@ -47,7 +47,7 @@ async function loadEventRoom(eventCode) {
         document.getElementById("hostPhoto").src = hostData.photoUrl || "fallback.png";
 
         // Add folder icon for host if they have uploaded photos
-        if (roomData.hostUploadedPhotoFolderPath) {
+        if (hostData.folderPath) {
           const hostFolderIcon = document.createElement("button");
           hostFolderIcon.textContent = "📁";
           hostFolderIcon.classList.add("folder-icon");
@@ -56,7 +56,7 @@ async function loadEventRoom(eventCode) {
             hostFolderIcon.addEventListener("click", () => {
               window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
                 eventCode
-              )}&folderName=${encodeURIComponent(roomData.hostUploadedPhotoFolderPath)}&userId=${encodeURIComponent(hostId)}`;
+              )}&folderName=${encodeURIComponent(hostData.folderPath)}&userId=${encodeURIComponent(hostId)}`;
             });
           } else {
             hostFolderIcon.disabled = true;
