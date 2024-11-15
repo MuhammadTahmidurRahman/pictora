@@ -48,6 +48,7 @@ async function loginUser() {
 }
 
 // Function to handle Google login and check if user exists
+// Function to handle Google login and check if user exists
 window.loginWithGoogle = async function () {
   try {
     const provider = new GoogleAuthProvider();
@@ -56,21 +57,21 @@ window.loginWithGoogle = async function () {
 
     // Check if the user exists in the Realtime Database
     const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
+    
     if (userSnapshot.exists()) {
       alert("Google sign-in successful");
-      window.location.href = 'join_event.html';
+      window.location.href = 'join_event.html';  // Redirect to the event page
     } else {
-      // If user does not exist, sign out and redirect to signup page
-      await signOut(auth);
-      alert("User not registered. Redirecting to sign-up page.");
-      window.location.href = 'signup.html';
+      // If user does not exist, show error and prompt to sign up
+      alert("Please sign up first before using Google sign-in.");
+      await signOut(auth);  // Sign out the user to avoid confusion
     }
   } catch (error) {
     console.error("Google sign-in failed:", error.message);
-    alert("Failed to sign in with Google. Redirecting to sign-up page.");
-    window.location.href = 'signup.html';
+    alert("Failed to sign in with Google. Please try again.");
   }
 };
+
 
 // Listen to authentication state changes
 onAuthStateChanged(auth, (user) => {
