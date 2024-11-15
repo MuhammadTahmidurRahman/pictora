@@ -18,141 +18,99 @@ const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const database = getDatabase(firebaseApp);
 
-let user = null;
-let userName = '';
-let userEmail = '';
-let userPhotoUrl = '';
+// Join Room function
+async function joinRoom() {
+  const roomCode = document.getElementById("room-code").value.trim();
+  const user = auth.currentUser;
 
-// Track authentication state
-onAuthStateChanged(auth, (currentUser) => {
-  if (currentUser) {
-    user = currentUser;
-    userName = user.displayName || 'Guest';
-    userEmail = user.email;
-    userPhotoUrl = user.photoURL || '';
-    console.log('User logged in:', user.email);
-  } else {
-    console.log('No user is logged in');
-    user = null;
-  }
-});
-
-// Main function to join the room, with checks for host and guest roles
-async function joinRoom(eventCode, roomName) {
+  // Ensure user is logged in
   if (!user) {
-    alert('Please log in to join the room!');
+    displayMessage("Please log in to join the room!");
     return;
   }
 
-  const userEmailKey = userEmail.replace(/\./g, '_');
-  const userId = user.uid;
-  const compositeKey = `${eventCode}_${roomName}_${userEmailKey}_${userName}`;
-
-  console.log(`Starting room join process for user ${userId} with compositeKey: ${compositeKey}`);
-
-  try {
-    // Check if the user is the host based on composite key and user ID
-    const hostRef = ref(database, `rooms/${eventCode}/host/${compositeKey}`);
-    const hostSnapshot = await get(hostRef);
-
-    if (hostSnapshot.exists()) {
-      const hostData = hostSnapshot.val();
-      console.log("Host data found:", hostData);
-
-      if (hostData.hostId === userId) {
-        alert("You are the host of this room.");
-        console.log("Confirmed as host, redirecting:", userId);
-        window.location.href = `eventroom.html?eventCode=${eventCode}`;
-        return;
-      } else {
-        console.log("Host ID does not match user ID:", userId);
-      }
-    } else {
-      console.log("No host entry found for this composite key.");
-    }
-
-    // Check if the user is already listed as a guest with the same composite key and user ID
-    const guestRef = ref(database, `rooms/${eventCode}/guests/${compositeKey}`);
-    const guestSnapshot = await get(guestRef);
-
-    if (guestSnapshot.exists()) {
-      const guestData = guestSnapshot.val();
-      console.log("Guest data found:", guestData);
-
-      if (guestData.guestId === userId) {
-        alert("You are already a guest in this room!");
-        console.log("Confirmed as guest, redirecting:", userId);
-        window.location.href = `eventroom.html?eventCode=${eventCode}`;
-        return;
-      }
-    } else {
-      console.log("No guest entry found for this composite key.");
-    }
-
-    // If the user is neither the host nor an existing guest, add them as a new guest
-    const userRef = ref(database, `users/${userId}`);
-    const userSnapshot = await get(userRef);
-
-    if (!userSnapshot.exists()) {
-      alert('User information not found!');
-      console.log("User info not found for:", userId);
-      return;
-    }
-
-    // Prepare guest data object
-    const guestData = {
-      guestId: userId,
-      guestName: userSnapshot.val().name || userName,
-      guestEmail: userEmail,
-      guestPhotoUrl: userSnapshot.val().photo || userPhotoUrl,
-    };
-
-    // Add guest data to the room with composite key
-    await set(guestRef, guestData);
-
-    // Redirect to the event room page as a new guest
-    alert("You have joined as a new guest!");
-    console.log("User enrolled as new guest:", userId);
-    window.location.href = `eventroom.html?eventCode=${eventCode}`;
-  } catch (error) {
-    console.error("Error processing room join:", error);
-  }
-}
-
-// Function to navigate to the event room after checking the code
-async function navigateToEventRoom() {
-  const eventCode = document.getElementById('eventCodeInput').value.trim();
-  if (!eventCode) {
-    alert('Please enter a code.');
+  // Validate room code
+  if (roomCode === "") {
+    displayMessage("Please enter a room code!");
     return;
   }
 
-  try {
-    const roomRef = ref(database, `rooms/${eventCode}`);
-    const roomSnapshot = await get(roomRef);
+  // Fetch room data from Firebase
+  const roomRef = database.ref(`rooms/${roomCode}`);
+  const roomSnapshot = await roomRef.get();
 
-    if (roomSnapshot.exists()) {
-      const roomData = roomSnapshot.val();
-      const roomName = roomData.roomName || 'No Room Name';
-
-      // Join the room as a guest or confirm host status
-      await joinRoom(eventCode, roomName);
-    } else {
-      alert('Room does not exist!');
-    }
-  } catch (error) {
-    console.error('Error navigating to event room:', error);
-    alert('An error occurred while verifying the room code.');
+  if (!roomSnapshot.exists()) {
+    displayMessage("Room does not exist!");
+    return;
   }
+
+  const roomData = roomSnapshot.val();
+
+  // Check if the user is the host
+  if (roomData.hostId === user.uid) {
+    displayMessage("You are the host of this room!");
+    window.location.href = `/eventroom.html?eventCode=${roomCode}`;
+    return;
+  }
+
+  // Check if the user is already a participant
+  const participantRef = database.ref(`rooms/${roomCode}/participants/${user.uid}`);
+  const participantSnapshot = await participantRef.get();
+
+  if (participantSnapshot.exists()) {
+    displayMessage("You are already a participant in this room!");
+    window.location.href = `/eventroom.html?eventCode=${roomCode}`;
+    return;
+  }
+
+  // If user is neither host nor participant, add as new participant
+  const sanitizedEmail = user.email.replace(/\./g, '_');
+  const participantData = {
+    name: user.displayName || "Guest",
+    email: user.email,
+    uploadedPhotoFolderPath: `rooms/${roomCode}/${user.uid}`,
+    photoUrl: user.photoURL || ""
+  };
+
+  await participantRef.set(participantData);
+  window.location.href = `/eventroom.html?eventCode=${roomCode}`;
 }
 
-// Go back to the previous page
-function goBack() {
-  window.history.back();
+// Function to display messages to the user
+function displayMessage(message) {
+  document.getElementById("message").innerText = message;
 }
 
-// Attach event listeners
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('joinEventBtn').addEventListener('click', navigateToEventRoom);
-  document.getElementById('backButton').addEventListener('click', goBack);
+// Function to listen for user profile changes and update participant data
+function listenForUserProfileChanges() {
+  const user = auth.currentUser;
+  const userRef = database.ref(`users/${user.uid}`);
+
+  userRef.on("value", async (snapshot) => {
+    const updatedName = snapshot.val().name || user.displayName || "Guest";
+    const updatedPhotoUrl = snapshot.val().photo || user.photoURL || "";
+
+    // Update participant data in all rooms where this user is a participant
+    const roomsSnapshot = await database.ref('rooms').get();
+    roomsSnapshot.forEach((room) => {
+      const eventCode = room.key;
+      const participantRef = database.ref(`rooms/${eventCode}/participants/${user.uid}`);
+
+      participantRef.get().then((participantSnapshot) => {
+        if (participantSnapshot.exists()) {
+          participantRef.update({
+            name: updatedName,
+            photoUrl: updatedPhotoUrl,
+          });
+        }
+      });
+    });
+  });
+}
+
+// Initialize listener for profile changes after login
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    listenForUserProfileChanges();
+  }
 });
