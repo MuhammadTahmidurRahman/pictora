@@ -28,24 +28,29 @@ document.getElementById("backButton").addEventListener("click", () => {
 // Load Event Room and Data
 async function loadEventRoom(eventCode) {
   try {
-    const roomRef = dbRef(database, `rooms/${eventCode}`);
+    const roomRef = dbRef(database, rooms/${eventCode});
     const snapshot = await get(roomRef);
     if (snapshot.exists()) {
       const roomData = snapshot.val();
+
+      // Display room name and code
       document.getElementById("roomName").textContent = roomData.roomName || "Event Room";
-      document.getElementById("roomCode").textContent = `Code: ${eventCode}`;
+      document.getElementById("roomCode").textContent = Code: ${eventCode};
 
       const user = auth.currentUser;
 
+      // Reset host actions
       const hostActions = document.getElementById("hostActions");
       hostActions.innerHTML = "";
 
+      // Load host information
       const hostId = roomData.hostId;
       const hostData = roomData.participants[hostId];
       if (hostData) {
         document.getElementById("hostName").textContent = hostData.name || "Host";
         document.getElementById("hostPhoto").src = hostData.photoUrl || "fallback.png";
 
+        // Add folder icon for host if they have uploaded photos
         if (hostData.folderPath) {
           const hostFolderIcon = document.createElement("button");
           hostFolderIcon.textContent = "📁";
@@ -53,7 +58,9 @@ async function loadEventRoom(eventCode) {
 
           if (user.uid === hostId) {
             hostFolderIcon.addEventListener("click", () => {
-              window.location.href = `photogallery.html?eventCode=${encodeURIComponent(eventCode)}&folderName=${encodeURIComponent(hostData.folderPath)}&userId=${encodeURIComponent(hostId)}`;
+              window.location.href = photogallery.html?eventCode=${encodeURIComponent(
+                eventCode
+              )}&folderName=${encodeURIComponent(hostData.folderPath)}&userId=${encodeURIComponent(hostId)};
             });
           } else {
             hostFolderIcon.disabled = true;
@@ -62,6 +69,7 @@ async function loadEventRoom(eventCode) {
           hostActions.appendChild(hostFolderIcon);
         }
 
+        // Add "Add Member" button for the host
         if (user.uid === hostId) {
           const addMemberButton = document.createElement("button");
           addMemberButton.textContent = "Add Member";
@@ -73,11 +81,13 @@ async function loadEventRoom(eventCode) {
         }
       }
 
+      // Load guests list
       const participants = roomData.participants || {};
       const guests = Object.entries(participants).filter(([key]) => key !== hostId);
 
       loadGuests(guests, user.uid, hostId, eventCode);
 
+      // Load manual guests
       const manualGuests = roomData.manualParticipants || {};
       loadManualGuests(Object.entries(manualGuests), user.uid, hostId, eventCode);
     } else {
@@ -86,6 +96,63 @@ async function loadEventRoom(eventCode) {
   } catch (error) {
     console.error("Error loading event room:", error);
   }
+}
+
+// Add functionality to the Upload Photos button
+document.getElementById("uploadPhotoButton").addEventListener("click", async () => {
+  const user = auth.currentUser;
+  if (!user) {
+    alert("Please log in to upload photos.");
+    return;
+  }
+
+  const eventCode = new URLSearchParams(window.location.search).get("eventCode");
+  const folderPath = rooms/${eventCode}/${user.uid};
+
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.multiple = true;
+
+  input.addEventListener("change", async () => {
+    const files = input.files;
+    if (files.length === 0) return;
+
+    try {
+      for (const file of files) {
+        const fileRef = storageRef(storage, ${folderPath}/${file.name});
+        await uploadBytes(fileRef, file);
+      }
+      alert("Photos uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading photos:", error);
+      alert("Failed to upload photos.");
+    }
+  });
+
+  input.click();
+});
+
+// Load Guests and Display Their Profile Pictures and Folder Icons
+function loadGuests(guests, currentUserId, hostId, eventCode) {
+  const guestListElem = document.getElementById("guestList");
+  guestListElem.innerHTML = "";
+
+  guests.forEach(([guestId, guestData]) => {
+    const guestItem = createGuestItem(guestId, guestData, currentUserId, hostId, eventCode);
+    guestListElem.appendChild(guestItem);
+  });
+}
+
+// Load Manual Guests
+function loadManualGuests(manualGuests, currentUserId, hostId, eventCode) {
+  const manualGuestListElem = document.getElementById("manualGuestList");
+  manualGuestListElem.innerHTML = "";
+
+  manualGuests.forEach(([guestId, guestData]) => {
+    const guestItem = createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, true);
+    manualGuestListElem.appendChild(guestItem);
+  });
 }
 
 // Add functionality to the Upload Photos button
