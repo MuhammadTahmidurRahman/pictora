@@ -3,23 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profile</title>
+  <title>Profile Page</title>
   <link rel="stylesheet" href="profile.css">
 </head>
 <body>
   <div class="profile-container">
-    <div class="profile-card">
-      <img id="profileImage" class="profile-image" alt="Profile Picture">
-      <div class="profile-info">
-        <div id="profileName" class="profile-field">Name</div>
-        <div id="profileEmail" class="profile-field">Email</div>
-      </div>
-      <div class="profile-actions">
-        <button id="editButton" class="profile-button">Edit</button>
-        <button id="logoutButton" class="profile-button">Logout</button>
-      </div>
+    <div class="profile-image-container">
+      <img id="profileImage" class="profile-image" src="default-avatar.png" alt="Profile Picture">
+    </div>
+    <input type="text" id="profileName" class="profile-field" readonly>
+    <input type="text" id="profileEmail" class="profile-field" readonly>
+    <div class="button-container">
+      <button id="editButton" class="button">Edit</button>
+      <button id="logoutButton" class="button">Log Out</button>
     </div>
   </div>
-  <script src="profile.js"></script>
+
+  <script src="profile.js" type="module"></script>
 </body>
 </html>
