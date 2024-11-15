@@ -27,14 +27,14 @@ document.getElementById("backButton").addEventListener("click", () => {
 // Load Event Room and Data
 async function loadEventRoom(eventCode) {
   try {
-    const roomRef = dbRef(database, rooms/${eventCode});
+    const roomRef = dbRef(database, `rooms/${eventCode}`);  // Fixed template literal
     const snapshot = await get(roomRef);
     if (snapshot.exists()) {
       const roomData = snapshot.val();
 
       // Display room name and code
       document.getElementById("roomName").textContent = roomData.roomName || "Event Room";
-      document.getElementById("roomCode").textContent = Code: ${eventCode};
+      document.getElementById("roomCode").textContent = `Code: ${eventCode}`;
 
       const user = auth.currentUser;
 
@@ -57,9 +57,9 @@ async function loadEventRoom(eventCode) {
 
           if (user.uid === hostId) {
             hostFolderIcon.addEventListener("click", () => {
-              window.location.href = photogallery.html?eventCode=${encodeURIComponent(
+              window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
                 eventCode
-              )}&folderName=${encodeURIComponent(hostData.folderPath)}&userId=${encodeURIComponent(hostId)};
+              )}&folderName=${encodeURIComponent(hostData.folderPath)}&userId=${encodeURIComponent(hostId)}`;
             });
           } else {
             hostFolderIcon.disabled = true;
@@ -106,7 +106,7 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
   }
 
   const eventCode = new URLSearchParams(window.location.search).get("eventCode");
-  const folderPath = rooms/${eventCode}/${user.uid};
+  const folderPath = `rooms/${eventCode}/${user.uid}`;  // Fixed template literal
 
   const input = document.createElement("input");
   input.type = "file";
@@ -119,7 +119,7 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
 
     try {
       for (const file of files) {
-        const fileRef = storageRef(storage, ${folderPath}/${file.name});
+        const fileRef = storageRef(storage, `${folderPath}/${file.name}`);  // Fixed template literal
         await uploadBytes(fileRef, file);
       }
       alert("Photos uploaded successfully!");
@@ -159,9 +159,8 @@ function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, i
   const guestItem = document.createElement("li");
   guestItem.classList.add("guest-item");
   guestItem.innerHTML = 
-    <img class="guest-photo" src="${guestData.photoUrl}" alt="Guest Photo" />
-    <span class="guest-name">${guestData.name}</span>
-  ;
+    `<img class="guest-photo" src="${guestData.photoUrl}" alt="Guest Photo" />
+    <span class="guest-name">${guestData.name}</span>`;
 
   if (guestData.folderPath) {
     const folderIcon = document.createElement("button");
@@ -170,9 +169,9 @@ function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, i
 
     if (currentUserId === hostId || currentUserId === guestId) {
       folderIcon.addEventListener("click", () => {
-        window.location.href = photogallery.html?eventCode=${encodeURIComponent(
+        window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
           eventCode
-        )}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)};
+        )}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)}`;
       });
     } else {
       folderIcon.disabled = true;
@@ -206,16 +205,16 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
     return;
   }
 
-  const participantId = ${eventCode}_${Date.now()};
-  const folderPath = rooms/${eventCode}/${participantId};
-  const storagePath = uploads/${participantId};
+  const participantId = `${eventCode}_${Date.now()}`;
+  const folderPath = `rooms/${eventCode}/${participantId}`;
+  const storagePath = `uploads/${participantId}`;
 
   try {
     const fileRef = storageRef(storage, storagePath);
     await uploadBytes(fileRef, guestPhoto);
     const photoUrl = await getDownloadURL(fileRef);
 
-    const manualGuestRef = dbRef(database, rooms/${eventCode}/manualParticipants/${participantId});
+    const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${participantId}`);
     await update(manualGuestRef, {
       name: guestName,
       email: guestEmail,
@@ -235,14 +234,11 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
 // Delete Manual Guest
 async function deleteManualGuest(eventCode, guestId, folderPath) {
   try {
-    const guestRef = dbRef(database, rooms/${eventCode}/manualParticipants/${guestId});
+    const guestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${guestId}`);
     await remove(guestRef);
 
-    const folderRef = storageRef(storage, folderPath);
-    const listResult = await listAll(folderRef);
-    for (const itemRef of listResult.items) {
-      await deleteObject(itemRef);
-    }
+    const folderRef = storageRef(storage, `rooms/${eventCode}/${guestId}`);
+    await deleteObject(folderRef);
 
     alert("Guest deleted successfully.");
     loadEventRoom(eventCode);
@@ -252,31 +248,15 @@ async function deleteManualGuest(eventCode, guestId, folderPath) {
   }
 }
 
-// Toggle Add Guest Dialog
-function toggleDialog(show) {
+// Toggle dialog visibility
+function toggleDialog(visible) {
   const dialog = document.getElementById("addGuestDialog");
-  dialog.classList.toggle("hidden", !show);
-
-  // Clear previous inputs
-  if (show) {
-    document.getElementById("guestName").value = "";
-    document.getElementById("guestEmail").value = "";
-    document.getElementById("guestPhoto").value = null;
-  }
+  dialog.style.display = visible ? "block" : "none";
 }
 
-// Check Authentication and Load Event Room
 onAuthStateChanged(auth, (user) => {
   if (user) {
     const eventCode = new URLSearchParams(window.location.search).get("eventCode");
-    if (eventCode) {
-      loadEventRoom(eventCode);
-    } else {
-      alert("Event Code is missing!");
-      window.location.href = "join_event.html";
-    }
-  } else {
-    alert("Please log in to access the event room.");
-    window.location.href = "login.html";
+    loadEventRoom(eventCode);
   }
 });
