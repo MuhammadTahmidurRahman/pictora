@@ -32,28 +32,20 @@ async function loadEventRoom(eventCode) {
     const snapshot = await get(roomRef);
     if (snapshot.exists()) {
       const roomData = snapshot.val();
-
-      // Display room name and code
       document.getElementById("roomName").textContent = roomData.roomName || "Event Room";
       document.getElementById("roomCode").textContent = `Code: ${eventCode}`;
 
       const user = auth.currentUser;
 
-      // Reset host actions
       const hostActions = document.getElementById("hostActions");
       hostActions.innerHTML = "";
 
-      // Load host information
       const hostId = roomData.hostId;
       const hostData = roomData.participants[hostId];
       if (hostData) {
         document.getElementById("hostName").textContent = hostData.name || "Host";
         document.getElementById("hostPhoto").src = hostData.photoUrl || "fallback.png";
 
-        // Fix: Create folder path for host with roomName and host image
-        const hostFolderPath = `rooms/${roomData.roomName}/${hostId}/${hostData.photoUrl.split('/').pop()}`;
-
-        // Add folder icon for host if they have uploaded photos
         if (hostData.folderPath) {
           const hostFolderIcon = document.createElement("button");
           hostFolderIcon.textContent = "📁";
@@ -61,9 +53,7 @@ async function loadEventRoom(eventCode) {
 
           if (user.uid === hostId) {
             hostFolderIcon.addEventListener("click", () => {
-              window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
-                eventCode
-              )}&folderName=${encodeURIComponent(hostData.folderPath)}&userId=${encodeURIComponent(hostId)}`;
+              window.location.href = `photogallery.html?eventCode=${encodeURIComponent(eventCode)}&folderName=${encodeURIComponent(hostData.folderPath)}&userId=${encodeURIComponent(hostId)}`;
             });
           } else {
             hostFolderIcon.disabled = true;
@@ -72,7 +62,6 @@ async function loadEventRoom(eventCode) {
           hostActions.appendChild(hostFolderIcon);
         }
 
-        // Add "Add Member" button for the host
         if (user.uid === hostId) {
           const addMemberButton = document.createElement("button");
           addMemberButton.textContent = "Add Member";
@@ -84,13 +73,11 @@ async function loadEventRoom(eventCode) {
         }
       }
 
-      // Load guests list
       const participants = roomData.participants || {};
       const guests = Object.entries(participants).filter(([key]) => key !== hostId);
 
       loadGuests(guests, user.uid, hostId, eventCode);
 
-      // Load manual guests
       const manualGuests = roomData.manualParticipants || {};
       loadManualGuests(Object.entries(manualGuests), user.uid, hostId, eventCode);
     } else {
@@ -162,10 +149,9 @@ function loadManualGuests(manualGuests, currentUserId, hostId, eventCode) {
 function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, isManual = false) {
   const guestItem = document.createElement("li");
   guestItem.classList.add("guest-item");
-  guestItem.innerHTML = `
-    <img class="guest-photo" src="${guestData.photoUrl}" alt="Guest Photo" />
-    <span class="guest-name">${guestData.name}</span>
-  `;
+  guestItem.innerHTML = 
+    `<img class="guest-photo" src="${guestData.photoUrl}" alt="Guest Photo" />
+    <span class="guest-name">${guestData.name}</span>`;
 
   if (guestData.folderPath) {
     const folderIcon = document.createElement("button");
@@ -174,9 +160,7 @@ function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, i
 
     if (currentUserId === hostId || currentUserId === guestId) {
       folderIcon.addEventListener("click", () => {
-        window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
-          eventCode
-        )}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)}`;
+        window.location.href = `photogallery.html?eventCode=${encodeURIComponent(eventCode)}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)}`;
       });
     } else {
       folderIcon.disabled = true;
@@ -186,67 +170,26 @@ function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, i
   }
 
   if (isManual && currentUserId === hostId) {
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete Guest";
-    deleteButton.classList.add("delete-guest-button");
-    deleteButton.addEventListener("click", async () => {
-      await deleteManualGuest(eventCode, guestId, guestData.folderPath);
+    const removeButton = document.createElement("button");
+    removeButton.textContent = "Remove Guest";
+    removeButton.classList.add("remove-button");
+    removeButton.addEventListener("click", async () => {
+      try {
+        await remove(dbRef(database, `rooms/${eventCode}/manualParticipants/${guestId}`));
+        alert("Guest removed.");
+      } catch (error) {
+        console.error("Error removing guest:", error);
+        alert("Failed to remove guest.");
+      }
     });
-    guestItem.appendChild(deleteButton);
+    guestItem.appendChild(removeButton);
   }
 
   return guestItem;
 }
 
-// Add Guest Button Logic
-document.getElementById("addGuestButton").addEventListener("click", async () => {
-  const guestName = document.getElementById("guestName").value.trim();
-  const guestEmail = document.getElementById("guestEmail").value.trim();
-  const guestPhoto = document.getElementById("guestPhoto").files[0];
-  const eventCode = new URLSearchParams(window.location.search).get("eventCode");
-
-  if (!guestName || !guestEmail || !guestPhoto) {
-    alert("All fields are required.");
-    return;
-  }
-
-  const participantId = `${eventCode}_${Date.now()}`;
-  const folderPath = `rooms/${eventCode}/${participantId}`;
-  const storagePath = `uploads/${participantId}`;
-
-  try {
-    const fileRef = storageRef(storage, storagePath);
-    await uploadBytes(fileRef, guestPhoto);
-    const photoUrl = await getDownloadURL(fileRef);
-
-    const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${participantId}`);
-    await update(manualGuestRef, {
-      name: guestName,
-      email: guestEmail,
-      photoUrl: photoUrl,
-      folderPath: folderPath,
-    });
-
-    alert("Guest added successfully!");
-    toggleDialog(false);
-    loadEventRoom(eventCode);
-  } catch (error) {
-    console.error("Error adding guest:", error);
-    alert("Failed to add guest.");
-  }
-});
-
-// Cancel Button Logic (Fix)
-document.getElementById("cancelButton").addEventListener("click", () => {
-  toggleDialog(false); // Hide the dialog
-  // Clear input fields
-  document.getElementById("guestName").value = "";
-  document.getElementById("guestEmail").value = "";
-  document.getElementById("guestPhoto").value = null;
-});
-
-// Toggle Dialog Visibility
-function toggleDialog(isVisible) {
-  const dialog = document.getElementById("guestDialog");
-  dialog.style.display = isVisible ? "block" : "none";
+// Toggle the dialog visibility
+function toggleDialog(visible) {
+  const dialog = document.getElementById("addMemberDialog");
+  dialog.style.display = visible ? "block" : "none";
 }
