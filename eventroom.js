@@ -27,7 +27,7 @@ document.getElementById("backButton").addEventListener("click", () => {
 // Load Event Room and Data
 async function loadEventRoom(eventCode) {
   try {
-    const roomRef = dbRef(database, `rooms/${eventCode}`);  // Fixed template literal
+    const roomRef = dbRef(database, `rooms/${eventCode}`);
     const snapshot = await get(roomRef);
     if (snapshot.exists()) {
       const roomData = snapshot.val();
@@ -57,9 +57,7 @@ async function loadEventRoom(eventCode) {
 
           if (user.uid === hostId) {
             hostFolderIcon.addEventListener("click", () => {
-              window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
-                eventCode
-              )}&folderName=${encodeURIComponent(hostData.folderPath)}&userId=${encodeURIComponent(hostId)}`;
+              window.location.href = `photogallery.html?eventCode=${encodeURIComponent(eventCode)}&folderName=${encodeURIComponent(hostData.folderPath)}&userId=${encodeURIComponent(hostId)}`;
             });
           } else {
             hostFolderIcon.disabled = true;
@@ -106,7 +104,7 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
   }
 
   const eventCode = new URLSearchParams(window.location.search).get("eventCode");
-  const folderPath = `rooms/${eventCode}/${user.uid}`;  // Fixed template literal
+  const folderPath = `rooms/${eventCode}/${user.uid}`;
 
   const input = document.createElement("input");
   input.type = "file";
@@ -118,10 +116,17 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
     if (files.length === 0) return;
 
     try {
+      // Create folder structure in Firebase Storage by uploading a dummy file
+      const dummyFile = new Blob([""], { type: "text/plain" });  // Empty text file as dummy
+      const dummyFileRef = storageRef(storage, `${folderPath}/.placeholder.txt`);
+      await uploadBytes(dummyFileRef, dummyFile);  // Upload dummy file to initialize the folder
+
+      // Now upload the actual photos
       for (const file of files) {
-        const fileRef = storageRef(storage, `${folderPath}/${file.name}`);  // Fixed template literal
+        const fileRef = storageRef(storage, `${folderPath}/${file.name}`);
         await uploadBytes(fileRef, file);
       }
+
       alert("Photos uploaded successfully!");
     } catch (error) {
       console.error("Error uploading photos:", error);
@@ -169,9 +174,7 @@ function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, i
 
     if (currentUserId === hostId || currentUserId === guestId) {
       folderIcon.addEventListener("click", () => {
-        window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
-          eventCode
-        )}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)}`;
+        window.location.href = `photogallery.html?eventCode=${encodeURIComponent(eventCode)}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)}`;
       });
     } else {
       folderIcon.disabled = true;
@@ -210,10 +213,17 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
   const storagePath = `uploads/${participantId}`;
 
   try {
+    // Create the folder structure in Firebase Storage by uploading a dummy file (e.g., .txt file)
+    const dummyFile = new Blob([""], { type: "text/plain" });  // Empty text file as dummy
+    const dummyFileRef = storageRef(storage, `${folderPath}/.placeholder.txt`);
+    await uploadBytes(dummyFileRef, dummyFile);  // Upload dummy file to initialize the folder
+
+    // Upload the guest photo
     const fileRef = storageRef(storage, storagePath);
     await uploadBytes(fileRef, guestPhoto);
     const photoUrl = await getDownloadURL(fileRef);
 
+    // Save the guest data in Realtime Database
     const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${participantId}`);
     await update(manualGuestRef, {
       name: guestName,
@@ -228,35 +238,5 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
   } catch (error) {
     console.error("Error adding guest:", error);
     alert("Failed to add guest.");
-  }
-});
-
-// Delete Manual Guest
-async function deleteManualGuest(eventCode, guestId, folderPath) {
-  try {
-    const guestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${guestId}`);
-    await remove(guestRef);
-
-    const folderRef = storageRef(storage, `rooms/${eventCode}/${guestId}`);
-    await deleteObject(folderRef);
-
-    alert("Guest deleted successfully.");
-    loadEventRoom(eventCode);
-  } catch (error) {
-    console.error("Error deleting guest:", error);
-    alert("Failed to delete guest.");
-  }
-}
-
-// Toggle dialog visibility
-function toggleDialog(visible) {
-  const dialog = document.getElementById("addGuestDialog");
-  dialog.style.display = visible ? "block" : "none";
-}
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    const eventCode = new URLSearchParams(window.location.search).get("eventCode");
-    loadEventRoom(eventCode);
   }
 });
