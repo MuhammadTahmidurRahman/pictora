@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getDatabase, ref as dbRef, push, update, get, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { getStorage, ref as storageRef, uploadBytes, deleteObject } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Firebase Initialization
 const firebaseConfig = {
@@ -93,78 +93,16 @@ async function loadEventRoom(eventCode) {
   }
 }
 
-// Load Guests and Display Their Profile Pictures and Folder Icons
-function loadGuests(guests, currentUserId, hostId, eventCode) {
-  const guestListElem = document.getElementById("guestList");
-  guestListElem.innerHTML = "";
-
-  guests.forEach(([guestId, guestData]) => {
-    const guestItem = createGuestItem(guestId, guestData, currentUserId, hostId, eventCode);
-    guestListElem.appendChild(guestItem);
-  });
-}
-
-// Load Manual Guests
-function loadManualGuests(manualGuests, currentUserId, hostId, eventCode) {
-  const guestListElem = document.getElementById("guestList");
-  manualGuests.forEach(([guestId, guestData]) => {
-    const guestItem = createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, true);
-    guestListElem.appendChild(guestItem);
-  });
-}
-
-// Create a Guest or Manual Guest List Item
-function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, isManual = false) {
-  const guestItem = document.createElement("li");
-  guestItem.classList.add("guest-item");
-  guestItem.innerHTML = `
-    <img class="guest-photo" src="${guestData.photoUrl || guestData.referencePhotoUrl || 'fallback.png'}" alt="Guest Photo" />
-    <span class="guest-name">${guestData.name || "Unnamed Guest"}</span>
-  `;
-
-  // Add folder icon if the guest has a folder
-  if (guestData.folderPath) {
-    const folderIcon = document.createElement("button");
-    folderIcon.textContent = "📁";
-    folderIcon.classList.add("folder-icon");
-
-    if (currentUserId === hostId) {
-      folderIcon.addEventListener("click", () => {
-        window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
-          eventCode
-        )}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)}`;
-      });
-    } else {
-      folderIcon.disabled = true;
-    }
-
-    guestItem.appendChild(folderIcon);
-  }
-
-  // Add "Delete Guest" button for manual guests
-  if (isManual && currentUserId === hostId) {
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete Guest";
-    deleteButton.classList.add("delete-guest-button");
-    deleteButton.addEventListener("click", async () => {
-      await deleteManualGuest(eventCode, guestId, guestData.folderPath);
-    });
-    guestItem.appendChild(deleteButton);
-  }
-
-  return guestItem;
-}
-
 // Toggle Add Guest Dialog
 function toggleDialog(show) {
   const dialog = document.getElementById("addGuestDialog");
   dialog.classList.toggle("hidden", !show);
 }
 
-// Add Member Button Logic
+// Add Guest Button Logic
 document.getElementById("addGuestButton").addEventListener("click", async () => {
-  const guestName = document.getElementById("guestName").value;
-  const guestEmail = document.getElementById("guestEmail").value;
+  const guestName = document.getElementById("guestName").value.trim();
+  const guestEmail = document.getElementById("guestEmail").value.trim();
   const guestPhoto = document.getElementById("guestPhoto").files[0];
   const eventCode = new URLSearchParams(window.location.search).get("eventCode");
 
@@ -173,15 +111,18 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
     return;
   }
 
-  const folderPath = `rooms/${eventCode}/manualParticipants/${eventCode}_${Date.now()}`;
-  const storagePath = `uploads/${eventCode}_${Date.now()}`;
+  const participantId = `${eventCode}_${Date.now()}`;
+  const folderPath = `rooms/${eventCode}/manualParticipants/${participantId}`;
+  const storagePath = `uploads/${participantId}`;
 
   try {
+    // Upload guest photo to Firebase Storage
     const fileRef = storageRef(storage, storagePath);
     await uploadBytes(fileRef, guestPhoto);
-    const photoUrl = await fileRef.getDownloadURL();
+    const photoUrl = await getDownloadURL(fileRef); // Corrected to explicitly call getDownloadURL
 
-    const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${eventCode}_${Date.now()}`);
+    // Save guest details in Firebase Realtime Database
+    const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${participantId}`);
     await update(manualGuestRef, {
       name: guestName,
       email: guestEmail,
@@ -198,29 +139,7 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
   }
 });
 
-// Close Dialog Logic
-document.getElementById("closeDialogButton").addEventListener("click", () => {
-  toggleDialog(false);
-});
-
-// Delete Manual Guest
-async function deleteManualGuest(eventCode, guestId, folderPath) {
-  try {
-    const guestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${guestId}`);
-    await remove(guestRef);
-
-    const folderRef = storageRef(storage, folderPath);
-    await deleteObject(folderRef);
-
-    alert("Guest deleted successfully.");
-    loadEventRoom(eventCode);
-  } catch (error) {
-    console.error("Error deleting guest:", error);
-    alert("Failed to delete guest.");
-  }
-}
-
-// Check Authentication and Load Event Room
+// Authentication and load event room
 onAuthStateChanged(auth, (user) => {
   if (user) {
     const eventCode = new URLSearchParams(window.location.search).get("eventCode");
