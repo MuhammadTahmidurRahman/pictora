@@ -31,11 +31,22 @@ const auth = getAuth(app);
 const storage = getStorage(app);
 const database = getDatabase(app);
 
-// Set persistence to local inside the login function
-// Function to handle email login and check if user exists
+const email = document.getElementById("email").value.trim();
+const password = document.getElementById("password").value.trim();
+
+if (!email || !password) {
+  alert("Please enter both email and password.");
+  return;  // Exit early if input is missing
+}
+
 async function loginUser() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
+
+  if (!email || !password) {
+    alert("Please enter both email and password.");
+    return;
+  }
 
   try {
     await setPersistence(auth, browserLocalPersistence);
@@ -46,19 +57,22 @@ async function loginUser() {
     const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
 
     if (userSnapshot.exists()) {
-      // If user exists in database, proceed to event page
       console.log("User logged in:", userCredential.user);
-      window.location.href = "join_event.html"; // Redirect to event page
+      window.location.href = "join_event.html"; // Redirect to the event page
     } else {
-      // If user does not exist, sign out and show error
       await signOut(auth);
       alert("Please sign up first before using email sign-in.");
     }
   } catch (error) {
     console.error("Login error:", error.message);
-    alert("Login failed. Please check your credentials.");
+    if (error.code === "auth/invalid-credential") {
+      alert("Invalid credentials. Please check your email and password.");
+    } else {
+      alert("Login failed. Please try again.");
+    }
   }
 }
+
 
 // Function to handle Google login and check if user exists
 window.loginWithGoogle = async function () {
@@ -101,6 +115,7 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
+// Toggle password visibility
 // Toggle password visibility
 function togglePassword(inputId) {
   const passwordField = document.getElementById(inputId);
