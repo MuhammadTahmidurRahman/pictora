@@ -22,6 +22,7 @@ const storage = getStorage();
 
 // Load Event Room Details
 async function loadEventRoom(eventCode) {
+  console.log("Loading event room with code:", eventCode); // Debugging log
   const roomRef = dbRef(database, `rooms/${eventCode}`);
   const roomSnapshot = await get(roomRef);
 
@@ -32,6 +33,8 @@ async function loadEventRoom(eventCode) {
   }
 
   const roomData = roomSnapshot.val();
+  console.log("Room data fetched:", roomData); // Debugging log
+
   document.getElementById("roomName").textContent = roomData.roomName || "No Room Name";
   document.getElementById("roomCode").textContent = `Room Code: ${eventCode}`;
   loadHostInfo(roomData.hostId, eventCode);
@@ -40,6 +43,7 @@ async function loadEventRoom(eventCode) {
 
 // Load Host Information
 async function loadHostInfo(hostId, eventCode) {
+  console.log("Loading host information for ID:", hostId); // Debugging log
   const hostRef = dbRef(database, `rooms/${eventCode}/participants/${hostId}`);
   const hostSnapshot = await get(hostRef);
 
@@ -47,22 +51,24 @@ async function loadHostInfo(hostId, eventCode) {
     const hostData = hostSnapshot.val();
     document.getElementById("hostName").textContent = hostData.name || "Unknown Host";
     document.getElementById("hostPhoto").src = hostData.photoUrl || "default-photo.jpg";
+  } else {
+    console.warn("Host data not found!"); // Debugging log
   }
 }
 
-// Load Guest List
+// Load Guest List with Profile Photos
 function loadGuestList(participants, hostId) {
   const guestListElement = document.getElementById("guestList");
   guestListElement.innerHTML = ""; // Clear the guest list
 
   for (const [participantId, participantData] of Object.entries(participants || {})) {
-    if (participantId !== hostId) { // Exclude the host from the guest list
+    if (participantId !== hostId) { // Only display guests, not the host
       const listItem = document.createElement("li");
       listItem.classList.add("guest-item");
 
       // Create image element for profile photo
       const profileImage = document.createElement("img");
-      profileImage.src = participantData.photoUrl || "default-photo.jpg"; // Default photo if photoUrl is unavailable
+      profileImage.src = participantData.photoUrl || "default-photo.jpg"; // Use default image if photoUrl is missing
       profileImage.alt = `${participantData.name || "Guest"}'s profile photo`;
       profileImage.classList.add("guest-photo"); // Add CSS class for styling
 
@@ -70,7 +76,7 @@ function loadGuestList(participants, hostId) {
       const nameSpan = document.createElement("span");
       nameSpan.textContent = participantData.name || "Unknown Guest";
 
-      // Append profile image and name span to the list item
+      // Append profile image and name to the list item
       listItem.appendChild(profileImage);
       listItem.appendChild(nameSpan);
 
@@ -86,7 +92,6 @@ function loadGuestList(participants, hostId) {
     }
   }
 }
-
 
 // Upload Photo
 document.getElementById("uploadPhotoButton").addEventListener("click", async () => {
