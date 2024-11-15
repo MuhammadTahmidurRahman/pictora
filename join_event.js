@@ -20,6 +20,22 @@ const auth = getAuth(firebaseApp);
 const database = getDatabase(firebaseApp);
 const storage = getStorage(firebaseApp);
 
+// Fetch the user's profile photo from Firebase Storage
+async function fetchUserProfilePhoto(uid) {
+  let photoUrl = "";
+  const userPhotoRef = storageRef(storage, `uploads/${uid}/profile.jpg`);
+
+  try {
+    photoUrl = await getDownloadURL(userPhotoRef);
+  } catch (error) {
+    console.error("Error fetching profile photo from storage:", error);
+    // If the profile image isn't found, you could use a default image or leave it blank
+    photoUrl = "default_image_url.jpg"; // Optional: Replace with your fallback image URL
+  }
+
+  return photoUrl;
+}
+
 // Join Room function
 async function joinRoom() {
   const roomCode = document.getElementById("eventCodeInput").value.trim();
@@ -60,34 +76,18 @@ async function joinRoom() {
     return;
   }
 
-  // Fetch the user's profile photo from Firebase Storage
+  // Fetch the user's profile photo from Firebase Storage (the uploaded photo)
   const photoUrl = await fetchUserProfilePhoto(user.uid);
 
-  // Create participant data without uploading photo folder path
+  // Create participant data and store the user's uploaded profile photo URL
   const participantData = {
     name: user.displayName || "Guest",
     email: user.email,
-    photoUrl: photoUrl,  // Store the user's photo URL from Storage
+    photoUrl: photoUrl,  // Use the photo URL from Firebase Storage
   };
 
   await set(participantRef, participantData);
   window.location.href = `/eventroom.html?eventCode=${roomCode}`;
-}
-
-// Function to fetch the user profile photo from Firebase Storage
-async function fetchUserProfilePhoto(uid) {
-  let photoUrl = "";
-  const userPhotoRef = storageRef(storage, `uploads/${uid}/profile.jpg`);
-
-  try {
-    photoUrl = await getDownloadURL(userPhotoRef);
-  } catch (error) {
-    console.error("Error fetching profile photo from storage:", error);
-    // If the profile image isn't found, you could use a default image or leave it blank
-    photoUrl = "default_image_url.jpg"; // Optional: Replace with your fallback image URL
-  }
-
-  return photoUrl;
 }
 
 // Function to display messages
