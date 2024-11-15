@@ -1,3 +1,5 @@
+
+// Import necessary Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getDatabase, ref as dbRef, update, get, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
@@ -60,7 +62,9 @@ async function loadEventRoom(eventCode) {
 
           if (user.uid === hostId) {
             hostFolderIcon.addEventListener("click", () => {
-              window.location.href = `photogallery.html?eventCode=${encodeURIComponent(eventCode)}&folderName=${encodeURIComponent(hostData.folderPath)}&userId=${encodeURIComponent(hostId)}`;
+              window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
+                eventCode
+              )}&folderName=${encodeURIComponent(hostData.folderPath)}&userId=${encodeURIComponent(hostId)}`;
             });
           } else {
             hostFolderIcon.disabled = true;
@@ -119,17 +123,10 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
     if (files.length === 0) return;
 
     try {
-      // Temporary folder initialization with a placeholder image (can be a 1x1 pixel image)
-      const placeholderImage = new Blob([""], { type: "image/jpeg" });  // Empty image as placeholder (or use a small image file)
-      const placeholderImageRef = storageRef(storage, `${folderPath}/.placeholder.jpg`);
-      await uploadBytes(placeholderImageRef, placeholderImage);  // Upload placeholder to create the folder
-
-      // Now upload the actual photos
       for (const file of files) {
         const fileRef = storageRef(storage, `${folderPath}/${file.name}`);
         await uploadBytes(fileRef, file);
       }
-
       alert("Photos uploaded successfully!");
     } catch (error) {
       console.error("Error uploading photos:", error);
@@ -166,9 +163,10 @@ function loadManualGuests(manualGuests, currentUserId, hostId, eventCode) {
 function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, isManual = false) {
   const guestItem = document.createElement("li");
   guestItem.classList.add("guest-item");
-  guestItem.innerHTML = 
-    `<img class="guest-photo" src="${guestData.photoUrl}" alt="Guest Photo" />
-    <span class="guest-name">${guestData.name}</span>`;
+  guestItem.innerHTML = `
+    <img class="guest-photo" src="${guestData.photoUrl}" alt="Guest Photo" />
+    <span class="guest-name">${guestData.name}</span>
+  `;
 
   if (guestData.folderPath) {
     const folderIcon = document.createElement("button");
@@ -177,7 +175,9 @@ function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, i
 
     if (currentUserId === hostId || currentUserId === guestId) {
       folderIcon.addEventListener("click", () => {
-        window.location.href = `photogallery.html?eventCode=${encodeURIComponent(eventCode)}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)}`;
+        window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
+          eventCode
+        )}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)}`;
       });
     } else {
       folderIcon.disabled = true;
@@ -220,7 +220,6 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
     await uploadBytes(fileRef, guestPhoto);
     const photoUrl = await getDownloadURL(fileRef);
 
-    // Save the guest data in Realtime Database
     const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${participantId}`);
     await update(manualGuestRef, {
       name: guestName,
