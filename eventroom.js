@@ -56,21 +56,37 @@ function loadGuestList(participants, hostId) {
   guestListElement.innerHTML = ""; // Clear the guest list
 
   for (const [participantId, participantData] of Object.entries(participants || {})) {
-    if (participantId !== hostId) {
+    if (participantId !== hostId) { // Exclude the host from the guest list
       const listItem = document.createElement("li");
-      listItem.textContent = participantData.name || "Unknown Guest";
+      listItem.classList.add("guest-item");
 
-      // Add folder icon if photo folder exists
+      // Create image element for profile photo
+      const profileImage = document.createElement("img");
+      profileImage.src = participantData.photoUrl || "default-photo.jpg"; // Default photo if photoUrl is unavailable
+      profileImage.alt = `${participantData.name || "Guest"}'s profile photo`;
+      profileImage.classList.add("guest-photo"); // Add CSS class for styling
+
+      // Create span element for the guest's name
+      const nameSpan = document.createElement("span");
+      nameSpan.textContent = participantData.name || "Unknown Guest";
+
+      // Append profile image and name span to the list item
+      listItem.appendChild(profileImage);
+      listItem.appendChild(nameSpan);
+
+      // Add folder icon if the photo folder exists
       if (participantData.folderPath) {
         const folderIcon = document.createElement("button");
         folderIcon.textContent = "📁 View Photos";
         folderIcon.onclick = () => viewGuestPhotos(eventCode, participantId);
         listItem.appendChild(folderIcon);
       }
+
       guestListElement.appendChild(listItem);
     }
   }
 }
+
 
 // Upload Photo
 document.getElementById("uploadPhotoButton").addEventListener("click", async () => {
