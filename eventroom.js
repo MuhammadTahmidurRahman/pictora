@@ -133,7 +133,7 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
   input.click();
 });
 
-// Load Guests and Display Their Profile Pictures and Folder Icons
+// Load Guests and Manual Guests
 function loadGuests(guests, currentUserId, hostId, eventCode) {
   const guestListElem = document.getElementById("guestList");
   guestListElem.innerHTML = "";
@@ -144,7 +144,6 @@ function loadGuests(guests, currentUserId, hostId, eventCode) {
   });
 }
 
-// Load Manual Guests
 function loadManualGuests(manualGuests, currentUserId, hostId, eventCode) {
   const manualGuestListElem = document.getElementById("manualGuestList");
   manualGuestListElem.innerHTML = "";
@@ -153,46 +152,6 @@ function loadManualGuests(manualGuests, currentUserId, hostId, eventCode) {
     const guestItem = createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, true);
     manualGuestListElem.appendChild(guestItem);
   });
-}
-
-// Create a Guest or Manual Guest List Item
-function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, isManual = false) {
-  const guestItem = document.createElement("li");
-  guestItem.classList.add("guest-item");
-  guestItem.innerHTML = `
-    <img class="guest-photo" src="${guestData.photoUrl}" alt="Guest Photo" />
-    <span class="guest-name">${guestData.name}</span>
-  `;
-
-  if (guestData.folderPath) {
-    const folderIcon = document.createElement("button");
-    folderIcon.textContent = "📁";
-    folderIcon.classList.add("folder-icon");
-
-    if (currentUserId === hostId || currentUserId === guestId) {
-      folderIcon.addEventListener("click", () => {
-        window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
-          eventCode
-        )}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)}`;
-      });
-    } else {
-      folderIcon.disabled = true;
-    }
-
-    guestItem.appendChild(folderIcon);
-  }
-
-  if (isManual && currentUserId === hostId) {
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete Guest";
-    deleteButton.classList.add("delete-guest-button");
-    deleteButton.addEventListener("click", async () => {
-      await deleteManualGuest(eventCode, guestId, guestData.folderPath);
-    });
-    guestItem.appendChild(deleteButton);
-  }
-
-  return guestItem;
 }
 
 // Add Guest Button Logic
@@ -209,7 +168,7 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
 
   const participantId = `${eventCode}_${Date.now()}`;
   const folderPath = `rooms/${eventCode}/${participantId}`;
-  const storagePath = `uploads/${participantId}`;
+  const storagePath = `uploads/${participantId}_${guestPhoto.name}`;
 
   try {
     const fileRef = storageRef(storage, storagePath);
