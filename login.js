@@ -31,48 +31,21 @@ const auth = getAuth(app);
 const storage = getStorage(app);
 const database = getDatabase(app);
 
-const email = document.getElementById("email").value.trim();
-const password = document.getElementById("password").value.trim();
-
-if (!email || !password) {
-  alert("Please enter both email and password.");
-  return;  // Exit early if input is missing
-}
-
+// Set persistence to local inside the login function
 async function loginUser() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
 
-  if (!email || !password) {
-    alert("Please enter both email and password.");
-    return;
-  }
-
   try {
     await setPersistence(auth, browserLocalPersistence);
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-
-    // Check if the user exists in the Realtime Database
-    const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
-
-    if (userSnapshot.exists()) {
-      console.log("User logged in:", userCredential.user);
-      window.location.href = "join_event.html"; // Redirect to the event page
-    } else {
-      await signOut(auth);
-      alert("Please sign up first before using email sign-in.");
-    }
+    console.log("User logged in:", userCredential.user);
+    window.location.href = "join_event.html";  // Redirect to event page on successful login
   } catch (error) {
     console.error("Login error:", error.message);
-    if (error.code === "auth/invalid-credential") {
-      alert("Invalid credentials. Please check your email and password.");
-    } else {
-      alert("Login failed. Please try again.");
-    }
+    alert("Login failed. Please check your credentials.");
   }
 }
-
 
 // Function to handle Google login and check if user exists
 window.loginWithGoogle = async function () {
@@ -82,26 +55,22 @@ window.loginWithGoogle = async function () {
     const user = result.user;
 
     // Check if the user exists in the Realtime Database
-    const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
-
+    const userSnapshot = await get(dbRef(database, users/${user.uid}));
     if (userSnapshot.exists()) {
-      // If user exists in the database, allow sign-in and redirect
       alert("Google sign-in successful");
-      window.location.href = 'join_event.html'; // Redirect to the event page
+      window.location.href = 'join_event.html';
     } else {
-      // If user does not exist, sign out and show error message
-      await signOut(auth);  // Sign out the user immediately after failed check
-      alert("Please sign up first before using Google sign-in.");
+      // If user does not exist, sign out and redirect to signup page
+      await signOut(auth);
+      alert("User not registered. Redirecting to sign-up page.");
+      window.location.href = 'signup.html';
     }
   } catch (error) {
     console.error("Google sign-in failed:", error.message);
-    alert("Failed to sign in with Google. Please try again.");
+    alert("Failed to sign in with Google. Redirecting to sign-up page.");
+    window.location.href = 'signup.html';
   }
 };
-
-// Add event listeners for login button and Google sign-in button
-document.getElementById('login-button').addEventListener('click', loginUser);
-document.getElementById('googleSignInButton').addEventListener('click', loginWithGoogle);
 
 // Listen to authentication state changes
 onAuthStateChanged(auth, (user) => {
@@ -116,9 +85,14 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // Toggle password visibility
-// Toggle password visibility
 function togglePassword(inputId) {
   const passwordField = document.getElementById(inputId);
   const type = passwordField.type === "password" ? "text" : "password";
   passwordField.type = type;
 }
+
+// Add event listener for login button
+document.getElementById('login-button').addEventListener('click', loginUser);
+
+// Add event listener for Google sign-in button
+document.getElementById('googleSignInButton').addEventListener('click', loginWithGoogle);
