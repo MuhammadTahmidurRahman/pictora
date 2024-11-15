@@ -55,9 +55,11 @@ function fetchUserProfile() {
       .then((snapshot) => {
         if (snapshot.exists()) {
           const userData = snapshot.val();
+          console.log("User data from database:", userData); // Debugging line
+          
           nameField.textContent = userData.name || 'No Name';
           emailField.textContent = user.email || 'No Email';
-          
+
           // Display profile picture if it exists, or use a default image
           if (userData.photo) {
             getDownloadURL(storageRef(storage, userData.photo))
@@ -72,7 +74,7 @@ function fetchUserProfile() {
             profileImage.src = 'default-avatar.png'; // Fallback image
           }
         } else {
-          console.error("No data available");
+          console.error("No data available for this user in the database.");
         }
       })
       .catch((error) => {
@@ -80,9 +82,20 @@ function fetchUserProfile() {
       });
   } else {
     console.error("User not authenticated");
-    window.location.href = "login.html"; // Redirect if not authenticated
+    window.location.href = "login.html"; // Redirect to login if not authenticated
   }
 }
+
+// Listen for auth state changes and fetch profile data if logged in
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    console.log("User is logged in:", user); // Debugging line
+    fetchUserProfile();
+  } else {
+    console.error("User not logged in");
+    window.location.href = "login.html"; // Redirect to login if not authenticated
+  }
+});
 
 // Edit name logic
 editButton.addEventListener("click", () => {
@@ -111,45 +124,6 @@ editButton.addEventListener("click", () => {
   }
 });
 
-// Delete account logic
-deleteButton.addEventListener("click", () => {
-  const user = auth.currentUser;
-  if (!user) {
-    console.error("User not authenticated");
-    return;
-  }
-
-  if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-    const userId = user.uid;
-    const userRef = dbRef(database, `users/${userId}`);
-    const profileImagePath = user.photoURL;
-
-    // Remove user data from the database
-    remove(userRef)
-      .then(() => {
-        // Delete profile image from storage if it exists
-        if (profileImagePath) {
-          const imageRef = storageRef(storage, profileImagePath);
-          deleteObject(imageRef).catch((error) => {
-            console.error("Error deleting profile image from storage:", error);
-          });
-        }
-
-        // Delete the user account
-        deleteUser(user)
-          .then(() => {
-            window.location.href = "login.html"; // Redirect to login
-          })
-          .catch((error) => {
-            console.error("Error deleting account:", error);
-          });
-      })
-      .catch((error) => {
-        console.error("Error removing user data:", error);
-      });
-  }
-});
-
 // Logout logic
 logoutButton.addEventListener("click", () => {
   signOut(auth)
@@ -159,14 +133,4 @@ logoutButton.addEventListener("click", () => {
     .catch((error) => {
       console.error("Error signing out:", error);
     });
-});
-
-// Listen for auth state changes and fetch profile data if logged in
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    fetchUserProfile();
-  } else {
-    console.error("User not logged in");
-    window.location.href = "login.html"; // Redirect to login if not authenticated
-  }
 });
