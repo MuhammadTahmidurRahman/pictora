@@ -4,33 +4,27 @@ body {
     background-size: cover;
     background-position: center;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: space-between;
     height: 100vh;
     margin: 0;
-}
-
-.container {
+  }
+  
+  .container {
     background: rgba(255, 255, 255, 0.85);
     padding: 20px;
     width: 300px;
     border-radius: 15px;
     text-align: center;
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.header h1 {
+    margin: auto;
+  }
+  
+  h1 {
     font-size: 24px;
     color: #000;
-}
-
-button {
+  }
+  
+  button {
     width: 100%;
     padding: 12px;
     margin-top: 15px;
@@ -40,13 +34,13 @@ button {
     border-radius: 10px;
     cursor: pointer;
     font-size: 16px;
-}
-
-button:hover {
+  }
+  
+  button:hover {
     background-color: #333;
-}
-
-input {
+  }
+  
+  input {
     width: 100%;
     padding: 12px;
     margin-bottom: 15px;
@@ -54,13 +48,33 @@ input {
     border: 1px solid #ccc;
     background-color: rgba(255, 255, 255, 0.7);
     color: #000;
-}
-
-input::placeholder {
+  }
+  
+  input::placeholder {
     color: rgba(0, 0, 0, 0.7);
-}
-
-input:focus {
+  }
+  
+  input:focus {
     outline: none;
     border: 1px solid #555;
-}
+  }
+  
+  .navbar {
+    display: flex;
+    justify-content: space-around;
+    background-color: #f9f9f9;
+    padding: 10px 0;
+    border-top: 1px solid #ccc;
+  }
+  
+  .navbar button {
+    background-color: black;
+    color: white;
+    border-radius: 50px;
+    width: 45%;
+  }
+  
+  .navbar button:hover {
+    background-color: #333;
+  }
+  
