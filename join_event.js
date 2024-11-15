@@ -60,28 +60,34 @@ async function joinRoom() {
     return;
   }
 
-  // Get the user's photo URL from Firebase Storage if available
-  let photoUrl = user.photoURL || "";
-  
-  if (!photoUrl) {
-    // If the user doesn't have a photo URL, attempt to fetch from Firebase Storage
-    const userPhotoRef = storageRef(storage, `uploads/${user.uid}/profile.jpg`);
-    try {
-      photoUrl = await getDownloadURL(userPhotoRef);
-    } catch (error) {
-      console.error("Error fetching profile photo from storage:", error);
-    }
-  }
+  // Fetch the user's profile photo from Firebase Storage (uploads folder)
+  const photoUrl = await fetchUserProfilePhoto(user.uid);
 
   // Create participant data without uploading photo folder path
   const participantData = {
     name: user.displayName || "Guest",
     email: user.email,
-    photoUrl: photoUrl,  // Store the user's photo URL
+    photoUrl: photoUrl,  // Store the user's photo URL from Storage
   };
 
   await set(participantRef, participantData);
   window.location.href = `/eventroom.html?eventCode=${roomCode}`;
+}
+
+// Function to fetch the user profile photo from Firebase Storage
+async function fetchUserProfilePhoto(uid) {
+  let photoUrl = "";
+  const userPhotoRef = storageRef(storage, `uploads/${uid}/profile.jpg`);
+
+  try {
+    photoUrl = await getDownloadURL(userPhotoRef);
+  } catch (error) {
+    console.error("Error fetching profile photo from storage:", error);
+    // If the profile image isn't found, you could use a default image or leave it blank
+    photoUrl = "default_image_url.jpg"; // Optional: Replace with your fallback image URL
+  }
+
+  return photoUrl;
 }
 
 // Function to display messages
@@ -110,16 +116,11 @@ function listenForUserProfileChanges() {
 
   onValue(userRef, async (snapshot) => {
     const updatedName = snapshot.val().name || user.displayName || "Guest";
-    let updatedPhotoUrl = snapshot.val().photo || user.photoURL || "";
+    let updatedPhotoUrl = snapshot.val().photo || "";  // You can also store this in the database
 
-    // Fetch the user's profile photo from storage if it is not set
+    // Fetch the updated user profile photo from Firebase Storage (uploads folder)
     if (!updatedPhotoUrl) {
-      const userPhotoRef = storageRef(storage, `uploads/${user.uid}/profile.jpg`);
-      try {
-        updatedPhotoUrl = await getDownloadURL(userPhotoRef);
-      } catch (error) {
-        console.error("Error fetching updated profile photo:", error);
-      }
+      updatedPhotoUrl = await fetchUserProfilePhoto(user.uid);
     }
 
     const roomsSnapshot = await get(ref(database, 'rooms'));
