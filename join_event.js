@@ -1,7 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
 import { getDatabase, ref, get, set, update, onValue } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
-import { getStorage, ref as storageRef, getDownloadURL } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -18,19 +17,23 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const database = getDatabase(firebaseApp);
-const storage = getStorage(firebaseApp);
 
-// Fetch the user's profile photo from Firebase Storage
+// Fetch the user's profile photo from Firebase Realtime Database
 async function fetchUserProfilePhoto(uid) {
   let photoUrl = "";
-  const userPhotoRef = storageRef(storage, `uploads/${uid}/profile.jpg`);
+  const userProfileRef = ref(database, `users/${uid}/profilePhoto`);
 
   try {
-    photoUrl = await getDownloadURL(userPhotoRef);
+    const snapshot = await get(userProfileRef);
+    if (snapshot.exists()) {
+      photoUrl = snapshot.val(); // Fetch the stored photo URL from the Realtime Database
+    } else {
+      console.error("Profile photo not found in Realtime Database");
+      photoUrl = "default_image_url.jpg"; // Optional: Replace with your fallback image URL
+    }
   } catch (error) {
-    console.error("Error fetching profile photo from storage:", error);
-    // If the profile image isn't found, you could use a default image or leave it blank
-    photoUrl = "default_image_url.jpg"; // Optional: Replace with your fallback image URL
+    console.error("Error fetching profile photo from Realtime Database:", error);
+    photoUrl = "default_image_url.jpg"; // Optional: Fallback image URL
   }
 
   return photoUrl;
@@ -76,14 +79,14 @@ async function joinRoom() {
     return;
   }
 
-  // Fetch the user's profile photo from Firebase Storage (the uploaded photo)
+  // Fetch the user's profile photo from Firebase Realtime Database (the uploaded photo URL)
   const photoUrl = await fetchUserProfilePhoto(user.uid);
 
   // Create participant data and store the user's uploaded profile photo URL
   const participantData = {
     name: user.displayName || "Guest",
     email: user.email,
-    photoUrl: photoUrl,  // Use the photo URL from Firebase Storage
+    photoUrl: photoUrl,  // Use the photo URL from Firebase Realtime Database
   };
 
   await set(participantRef, participantData);
@@ -116,9 +119,9 @@ function listenForUserProfileChanges() {
 
   onValue(userRef, async (snapshot) => {
     const updatedName = snapshot.val().name || user.displayName || "Guest";
-    let updatedPhotoUrl = snapshot.val().photo || "";  // You can also store this in the database
+    let updatedPhotoUrl = snapshot.val().profilePhoto || "";  // Now using 'profilePhoto' for consistency
 
-    // Fetch the updated user profile photo from Firebase Storage (uploads folder)
+    // Fetch the updated user profile photo from Firebase Realtime Database
     if (!updatedPhotoUrl) {
       updatedPhotoUrl = await fetchUserProfilePhoto(user.uid);
     }
