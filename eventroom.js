@@ -27,7 +27,7 @@ async function loadEventRoom(eventCode) {
 
   if (!roomSnapshot.exists()) {
     alert("Room does not exist!");
-    window.location.href = "createorjoinroom.html";
+    window.location.href = "join_event.html"; // Redirect if room doesn't exist
     return;
   }
 
@@ -58,16 +58,15 @@ function loadGuestList(participants, hostId) {
   for (const [participantId, participantData] of Object.entries(participants || {})) {
     if (participantId !== hostId) {
       const listItem = document.createElement("li");
+      listItem.textContent = participantData.name || "Unknown Guest";
 
-      const guestPhoto = document.createElement("img");
-      guestPhoto.src = participantData.photoUrl || "default-photo.jpg";
-
-      const guestName = document.createElement("span");
-      guestName.textContent = participantData.name || "Unknown Guest";
-
-      listItem.appendChild(guestPhoto);
-      listItem.appendChild(guestName);
-
+      // Add folder icon if photo folder exists
+      if (participantData.folderPath) {
+        const folderIcon = document.createElement("button");
+        folderIcon.textContent = "📁 View Photos";
+        folderIcon.onclick = () => viewGuestPhotos(eventCode, participantId);
+        listItem.appendChild(folderIcon);
+      }
       guestListElement.appendChild(listItem);
     }
   }
