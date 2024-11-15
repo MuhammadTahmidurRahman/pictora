@@ -93,10 +93,68 @@ async function loadEventRoom(eventCode) {
   }
 }
 
-// Toggle Add Guest Dialog
-function toggleDialog(show) {
-  const dialog = document.getElementById("addGuestDialog");
-  dialog.classList.toggle("hidden", !show);
+// Load Guests and Display Their Profile Pictures and Folder Icons
+function loadGuests(guests, currentUserId, hostId, eventCode) {
+  const guestListElem = document.getElementById("guestList");
+  guestListElem.innerHTML = "";
+
+  guests.forEach(([guestId, guestData]) => {
+    const guestItem = createGuestItem(guestId, guestData, currentUserId, hostId, eventCode);
+    guestListElem.appendChild(guestItem);
+  });
+}
+
+// Load Manual Guests
+function loadManualGuests(manualGuests, currentUserId, hostId, eventCode) {
+  const manualGuestListElem = document.getElementById("manualGuestList");
+  manualGuestListElem.innerHTML = "";
+
+  manualGuests.forEach(([guestId, guestData]) => {
+    const guestItem = createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, true);
+    manualGuestListElem.appendChild(guestItem);
+  });
+}
+
+// Create a Guest or Manual Guest List Item
+function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, isManual = false) {
+  const guestItem = document.createElement("li");
+  guestItem.classList.add("guest-item");
+  guestItem.innerHTML = `
+    <img class="guest-photo" src="${guestData.photoUrl}" alt="Guest Photo" />
+    <span class="guest-name">${guestData.name}</span>
+  `;
+
+  // Add folder icon if the guest has a folder
+  if (guestData.folderPath) {
+    const folderIcon = document.createElement("button");
+    folderIcon.textContent = "📁";
+    folderIcon.classList.add("folder-icon");
+
+    if (currentUserId === hostId || currentUserId === guestId) {
+      folderIcon.addEventListener("click", () => {
+        window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
+          eventCode
+        )}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)}`;
+      });
+    } else {
+      folderIcon.disabled = true;
+    }
+
+    guestItem.appendChild(folderIcon);
+  }
+
+  // Add "Delete Guest" button for manual guests
+  if (isManual && currentUserId === hostId) {
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete Guest";
+    deleteButton.classList.add("delete-guest-button");
+    deleteButton.addEventListener("click", async () => {
+      await deleteManualGuest(eventCode, guestId, guestData.folderPath);
+    });
+    guestItem.appendChild(deleteButton);
+  }
+
+  return guestItem;
 }
 
 // Add Guest Button Logic
@@ -112,34 +170,55 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
   }
 
   const participantId = `${eventCode}_${Date.now()}`;
-  const folderPath = `rooms/${eventCode}/manualParticipants/${participantId}`;
+  const folderPath = `rooms/${eventCode}/${participantId}`;
   const storagePath = `uploads/${participantId}`;
 
   try {
-    // Upload guest photo to Firebase Storage
     const fileRef = storageRef(storage, storagePath);
     await uploadBytes(fileRef, guestPhoto);
-    const photoUrl = await getDownloadURL(fileRef); // Corrected to explicitly call getDownloadURL
+    const photoUrl = await getDownloadURL(fileRef);
 
-    // Save guest details in Firebase Realtime Database
     const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${participantId}`);
     await update(manualGuestRef, {
       name: guestName,
       email: guestEmail,
-      referencePhotoUrl: photoUrl,
+      photoUrl,
       folderPath,
     });
 
     alert("Guest added successfully.");
-    toggleDialog(false); // Close the dialog
-    loadEventRoom(eventCode); // Reload the room to show new guest
+    toggleDialog(false);
+    loadEventRoom(eventCode);
   } catch (error) {
     console.error("Error adding guest:", error);
     alert("Failed to add guest.");
   }
 });
 
-// Authentication and load event room
+// Delete Manual Guest
+async function deleteManualGuest(eventCode, guestId, folderPath) {
+  try {
+    const guestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${guestId}`);
+    await remove(guestRef);
+
+    const folderRef = storageRef(storage, folderPath);
+    await deleteObject(folderRef);
+
+    alert("Guest deleted successfully.");
+    loadEventRoom(eventCode);
+  } catch (error) {
+    console.error("Error deleting guest:", error);
+    alert("Failed to delete guest.");
+  }
+}
+
+// Toggle Add Guest Dialog
+function toggleDialog(show) {
+  const dialog = document.getElementById("addGuestDialog");
+  dialog.classList.toggle("hidden", !show);
+}
+
+// Check Authentication and Load Event Room
 onAuthStateChanged(auth, (user) => {
   if (user) {
     const eventCode = new URLSearchParams(window.location.search).get("eventCode");
