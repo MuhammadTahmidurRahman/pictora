@@ -32,6 +32,7 @@ const storage = getStorage(app);
 const database = getDatabase(app);
 
 // Set persistence to local inside the login function
+// Function to handle email login
 async function loginUser() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -43,7 +44,11 @@ async function loginUser() {
     window.location.href = "join_event.html";  // Redirect to event page on successful login
   } catch (error) {
     console.error("Login error:", error.message);
-    alert("Login failed. Please check your credentials.");
+    if (error.code === 'auth/user-not-found') {
+      alert("No account found with this email. Please sign up.");
+    } else {
+      alert("Login failed. Please check your credentials.");
+    }
   }
 }
 
@@ -55,20 +60,20 @@ window.loginWithGoogle = async function () {
     const user = result.user;
 
     // Check if the user exists in the Realtime Database
-    const userSnapshot = await get(dbRef(database, users,$user.uid));
+    const userSnapshot = await get(dbRef(database, "users/" + user.uid));
     if (userSnapshot.exists()) {
       alert("Google sign-in successful");
-      window.location.href = 'join_event.html';
+      window.location.href = 'join_event.html';  // Redirect to the event page
     } else {
-      // If user does not exist, sign out and redirect to signup page
+      // If user does not exist in the database, sign out and redirect to signup page
       await signOut(auth);
-      alert("User not registered. Redirecting to sign-up page.");
-      window.location.href = 'signup.html';
+      alert("No account found with this Google account. Please sign up.");
+      window.location.href = 'signup.html';  // Redirect to signup page
     }
   } catch (error) {
     console.error("Google sign-in failed:", error.message);
-    alert("Failed to sign in with Google. Redirecting to sign-up page.");
-    window.location.href = 'signup.html';
+    alert("Failed to sign in with Google. Please sign up.");
+    window.location.href = 'signup.html';  // Redirect to signup page if sign-in fails
   }
 };
 
