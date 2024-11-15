@@ -71,14 +71,15 @@ button:hover {
 }
 
 #guestList li {
-    display: flex;
-    align-items: center;
+    display: flex; /* Aligns content in a row */
+    align-items: center; /* Centers items vertically */
     margin: 10px 0;
     padding: 10px;
     background: #f9f9f9;
     border: 1px solid #ddd;
     border-radius: 8px;
 }
+
 
 /*#guestList li img {
     width: 50px;
@@ -91,8 +92,10 @@ button:hover {
 .guest-photo {
     width: 50px;
     height: 50px;
-    border-radius: 50%;
-    margin-right: 10px;
+    border-radius: 50%; /* Makes it circular */
+    margin-right: 10px; /* Adds spacing from the text */
+    object-fit: cover; /* Ensures the image fits within the boundary */
+    display: inline-block; /* Ensures proper alignment */
 }
 
 
