@@ -1,14 +1,18 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signOut,
-  setPersistence,
-  browserLocalPersistence,
-  onAuthStateChanged,
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  signInWithPopup, 
+  fetchSignInMethodsForEmail, 
+  GoogleAuthProvider, 
+  signInWithEmailAndPassword, 
+  onAuthStateChanged, 
+  setPersistence, 
+  browserLocalPersistence, 
+  signOut 
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { getDatabase, ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -17,38 +21,43 @@ const firebaseConfig = {
   projectId: "pictora-7f0ad",
   storageBucket: "pictora-7f0ad.appspot.com",
   messagingSenderId: "155732133141",
+  databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app/",
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const storage = getStorage(app);
+const database = getDatabase(app);
 
-// Set persistence to local
-setPersistence(auth, browserLocalPersistence)
-  .then(() => {
-    console.log("Persistence set to local");
-  })
-  .catch((error) => {
-    console.error("Error setting persistence:", error);
-  });
+// Set persistence to local inside the login function
+async function loginUser() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  try {
+    await setPersistence(auth, browserLocalPersistence);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    console.log("User logged in:", userCredential.user);
+    window.location.href = "join_event.html";  // Redirect to event page on successful login
+  } catch (error) {
+    console.error("Login error:", error.message);
+    alert("Login failed. Please check your credentials.");
+  }
+}
 
 // Function to handle Google login and check if user exists
 window.loginWithGoogle = async function () {
   try {
-    // Initiate Google Sign-In
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Check if the user exists in Firestore
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    if (userDoc.exists()) {
-      // If user exists, proceed to the next step
+    // Check if the user exists in the Realtime Database
+    const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
+    if (userSnapshot.exists()) {
       alert("Google sign-in successful");
-
-      // Redirect to the create or join room page
       window.location.href = 'join_event.html';
     } else {
       // If user does not exist, sign out and redirect to signup page
@@ -57,27 +66,33 @@ window.loginWithGoogle = async function () {
       window.location.href = 'signup.html';
     }
   } catch (error) {
-    console.error("Google sign-in failed:", error);
+    console.error("Google sign-in failed:", error.message);
     alert("Failed to sign in with Google. Redirecting to sign-up page.");
     window.location.href = 'signup.html';
   }
 };
 
-// Single onAuthStateChanged listener
+// Listen to authentication state changes
 onAuthStateChanged(auth, (user) => {
-  console.log("Auth state changed. Checking user status...");
-  console.log("Current path:", window.location.pathname);
   if (user) {
-    console.log("User is logged in:", user);
-    // Redirect to join_event if logged in and not already there
-    if (window.location.pathname === '/login.html') {
-      window.location.href = 'join_event.html';
+    console.log("User is logged in.");
+    if (window.location.pathname !== "/join_event.html") {
+      window.location.href = "join_event.html"; // Redirect only if not already on the target page
     }
   } else {
-    console.log("User is not logged in.");
-    // Redirect to signup if user is not logged in and not on login or signup pages
-    if (window.location.pathname !== '/signup.html' && window.location.pathname !== '/login.html') {
-      window.location.href = 'signup.html';
-    }
+    console.log("No user is logged in.");
   }
 });
+
+// Toggle password visibility
+function togglePassword(inputId) {
+  const passwordField = document.getElementById(inputId);
+  const type = passwordField.type === "password" ? "text" : "password";
+  passwordField.type = type;
+}
+
+// Add event listener for login button
+document.getElementById('login-button').addEventListener('click', loginUser);
+
+// Add event listener for Google sign-in button
+document.getElementById('googleSignInButton').addEventListener('click', loginWithGoogle);

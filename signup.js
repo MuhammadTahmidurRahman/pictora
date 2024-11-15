@@ -1,26 +1,8 @@
+// Ensure no duplicate imports and only import necessary functions once
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithPopup, fetchSignInMethodsForEmail, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import { getDatabase, ref as dbRef, set, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-
-const auth = getAuth();
-
-onAuthStateChanged(auth, (user) => {
-  console.log("Auth state changed. Checking user status...");
-  if (user) {
-    console.log("User is already logged in:", user);
-    // If user is logged in, redirect to join_event
-    if (window.location.pathname === '/signup.html') {
-      console.log("Redirecting to join_event...");
-      window.location.href = 'join_event.html'; // Redirect to event page
-    }
-  } else {
-    console.log("User is not logged in. Staying on signup page.");
-    // If the user is not logged in, do not redirect.
-  }
-});
-
 
 // Firebase configuration
 const firebaseConfig = {
@@ -29,35 +11,41 @@ const firebaseConfig = {
   projectId: "pictora-7f0ad",
   storageBucket: "pictora-7f0ad.appspot.com",
   messagingSenderId: "155732133141",
-  databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app",
+  databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app/",
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-//const auth = getAuth();
+const auth = getAuth();
 const storage = getStorage();
 const database = getDatabase();
 
-// Toggle password visibility
-function togglePassword(fieldId) {
+// Check auth state and handle redirection
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    console.log("User is logged in, redirecting to join event...");
+    window.location.href = 'join_event.html';
+  }
+});
+
+// Function declarations
+window.togglePassword = function (fieldId) {
   const field = document.getElementById(fieldId);
   field.type = field.type === "password" ? "text" : "password";
-}
+};
 
-// Show image picker
-function showImagePicker() {
+window.showImagePicker = function () {
   document.getElementById("image").click();
-}
+};
 
-// Display selected image status
-function displayImage(input) {
+window.displayImage = function (input) {
   const uploadText = document.getElementById("upload-text");
   uploadText.textContent = input.files && input.files[0] ? "Photo selected" : "Upload your photo here";
-}
+};
 
 // Register user with email and password and upload profile image
-async function registerUser() {
+window.registerUser = async function () {
   const name = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -89,15 +77,7 @@ async function registerUser() {
       return;
     }
 
-    // 2. Check if the email is already registered in Realtime Database
-    const userQuery = query(dbRef(database, "users"), orderByChild("email"), equalTo(email));
-    const userSnapshot = await get(userQuery);
-    if (userSnapshot.exists()) {
-      alert("This email is already registered in the database. Please log in instead.");
-      return;
-    }
-
-    // Create user with email and password
+    // 2. Create user with email and password
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
@@ -119,10 +99,10 @@ async function registerUser() {
     console.error("Error creating user:", error);
     alert("Failed to register user. Please try again.");
   }
-}
+};
 
 // Google Sign-In with image upload validation
-async function signInWithGoogle() {
+window.signInWithGoogle = async function () {
   const provider = new GoogleAuthProvider();
   const imageFile = document.getElementById("image").files[0];
 
@@ -161,21 +141,4 @@ async function signInWithGoogle() {
     console.error("Error with Google Sign-In:", error);
     alert("Google Sign-In failed. Please try again.");
   }
-}
-
-
-onAuthStateChanged(auth, (user) => {
-  // If the user is logged in, redirect them to the join event page
-  if (user) {
-    console.log("User is already logged in, redirecting to join event...");
-    window.location.href = 'join_event.html'; // Redirect to event page
-  }
-  // Else, stay on the signup page
-});
-
-// Expose functions to global scope for inline HTML event handlers
-window.togglePassword = togglePassword;
-window.showImagePicker = showImagePicker;
-window.displayImage = displayImage;
-window.registerUser = registerUser;
-window.signInWithGoogle = signInWithGoogle;
+};
