@@ -1,8 +1,8 @@
 // Import necessary Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref as dbRef, update, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { getStorage, ref as storageRef, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getDatabase, ref as dbRef, get, set, update, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getStorage, ref as storageRef, uploadBytes } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Firebase Initialization
 const firebaseConfig = {
@@ -20,134 +20,117 @@ const auth = getAuth();
 const database = getDatabase();
 const storage = getStorage();
 
-// Load Event Room and Data
+// Load Event Room Details
 async function loadEventRoom(eventCode) {
-  try {
-    const roomRef = dbRef(database, `rooms/${eventCode}`);
-    const snapshot = await get(roomRef);
-    if (snapshot.exists()) {
-      const roomData = snapshot.val();
-      document.getElementById("roomName").textContent = roomData.roomName || 'Event Room';
-      document.getElementById("roomCode").textContent = `Code: ${eventCode}`;
+  const roomRef = dbRef(database, `rooms/${eventCode}`);
+  const roomSnapshot = await get(roomRef);
 
-      // Load Host information
-      const hostData = Object.values(roomData.host || {})[0];
-      if (hostData) {
-        document.getElementById("hostPhoto").src = hostData.hostPhotoUrl || "fallback.png";
-        document.getElementById("hostName").textContent = hostData.hostName || "Host";
-      }
+  if (!roomSnapshot.exists()) {
+    alert("Room does not exist!");
+    window.location.href = "createorjoinroom.html"; // Redirect if room doesn't exist
+    return;
+  }
 
-      // Load Guest List
-      loadGuests(roomData.guests);
-    } else {
-      alert("Room does not exist.");
-    }
-  } catch (error) {
-    console.error("Error loading event room:", error);
+  const roomData = roomSnapshot.val();
+  document.getElementById("roomName").textContent = roomData.roomName || "No Room Name";
+  document.getElementById("roomCode").textContent = `Room Code: ${eventCode}`;
+  loadHostInfo(roomData.hostId, eventCode);
+  loadGuestList(roomData.participants, roomData.hostId);
+}
+
+// Load Host Information
+async function loadHostInfo(hostId, eventCode) {
+  const hostRef = dbRef(database, `rooms/${eventCode}/participants/${hostId}`);
+  const hostSnapshot = await get(hostRef);
+
+  if (hostSnapshot.exists()) {
+    const hostData = hostSnapshot.val();
+    document.getElementById("hostName").textContent = hostData.name || "Unknown Host";
+    document.getElementById("hostPhoto").src = hostData.photoUrl || "default-photo.jpg";
   }
 }
 
 // Load Guest List
-function loadGuests(guestsData) {
-  const guestListElem = document.getElementById("guestList");
-  guestListElem.innerHTML = "";
+function loadGuestList(participants, hostId) {
+  const guestListElement = document.getElementById("guestList");
+  guestListElement.innerHTML = ""; // Clear the guest list
 
-  Object.values(guestsData || {}).forEach((guest) => {
-    const guestItem = document.createElement("li");
-    guestItem.innerHTML = `
-      <img src="${guest.guestPhotoUrl || 'fallback.png'}" width="40" height="40" style="border-radius: 50%;" alt="Guest Photo">
-      <span>${guest.guestName || "Unnamed Guest"}</span>
-    `;
-    guestListElem.appendChild(guestItem);
-  });
-}
+  for (const [participantId, participantData] of Object.entries(participants || {})) {
+    if (participantId !== hostId) {
+      const listItem = document.createElement("li");
+      listItem.textContent = participantData.name || "Unknown Guest";
 
-// Detect User Role (Host or Guest)
-async function detectUserType(eventCode, userId) {
-  const roomRef = dbRef(database, `rooms/${eventCode}`);
-  const snapshot = await get(roomRef);
-
-  if (snapshot.exists()) {
-    const roomData = snapshot.val();
-
-    // Check if user is host
-    for (const hostKey in roomData.host) {
-      if (roomData.host[hostKey]?.hostId === userId) {
-        return { type: "host", key: hostKey };
+      // Add folder icon if photo folder exists
+      if (participantData.folderPath) {
+        const folderIcon = document.createElement("button");
+        folderIcon.textContent = "📁 View Photos";
+        folderIcon.onclick = () => viewGuestPhotos(eventCode, participantId);
+        listItem.appendChild(folderIcon);
       }
-    }
-
-    // Check if user is guest
-    for (const guestKey in roomData.guests) {
-      if (roomData.guests[guestKey]?.guestId === userId) {
-        return { type: "guest", key: guestKey };
-      }
+      guestListElement.appendChild(listItem);
     }
   }
-
-  return null;
 }
 
-// Upload Multiple Photos
+// Upload Photo
 document.getElementById("uploadPhotoButton").addEventListener("click", async () => {
+  const eventCode = new URLSearchParams(window.location.search).get("eventCode");
   const user = auth.currentUser;
+
   if (!user) {
-    alert("You need to log in!");
+    alert("Please log in to upload photos.");
     return;
   }
 
-  const eventCode = new URLSearchParams(window.location.search).get("eventCode");
-  const picker = document.createElement("input");
-  picker.type = "file";
-  picker.accept = "image/*";
-  picker.multiple = true; // Allow multiple files
-  picker.click();
-
-  picker.onchange = async (event) => {
-    const files = event.target.files;
-    if (!files.length) return;
-
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.multiple = true;
+  fileInput.accept = "image/*";
+  fileInput.onchange = async () => {
+    const files = fileInput.files;
     const userId = user.uid;
+    const folderPath = `rooms/${eventCode}/${userId}`;
+    const userFolderRef = storageRef(storage, folderPath);
 
-    // Detect user role (host/guest)
-    const userType = await detectUserType(eventCode, userId);
-    if (!userType) {
-      alert("User is not part of this room!");
-      return;
+    for (let file of files) {
+      const fileRef = storageRef(userFolderRef, file.name);
+      await uploadBytes(fileRef, file);
     }
 
-    const folderType = userType.type === 'host' ? 'host' : 'guests';
-    const userKey = userType.key;
-    const uploadedPhotoUrls = [];
+    const participantRef = dbRef(database, `rooms/${eventCode}/participants/${userId}`);
+    await update(participantRef, { folderPath });
 
-    try {
-      for (const file of files) {
-        const storagePath = `rooms/${eventCode}/${folderType}/${userKey}/photos/${Date.now()}_${file.name}`;
-        const fileRef = storageRef(storage, storagePath);
-        const snapshot = await uploadBytes(fileRef, file);
-        const photoUrl = await getDownloadURL(snapshot.ref);
-        uploadedPhotoUrls.push(photoUrl);
-      }
-
-      const userRef = dbRef(database, `rooms/${eventCode}/${folderType}/${userKey}`);
-
-      // Update the uploadedPhotoFolderPath with a reference to the uploaded photos
-      await update(userRef, {
-        uploadedPhotoFolderPath: `rooms/${eventCode}/${folderType}/${userKey}/photos/`
-      });
-
-      alert("Photos uploaded successfully!");
-    } catch (error) {
-      console.error("Error uploading photos:", error);
-      alert("Failed to upload photos.");
-    }
+    alert(`${files.length} photo(s) uploaded successfully!`);
   };
+  fileInput.click();
 });
 
-// Window onload
-window.onload = () => {
+// Delete Room
+document.getElementById("deleteRoomButton").addEventListener("click", async () => {
   const eventCode = new URLSearchParams(window.location.search).get("eventCode");
-  if (eventCode) {
-    loadEventRoom(eventCode);
+  const confirmation = confirm("Are you sure you want to delete this room?");
+
+  if (confirmation) {
+    await remove(dbRef(database, `rooms/${eventCode}`));
+    alert("Room deleted successfully.");
+    window.location.href = "createorjoinroom.html";
   }
-};
+});
+
+// Back Button Event
+document.getElementById("backButton").addEventListener("click", () => {
+  window.location.href = "createorjoinroom.html";
+});
+
+// Load event room data after user authentication
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    const eventCode = new URLSearchParams(window.location.search).get("eventCode");
+    if (eventCode) {
+      loadEventRoom(eventCode);
+    }
+  } else {
+    alert("Please log in to access the event room.");
+    window.location.href = "login.html";
+  }
+});
