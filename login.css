@@ -97,14 +97,28 @@ button.google-button {
   justify-content: center;
   align-items: center;
 }
+.google-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #4285F4; /* Google's blue color */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+}
 
-button.google-button::before {
-  content: '';
-  background: url('google-logo.png') no-repeat center/contain; /* Add your Google logo image path */
-  width: 20px;
-  height: 20px;
-  display: inline-block;
+.google-button img {
   margin-right: 10px;
+  width: 20px; /* Adjust size if necessary */
+  height: 20px;
+}
+
+.google-button:hover {
+  background-color: #357ae8; /* Darker blue for hover */
 }
 
 .signup-link {
