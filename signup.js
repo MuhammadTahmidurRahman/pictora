@@ -45,6 +45,7 @@ window.displayImage = function (input) {
 };
 
 // Register user with email and password and upload profile image
+// Register user with email and password and upload profile image
 window.registerUser = async function () {
   const name = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
@@ -60,14 +61,23 @@ window.registerUser = async function () {
     alert("Passwords do not match.");
     return;
   }
-  if (password.length < 6) {
-    alert("Password must be at least 6 characters long.");
+  if (password.length < 8) {
+    alert("Password must be at least 8 characters long.");
     return;
   }
   if (!imageFile) {
     alert("Please upload a profile image.");
     return;
   }
+
+  // rest of the code...
+};
+
+// Change text when the photo is uploaded
+window.displayImage = function (input) {
+  const uploadText = document.getElementById("upload-text");
+  uploadText.textContent = input.files && input.files[0] ? "Photo uploaded" : "Upload your photo here";
+};
 
   try {
     // 1. Check if the email is already registered in Firebase Authentication
@@ -98,8 +108,7 @@ window.registerUser = async function () {
   } catch (error) {
     console.error("Error creating user:", error);
     alert("Failed to register user. Please try again.");
-  }
-};
+  };
 
 // Google Sign-In with image upload validation
 window.signInWithGoogle = async function () {
