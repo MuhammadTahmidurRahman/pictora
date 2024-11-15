@@ -19,6 +19,7 @@ body {
     overflow-y: auto; /* Enable scrolling */
   }
   
+  /* Button styles */
   button {
     width: 100%;
     padding: 10px;
@@ -34,14 +35,17 @@ body {
     background: #555;
   }
   
-  .guest-photo {
-    width: 50px;
-    height: 50px;
+  /* Host photo styles */
+  #hostPhoto {
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
-    margin-right: 10px;
-    object-fit: cover;
+    margin: 10px auto;
+    display: block;
+    object-fit: cover; /* Ensure proper scaling */
   }
   
+  /* Folder icon styles */
   .folder-icon {
     margin-left: 10px;
     cursor: pointer;
@@ -55,20 +59,33 @@ body {
     color: #ccc;
   }
   
-  .add-member-button {
-    background-color: #007BFF;
-    color: white;
-    font-size: 16px;
-    margin-top: 10px;
+  /* Guest list styles */
+  #guestList {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
   }
   
-  .delete-guest-button {
-    background-color: #ff4c4c;
-    color: white;
-    font-size: 14px;
-    margin-left: 10px;
+  #guestList li {
+    display: flex; /* Aligns content in a row */
+    align-items: center; /* Centers items vertically */
+    margin: 10px 0;
+    padding: 10px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
   }
   
+  /* Guest photo styles */
+  .guest-photo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover; /* Ensure proper scaling */
+  }
+  
+  /* Dialog styles */
   .dialog {
     position: fixed;
     top: 0;
@@ -102,6 +119,7 @@ body {
     border-radius: 5px;
   }
   
+  /* Buttons in the dialog */
   .dialog-buttons {
     display: flex;
     justify-content: space-between;
@@ -110,5 +128,19 @@ body {
   
   .dialog-buttons button {
     width: 45%;
+  }
+  
+  .add-member-button {
+    background-color: #007BFF;
+    color: white;
+    font-size: 16px;
+    margin-top: 10px;
+  }
+  
+  .delete-guest-button {
+    background-color: #ff4c4c;
+    color: white;
+    font-size: 14px;
+    margin-left: 10px;
   }
   
