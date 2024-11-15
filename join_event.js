@@ -1,6 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
-import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
+import { getDatabase, ref, get, set, update, onValue } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -20,7 +20,7 @@ const database = getDatabase(firebaseApp);
 
 // Join Room function
 async function joinRoom() {
-  const roomCode = document.getElementById("room-code").value.trim();
+  const roomCode = document.getElementById("eventCodeInput").value.trim();
   const user = auth.currentUser;
 
   // Ensure user is logged in
@@ -36,8 +36,8 @@ async function joinRoom() {
   }
 
   // Fetch room data from Firebase
-  const roomRef = database.ref(`rooms/${roomCode}`);
-  const roomSnapshot = await roomRef.get();
+  const roomRef = ref(database, `rooms/${roomCode}`);
+  const roomSnapshot = await get(roomRef);
 
   if (!roomSnapshot.exists()) {
     displayMessage("Room does not exist!");
@@ -54,8 +54,8 @@ async function joinRoom() {
   }
 
   // Check if the user is already a participant
-  const participantRef = database.ref(`rooms/${roomCode}/participants/${user.uid}`);
-  const participantSnapshot = await participantRef.get();
+  const participantRef = ref(database, `rooms/${roomCode}/participants/${user.uid}`);
+  const participantSnapshot = await get(participantRef);
 
   if (participantSnapshot.exists()) {
     displayMessage("You are already a participant in this room!");
@@ -69,10 +69,10 @@ async function joinRoom() {
     name: user.displayName || "Guest",
     email: user.email,
     uploadedPhotoFolderPath: `rooms/${roomCode}/${user.uid}`,
-    photoUrl: user.photoURL || ""
+    photoUrl: user.photoURL || "",
   };
 
-  await participantRef.set(participantData);
+  await set(participantRef, participantData);
   window.location.href = `/eventroom.html?eventCode=${roomCode}`;
 }
 
@@ -84,21 +84,21 @@ function displayMessage(message) {
 // Function to listen for user profile changes and update participant data
 function listenForUserProfileChanges() {
   const user = auth.currentUser;
-  const userRef = database.ref(`users/${user.uid}`);
+  const userRef = ref(database, `users/${user.uid}`);
 
-  userRef.on("value", async (snapshot) => {
+  onValue(userRef, async (snapshot) => {
     const updatedName = snapshot.val().name || user.displayName || "Guest";
     const updatedPhotoUrl = snapshot.val().photo || user.photoURL || "";
 
     // Update participant data in all rooms where this user is a participant
-    const roomsSnapshot = await database.ref('rooms').get();
+    const roomsSnapshot = await get(ref(database, 'rooms'));
     roomsSnapshot.forEach((room) => {
       const eventCode = room.key;
-      const participantRef = database.ref(`rooms/${eventCode}/participants/${user.uid}`);
+      const participantRef = ref(database, `rooms/${eventCode}/participants/${user.uid}`);
 
-      participantRef.get().then((participantSnapshot) => {
+      get(participantRef).then((participantSnapshot) => {
         if (participantSnapshot.exists()) {
-          participantRef.update({
+          update(participantRef, {
             name: updatedName,
             photoUrl: updatedPhotoUrl,
           });
@@ -109,7 +109,7 @@ function listenForUserProfileChanges() {
 }
 
 // Initialize listener for profile changes after login
-auth.onAuthStateChanged((user) => {
+onAuthStateChanged(auth, (user) => {
   if (user) {
     listenForUserProfileChanges();
   }
