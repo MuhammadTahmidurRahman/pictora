@@ -23,6 +23,9 @@ const storage = getStorage();
 document.getElementById("backButton").addEventListener("click", () => {
   window.location.href = "join_event.html";
 });
+document.getElementById("closeDialogButton").addEventListener("click", () => {
+  toggleDialog(false);  // Close the dialog
+});
 
 // Load Event Room and Data
 async function loadEventRoom(eventCode) {
