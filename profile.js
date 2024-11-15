@@ -10,6 +10,7 @@ import {
 import {
   getStorage,
   ref as storageRef,
+  getDownloadURL,
   deleteObject
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import {
@@ -22,13 +23,13 @@ import {
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
-  authDomain: "pictora-7f0ad.firebaseapp.com",
-  projectId: "pictora-7f0ad",
-  storageBucket: "pictora-7f0ad.appspot.com",
-  messagingSenderId: "155732133141",
-  databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app/",
-  appId: "1:155732133141:web:c5646717494a496a6dd51c"
+    apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
+    authDomain: "pictora-7f0ad.firebaseapp.com",
+    projectId: "pictora-7f0ad",
+    storageBucket: "pictora-7f0ad.appspot.com",
+    messagingSenderId: "155732133141",
+    databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app/",
+    appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
 
 // Initialize Firebase
@@ -54,9 +55,22 @@ function fetchUserProfile() {
       .then((snapshot) => {
         if (snapshot.exists()) {
           const userData = snapshot.val();
-          profileImage.src = userData.photo || ''; // Display photo or fallback if null
           nameField.textContent = userData.name || 'No Name';
           emailField.textContent = user.email || 'No Email';
+          
+          // Display profile picture if it exists, or use a default image
+          if (userData.photo) {
+            getDownloadURL(storageRef(storage, userData.photo))
+              .then((url) => {
+                profileImage.src = url;
+              })
+              .catch((error) => {
+                console.error("Error fetching profile image:", error);
+                profileImage.src = 'default-avatar.png'; // Fallback image
+              });
+          } else {
+            profileImage.src = 'default-avatar.png'; // Fallback image
+          }
         } else {
           console.error("No data available");
         }
@@ -66,6 +80,7 @@ function fetchUserProfile() {
       });
   } else {
     console.error("User not authenticated");
+    window.location.href = "login.html"; // Redirect if not authenticated
   }
 }
 
@@ -112,7 +127,7 @@ deleteButton.addEventListener("click", () => {
     // Remove user data from the database
     remove(userRef)
       .then(() => {
-        // Delete profile image from storage, if it exists
+        // Delete profile image from storage if it exists
         if (profileImagePath) {
           const imageRef = storageRef(storage, profileImagePath);
           deleteObject(imageRef).catch((error) => {

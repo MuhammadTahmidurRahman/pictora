@@ -8,17 +8,13 @@
 </head>
 <body>
   <div class="profile-container">
-    <div class="profile-image-container">
-      <img id="profileImage" class="profile-image" src="default-avatar.png" alt="Profile Picture">
-    </div>
-    <input type="text" id="profileName" class="profile-field" readonly>
-    <input type="text" id="profileEmail" class="profile-field" readonly>
-    <div class="button-container">
-      <button id="editButton" class="button">Edit</button>
-      <button id="logoutButton" class="button">Log Out</button>
-    </div>
+    <img id="profileImage" class="profile-image" src="default-avatar.png" alt="Profile Picture">
+    <div id="profileName" class="profile-field"></div>
+    <div id="profileEmail" class="profile-field"></div>
+    <button id="editButton" class="button">Edit</button>
+    <button id="deleteButton" class="button">Delete Account</button>
+    <button id="logoutButton" class="button">Log Out</button>
   </div>
-
   <script src="profile.js" type="module"></script>
 </body>
 </html>
