@@ -19,6 +19,15 @@ body {
     overflow-y: auto; /* Enable scrolling */
   }
   
+  /* Scrollable list styles */
+  .scrollable-list {
+    max-height: 150px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+  }
+  
   /* Button styles */
   button {
     width: 100%;
@@ -60,15 +69,14 @@ body {
   }
   
   /* Guest list styles */
-  #guestList {
-    list-style-type: none;
+  #guestList, #manualGuestList {
     padding: 0;
-    margin: 0;
+    margin: 10px 0;
   }
   
-  #guestList li {
-    display: flex; /* Aligns content in a row */
-    align-items: center; /* Centers items vertically */
+  #guestList li, #manualGuestList li {
+    display: flex;
+    align-items: center;
     margin: 10px 0;
     padding: 10px;
     background: #f9f9f9;
