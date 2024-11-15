@@ -61,10 +61,10 @@ async function joinRoom() {
   const participantData = {
     name: user.displayName || "Guest",
     email: user.email,
-    uploadedPhotoFolderPath: `rooms/${roomCode}/${user.uid}`,
-    photoUrl: user.photoURL || "",
+    photoUrl: user.photoURL || "",  // Store the user's photo URL directly
   };
 
+  // Only set the participant data without the uploadedPhotoFolderPath
   await set(participantRef, participantData);
   window.location.href = `/eventroom.html?eventCode=${roomCode}`;
 }
@@ -120,4 +120,3 @@ onAuthStateChanged(auth, (user) => {
     listenForUserProfileChanges();
   }
 });
-
