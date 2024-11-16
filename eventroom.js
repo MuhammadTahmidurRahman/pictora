@@ -199,7 +199,7 @@ function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, i
   return guestItem;
 }
 
-/// Add Guest Button Logic
+// Add Guest Button Logic
 document.getElementById("addGuestButton").addEventListener("click", async () => {
   const guestName = document.getElementById("guestName").value.trim();
   const guestEmail = document.getElementById("guestEmail").value.trim();
@@ -230,16 +230,12 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
       folderPath,
     });
 
-    // Ensure the profile picture is also uploaded to the folder path of the manual participant
-    // Fetch the profile photo URL from the data
-    const profileImageUrl = "https://firebasestorage.googleapis.com/v0/b/pictora-7f0ad.appspot.com/o/uploads%2F4B3AC5YZ_1731691793585?alt=media&token=3a62378c-4b97-40aa-928b-0b7eae140c5d";  // Provided URL
+    // Ensure the profile picture is fetched from `photoUrl` and uploaded to the manual participant's folder
+    const response = await fetch(photoUrl); // Fetch the uploaded profile photo using its URL
+    const blob = await response.blob();  // Convert the fetched image to a Blob
+    const participantImageRef = storageRef(storage, `${folderPath}/${guestName.replace(/\s+/g, "_")}_profilePhoto.jpg`);  // Save with dynamic file name
 
-    // Download the profile image from the provided URL and upload it to the participant's folder
-    const response = await fetch(profileImageUrl);
-    const blob = await response.blob();  // Convert the image to a Blob
-    const participantImageRef = storageRef(storage, `${folderPath}/profilePicture.jpg`);  // You can change the file name if needed
-
-    // Upload the profile picture to the correct folder path
+    // Upload the profile picture to the folder path
     await uploadBytes(participantImageRef, blob);
 
     alert("Guest added successfully and profile picture uploaded.");
@@ -250,6 +246,7 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
     alert("Failed to add guest.");
   }
 });
+
 
 // Delete Manual Guest
 async function deleteManualGuest(eventCode, guestId, folderPath) {
