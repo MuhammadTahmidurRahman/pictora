@@ -13,12 +13,37 @@
     <input type="text" placeholder="Enter event code to join" />
     <button>Join Room</button>
   </div>
+  
+  <!-- Navbar with a three-dot menu -->
   <div class="navbar">
-    <button>Home</button>
-    <button>Profile</button>
+    <div class="menu">
+      <button class="menu-toggle">⋮</button>
+      <div class="dropdown">
+        <button onclick="goToHome()">Home</button>
+        <button onclick="goToProfile()">Profile</button>
+      </div>
+    </div>
   </div>
+
+  <script>
+    // JavaScript to toggle the dropdown visibility
+    const menuToggle = document.querySelector('.menu-toggle');
+    const dropdown = document.querySelector('.dropdown');
+
+    menuToggle.addEventListener('click', () => {
+      dropdown.classList.toggle('show');
+    });
+
+    // Functions for navigation
+    function goToHome() {
+      alert('Navigating to Home...');
+      // Implement your logic to navigate to Home
+    }
+
+    function goToProfile() {
+      alert('Navigating to Profile...');
+      // Implement your logic to navigate to Profile
+    }
+  </script>
 </body>
 </html>
-
-
-<
