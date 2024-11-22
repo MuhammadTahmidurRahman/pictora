@@ -13,24 +13,24 @@ body {
 
 .container {
   background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  padding: 30px 20px;
-  width: 320px;
+  padding: 40px 30px; /* Improved padding for a balanced look */
+  width: 350px; /* Slightly wider for better content spacing */
   border-radius: 15px;
   text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Add depth */
 }
 
 h1 {
-  font-size: 26px;
+  font-size: 28px; /* Larger for better readability */
   color: #333;
-  margin-bottom: 20px;
+  margin-bottom: 25px; /* Extra spacing for separation */
   font-weight: bold;
 }
 
 button {
   width: 100%;
-  padding: 14px;
-  margin-top: 15px;
+  padding: 15px; /* Larger padding for a more prominent feel */
+  margin-top: 20px; /* Increased spacing between elements */
   background-color: black;
   color: white;
   border: none;
@@ -47,11 +47,11 @@ button:hover {
 
 input {
   width: 100%;
-  padding: 14px;
-  margin-bottom: 15px;
+  padding: 14px; /* Balanced padding */
+  margin-bottom: 20px; /* Increased margin for separation */
   border-radius: 8px;
   border: 1px solid #ccc;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.85);
   color: #333;
   font-size: 14px;
   transition: border-color 0.3s ease, background-color 0.3s ease;
@@ -71,24 +71,24 @@ input:focus {
   display: flex;
   justify-content: space-around;
   background-color: rgba(255, 255, 255, 0.9);
-  padding: 15px 0;
+  padding: 15px 0; /* Balanced padding */
   border-top: 1px solid #ccc;
-  position: fixed;
+  position: fixed; /* Keep it fixed at the bottom */
   bottom: 0;
   width: 100%;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
 
 .navbar button {
   background-color: black;
   color: white;
   border-radius: 25px;
-  width: 40%;
+  width: 40%; /* Consistent button size */
   font-size: 14px;
-  padding: 10px;
+  padding: 12px; /* Better spacing for a polished look */
   font-weight: bold;
   transition: background-color 0.3s ease;
 }
-
 
 .navbar button:hover {
   background-color: #555;
