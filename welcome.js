@@ -12,3 +12,14 @@ function navigateTo(page) {
     console.error("Navigation failed:", error);
   }
 }
+function toggleMenu() {
+  const menu = document.getElementById("menu");
+  if (menu.classList.contains("menu-hidden")) {
+    menu.classList.remove("menu-hidden");
+    menu.classList.add("menu-visible");
+  } else {
+    menu.classList.remove("menu-visible");
+    menu.classList.add("menu-hidden");
+  }
+}
+
