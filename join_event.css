@@ -1,6 +1,6 @@
 body {
   font-family: 'Arial', sans-serif;
-  background-image: url('hpbg1.png');
+  background-image: url('hpbg1.png'); /* Replace with your actual background image */
   background-size: cover;
   background-position: center;
   display: flex;
@@ -12,25 +12,26 @@ body {
 }
 
 .container {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 40px 30px; /* Improved padding for a balanced look */
-  width: 350px; /* Slightly wider for better content spacing */
+  backdrop-filter: blur(8px); /* Adds the blur effect */
+  background: rgba(255, 255, 255, 0.5); /* Translucent white background */
+  padding: 30px 25px; /* Adjusted padding for balance */
+  width: 350px; /* Consistent width for a better look */
   border-radius: 15px;
   text-align: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Add depth */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Enhanced shadow for depth */
 }
 
 h1 {
-  font-size: 28px; /* Larger for better readability */
+  font-size: 24px;
   color: #333;
-  margin-bottom: 25px; /* Extra spacing for separation */
+  margin-bottom: 20px;
   font-weight: bold;
 }
 
 button {
   width: 100%;
-  padding: 15px; /* Larger padding for a more prominent feel */
-  margin-top: 20px; /* Increased spacing between elements */
+  padding: 15px;
+  margin-top: 20px;
   background-color: black;
   color: white;
   border: none;
@@ -47,8 +48,8 @@ button:hover {
 
 input {
   width: 100%;
-  padding: 14px; /* Balanced padding */
-  margin-bottom: 20px; /* Increased margin for separation */
+  padding: 12px;
+  margin-bottom: 20px;
   border-radius: 8px;
   border: 1px solid #ccc;
   background-color: rgba(255, 255, 255, 0.85);
@@ -70,22 +71,22 @@ input:focus {
 .navbar {
   display: flex;
   justify-content: space-around;
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 15px 0; /* Balanced padding */
+  background-color: rgba(255, 255, 255, 0.8); /* Translucent navbar */
+  padding: 15px 0;
   border-top: 1px solid #ccc;
-  position: fixed; /* Keep it fixed at the bottom */
+  position: fixed;
   bottom: 0;
   width: 100%;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .navbar button {
   background-color: black;
   color: white;
   border-radius: 25px;
-  width: 40%; /* Consistent button size */
+  width: 40%;
   font-size: 14px;
-  padding: 12px; /* Better spacing for a polished look */
+  padding: 12px;
   font-weight: bold;
   transition: background-color 0.3s ease;
 }
