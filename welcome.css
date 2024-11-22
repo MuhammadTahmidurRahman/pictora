@@ -34,69 +34,18 @@ body, html {
   z-index: 1;
 }
 
-/* Three-dot Menu */
-.menu-dots {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  cursor: pointer;
-  z-index: 3;
-}
-
-.menu-dots .dot {
-  width: 8px;
-  height: 8px;
-  background-color: white;
-  border-radius: 50%;
-}
-
-#menu {
-  position: absolute;
-  top: 40px;
-  right: 15px;
-  background: rgba(0, 0, 0, 0.8);
-  padding: 10px;
-  border-radius: 5px;
-  display: none;
-  flex-direction: column;
-  gap: 10px;
-  z-index: 3;
-}
-
-#menu a {
-  color: white;
-  text-decoration: none;
-  font-size: 14px;
-}
-
-.menu-hidden {
-  display: none;
-}
-
-.menu-visible {
-  display: flex;
-}
-
-/* Title Section */
 .title-section {
   position: relative;
   z-index: 2;
-  margin-top: 20vh;
+  margin-top: 25vh;
   text-align: center;
 }
 
 .title {
   font-size: 40px;
   font-weight: bold;
-  color: rgba(255, 255, 255, 0.9);
-  text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
+  color: white;
+  text-shadow: 2px 2px 3px black;
 }
 
 .title .icon {
@@ -106,40 +55,37 @@ body, html {
 
 .welcome-message {
   margin: 20px auto;
-  padding: 10px 15px;
-  max-width: 60%;
-  font-size: 18px;
-  color: rgba(255, 255, 255, 0.9);
-  background: rgba(0, 0, 0, 0.6);
-  border-radius: 5px;
-  text-align: center;
-  box-shadow: 1.5px 1.5px 3px rgba(0, 0, 0, 0.8);
+  padding: 15px 20px;
+  max-width: 80%;
+  font-size: 20px;
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  box-shadow: 1.5px 1.5px 2px black;
 }
 
-/* Buttons Section */
 .button-section {
   position: relative;
   z-index: 2;
   margin-bottom: 50px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  width: 50%; /* Reduced width for smaller buttons */
+  gap: 20px;
+  width: 80%;
 }
 
 .button {
   width: 100%;
-  padding: 10px;
+  padding: 15px;
   font-size: 16px;
   color: white;
-  background: rgba(0, 0, 0, 0.8);
+  background-color: black;
   border: none;
   border-radius: 20px;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+  transition: background-color 0.3s;
 }
 
 .button:hover {
-  background: rgba(50, 50, 50, 0.9);
-  transform: scale(1.05);
+  background-color: #333;
 }
