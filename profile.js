@@ -19,6 +19,7 @@ let user = auth.currentUser;
 
 window.onload = function() {
   // Check if user is logged in
+  user = auth.currentUser;  // Always re-fetch current user on load
   if (!user) {
     window.location.href = "login.html"; // Redirect to login page if not logged in
   } else {
@@ -38,13 +39,22 @@ async function fetchUserProfile() {
 
   if (snapshot.exists()) {
     const userData = snapshot.val();
+    
+    // Display profile name
     document.getElementById('profile-name').textContent = userData.name || 'No Name';
+
+    // Display email
     document.getElementById('profile-email').textContent = user.email || 'No Email';
     
-    // Set profile image if available
+    // Display profile picture if exists
+    const profilePicture = document.getElementById('profile-picture');
     if (userData.photo) {
-      document.getElementById('profile-picture').src = userData.photo;
+      profilePicture.src = userData.photo; // Set profile picture
+    } else {
+      profilePicture.src = 'default-profile-pic.jpg'; // Optional: Set a default picture if no photo exists
     }
+  } else {
+    console.log('User data not found in database');
   }
 }
 
@@ -83,7 +93,7 @@ function showEditNameDialog() {
 
 async function deleteAccount() {
   try {
-    // Delete profile image from Firebase Storage
+    // Delete profile image from Firebase Storage if exists
     const userRef = database.ref('users/' + user.uid);
     const userData = (await userRef.get()).val();
     if (userData.photo) {
