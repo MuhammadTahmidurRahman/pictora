@@ -21,27 +21,29 @@ const auth = getAuth(app);
 const database = getDatabase(app);
 const storage = getStorage(app);
 
-// Listen for authentication state changes
+// Check if the user is logged in using onAuthStateChanged
 onAuthStateChanged(auth, (user) => {
+  console.log("Auth state changed. User:", user); // Debugging
   if (user) {
-    // If the user is logged in, fetch and display their profile
+    // User is logged in, fetch and display profile data
     fetchUserProfile(user);
   } else {
-    // If not logged in, redirect to the login page
+    // No user is logged in, redirect to login page
     window.location.href = "login.html";
   }
 });
 
-// Function to fetch user profile data from Firebase
+// Fetch and display user profile data from Firebase
 async function fetchUserProfile(user) {
+  console.log("Fetching user profile for:", user.uid); // Debugging
   const userRef = ref(database, 'users/' + user.uid);
   const snapshot = await get(userRef);
 
   if (snapshot.exists()) {
     const userData = snapshot.val();
-    console.log(userData); // Debugging to confirm the data is fetched
+    console.log("User data fetched:", userData); // Debugging
 
-    // Update profile UI
+    // Display profile name
     document.getElementById('profile-name').textContent = userData.name || 'No Name';
     document.getElementById('profile-email').textContent = user.email || 'No Email';
 
@@ -55,14 +57,14 @@ async function fetchUserProfile(user) {
       profilePicture.src = 'default-profile-pic.jpg';
     }
 
-    // Show the profile page (in case it was hidden initially)
+    // Show the profile container after fetching data
     document.getElementById('profile-container').style.display = 'block';
   } else {
-    console.log('User data not found.');
+    console.log('User data not found in database');
   }
 }
 
-// Function to update the user's name
+// Update the user's display name
 async function updateDisplayName(newName) {
   try {
     await auth.currentUser.updateProfile({ displayName: newName });
