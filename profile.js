@@ -1,4 +1,9 @@
 // Firebase configuration
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getDatabase, ref as dbRef, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
   authDomain: "pictora-7f0ad.firebaseapp.com",
@@ -49,9 +54,9 @@ async function fetchUserProfile() {
     // Display profile picture if exists
     const profilePicture = document.getElementById('profile-picture');
     if (userData.photo) {
-      profilePicture.src = userData.photo; // Set profile picture
+      profilePicture.src = userData.photo; // Set profile picture from Firebase
     } else {
-      profilePicture.src = 'default-profile-pic.jpg'; // Optional: Set a default picture if no photo exists
+      profilePicture.src = 'default-profile-pic.jpg'; // Default picture if none exists
     }
   } else {
     console.log('User data not found in database');
@@ -63,22 +68,6 @@ async function updateDisplayName(newName) {
     await user.updateProfile({ displayName: newName });
     const userRef = database.ref('users/' + user.uid);
     await userRef.update({ name: newName });
-
-    // Update display name in rooms
-    const roomsRef = database.ref('rooms');
-    const roomsSnapshot = await roomsRef.get();
-    if (roomsSnapshot.exists()) {
-      const roomsData = roomsSnapshot.val();
-      for (let roomId in roomsData) {
-        const roomData = roomsData[roomId];
-        if (roomData.hostId === user.uid) {
-          await roomsRef.child(roomId).update({ hostName: newName });
-        }
-        if (roomData.participants && roomData.participants[user.uid]) {
-          await roomsRef.child(roomId).child('participants').child(user.uid).update({ name: newName });
-        }
-      }
-    }
   } catch (error) {
     alert('Error updating display name: ' + error.message);
   }
@@ -104,29 +93,10 @@ async function deleteAccount() {
     // Delete user data from Realtime Database
     await userRef.remove();
 
-    // Delete rooms the user is associated with
-    const roomsRef = database.ref('rooms');
-    const roomsSnapshot = await roomsRef.get();
-    if (roomsSnapshot.exists()) {
-      const roomsData = roomsSnapshot.val();
-      for (let roomId in roomsData) {
-        const roomData = roomsData[roomId];
-        if (roomData.hostId === user.uid) {
-          // Delete associated images in Firebase Storage
-          const roomImagesRef = storage.ref('rooms/' + roomId);
-          const images = await roomImagesRef.listAll();
-          for (let item of images.items) {
-            await item.delete();
-          }
-          await roomsRef.child(roomId).remove();
-        }
-      }
-    }
-
     // Delete user from Firebase Authentication
     await user.delete();
     alert('Your account has been deleted.');
-    window.location.href = 'login.html'; // Redirect to login
+    window.location.href = 'login.html'; // Redirect to login page
   } catch (error) {
     alert('Error deleting account: ' + error.message);
   }
