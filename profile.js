@@ -1,8 +1,8 @@
 // Firebase configuration
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref as dbRef, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getStorage, ref as storageRef, deleteObject } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
@@ -15,10 +15,10 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const database = firebase.database();
-const storage = firebase.storage();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
+const storage = getStorage(app);
 
 let user = auth.currentUser;
 
@@ -39,8 +39,8 @@ window.onload = function() {
 };
 
 async function fetchUserProfile() {
-  const userRef = database.ref('users/' + user.uid);
-  const snapshot = await userRef.get();
+  const userRef = ref(database, 'users/' + user.uid);
+  const snapshot = await get(userRef);
 
   if (snapshot.exists()) {
     const userData = snapshot.val();
@@ -66,8 +66,8 @@ async function fetchUserProfile() {
 async function updateDisplayName(newName) {
   try {
     await user.updateProfile({ displayName: newName });
-    const userRef = database.ref('users/' + user.uid);
-    await userRef.update({ name: newName });
+    const userRef = ref(database, 'users/' + user.uid);
+    await update(userRef, { name: newName });
   } catch (error) {
     alert('Error updating display name: ' + error.message);
   }
@@ -83,15 +83,15 @@ function showEditNameDialog() {
 async function deleteAccount() {
   try {
     // Delete profile image from Firebase Storage if exists
-    const userRef = database.ref('users/' + user.uid);
-    const userData = (await userRef.get()).val();
+    const userRef = ref(database, 'users/' + user.uid);
+    const userData = (await get(userRef)).val();
     if (userData.photo) {
-      const storageRef = storage.refFromURL(userData.photo);
-      await storageRef.delete();
+      const storageReference = storageRef(storage, userData.photo);
+      await deleteObject(storageReference);
     }
 
     // Delete user data from Realtime Database
-    await userRef.remove();
+    await remove(userRef);
 
     // Delete user from Firebase Authentication
     await user.delete();
