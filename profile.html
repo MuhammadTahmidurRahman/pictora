@@ -3,22 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profile Page</title>
+  <title>Profile</title>
   <link rel="stylesheet" href="profile.css">
 </head>
 <body>
-  <div class="profile-container">
-    <div class="profile-image-container">
-      <img id="profileImage" class="profile-image" src="default-avatar.png" alt="Profile Picture">
+  <div id="profile-container">
+    <div id="profile-header">
+      <h1>Profile</h1>
     </div>
-    <input type="text" id="profileName" class="profile-field" readonly>
-    <input type="text" id="profileEmail" class="profile-field" readonly>
-    <div class="button-container">
-      <button id="editButton" class="button">Edit</button>
-      <button id="logoutButton" class="button">Log Out</button>
+    <div id="profile-body">
+      <div id="profile-picture-container">
+        <img id="profile-picture" src="" alt="Profile Picture" />
+      </div>
+      <div id="profile-info">
+        <h2 id="profile-name"></h2>
+        <p id="profile-email"></p>
+      </div>
+      <button id="edit-name-btn">Edit Profile</button>
+      <button id="delete-account-btn">Delete Account</button>
+      <button id="logout-btn">Logout</button>
     </div>
   </div>
 
-  <script src="profile.js" type="module"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.9.3/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.9.3/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.9.3/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.9.3/firebase-storage.js"></script>
+  <script src="profile.js"></script>
 </body>
 </html>

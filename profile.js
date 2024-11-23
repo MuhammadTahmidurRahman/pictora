@@ -1,25 +1,3 @@
-// Import necessary Firebase services
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import {
-  getAuth,
-  onAuthStateChanged,
-  updateProfile,
-  signOut,
-  deleteUser
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import {
-  getStorage,
-  ref as storageRef,
-  deleteObject
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import {
-  getDatabase,
-  ref as dbRef,
-  get,
-  update,
-  remove
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-
 // Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
@@ -32,126 +10,126 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const database = getDatabase();
-const storage = getStorage();
+const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const database = firebase.database();
+const storage = firebase.storage();
 
-// DOM elements
-const profileImage = document.getElementById("profileImage");
-const nameField = document.getElementById("profileName");
-const emailField = document.getElementById("profileEmail");
-const editButton = document.getElementById("editButton");
-const deleteButton = document.getElementById("deleteButton");
-const logoutButton = document.getElementById("logoutButton");
+let user = auth.currentUser;
 
-// Fetch user profile data
-function fetchUserProfile() {
-  const user = auth.currentUser;
-  if (user) {
-    const userRef = dbRef(database, `users/${user.uid}`);
-    get(userRef)
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          const userData = snapshot.val();
-          profileImage.src = userData.photo || ''; // Display photo or fallback if null
-          nameField.textContent = userData.name || 'No Name';
-          emailField.textContent = user.email || 'No Email';
-        } else {
-          console.error("No data available");
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching profile data:", error);
-      });
+window.onload = function() {
+  // Check if user is logged in
+  if (!user) {
+    window.location.href = "login.html"; // Redirect to login page if not logged in
   } else {
-    console.error("User not authenticated");
+    // Display user profile data
+    fetchUserProfile();
+  }
+
+  // Event listeners for buttons
+  document.getElementById('edit-name-btn').addEventListener('click', showEditNameDialog);
+  document.getElementById('delete-account-btn').addEventListener('click', showDeleteAccountDialog);
+  document.getElementById('logout-btn').addEventListener('click', logout);
+};
+
+async function fetchUserProfile() {
+  const userRef = database.ref('users/' + user.uid);
+  const snapshot = await userRef.get();
+
+  if (snapshot.exists()) {
+    const userData = snapshot.val();
+    document.getElementById('profile-name').textContent = userData.name || 'No Name';
+    document.getElementById('profile-email').textContent = user.email || 'No Email';
+    
+    // Set profile image if available
+    if (userData.photo) {
+      document.getElementById('profile-picture').src = userData.photo;
+    }
   }
 }
 
-// Edit name logic
-editButton.addEventListener("click", () => {
-  const user = auth.currentUser;
-  if (!user) {
-    console.error("User not authenticated");
-    return;
-  }
+async function updateDisplayName(newName) {
+  try {
+    await user.updateProfile({ displayName: newName });
+    const userRef = database.ref('users/' + user.uid);
+    await userRef.update({ name: newName });
 
-  const newName = prompt("Enter your new name:");
-  if (newName) {
-    updateProfile(user, { displayName: newName })
-      .then(() => {
-        const userRef = dbRef(database, `users/${user.uid}`);
-        update(userRef, { name: newName })
-          .then(() => {
-            fetchUserProfile(); // Refresh profile data
-          })
-          .catch((error) => {
-            console.error("Error updating database name:", error);
-          });
-      })
-      .catch((error) => {
-        console.error("Error updating profile:", error);
-      });
-  }
-});
-
-// Delete account logic
-deleteButton.addEventListener("click", () => {
-  const user = auth.currentUser;
-  if (!user) {
-    console.error("User not authenticated");
-    return;
-  }
-
-  if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-    const userId = user.uid;
-    const userRef = dbRef(database, `users/${userId}`);
-    const profileImagePath = user.photoURL;
-
-    // Remove user data from the database
-    remove(userRef)
-      .then(() => {
-        // Delete profile image from storage, if it exists
-        if (profileImagePath) {
-          const imageRef = storageRef(storage, profileImagePath);
-          deleteObject(imageRef).catch((error) => {
-            console.error("Error deleting profile image from storage:", error);
-          });
+    // Update display name in rooms
+    const roomsRef = database.ref('rooms');
+    const roomsSnapshot = await roomsRef.get();
+    if (roomsSnapshot.exists()) {
+      const roomsData = roomsSnapshot.val();
+      for (let roomId in roomsData) {
+        const roomData = roomsData[roomId];
+        if (roomData.hostId === user.uid) {
+          await roomsRef.child(roomId).update({ hostName: newName });
         }
-
-        // Delete the user account
-        deleteUser(user)
-          .then(() => {
-            window.location.href = "login.html"; // Redirect to login
-          })
-          .catch((error) => {
-            console.error("Error deleting account:", error);
-          });
-      })
-      .catch((error) => {
-        console.error("Error removing user data:", error);
-      });
+        if (roomData.participants && roomData.participants[user.uid]) {
+          await roomsRef.child(roomId).child('participants').child(user.uid).update({ name: newName });
+        }
+      }
+    }
+  } catch (error) {
+    alert('Error updating display name: ' + error.message);
   }
-});
+}
 
-// Logout logic
-logoutButton.addEventListener("click", () => {
-  signOut(auth)
-    .then(() => {
-      window.location.href = "login.html"; // Redirect to login
-    })
-    .catch((error) => {
-      console.error("Error signing out:", error);
-    });
-});
-
-// Listen for auth state changes and fetch profile data if logged in
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    fetchUserProfile();
-  } else {
-    console.error("User not logged in");
-    window.location.href = "login.html"; // Redirect to login if not authenticated
+function showEditNameDialog() {
+  const newName = prompt('Enter your new name:', user.displayName || '');
+  if (newName && newName !== user.displayName) {
+    updateDisplayName(newName);
   }
-});
+}
+
+async function deleteAccount() {
+  try {
+    // Delete profile image from Firebase Storage
+    const userRef = database.ref('users/' + user.uid);
+    const userData = (await userRef.get()).val();
+    if (userData.photo) {
+      const storageRef = storage.refFromURL(userData.photo);
+      await storageRef.delete();
+    }
+
+    // Delete user data from Realtime Database
+    await userRef.remove();
+
+    // Delete rooms the user is associated with
+    const roomsRef = database.ref('rooms');
+    const roomsSnapshot = await roomsRef.get();
+    if (roomsSnapshot.exists()) {
+      const roomsData = roomsSnapshot.val();
+      for (let roomId in roomsData) {
+        const roomData = roomsData[roomId];
+        if (roomData.hostId === user.uid) {
+          // Delete associated images in Firebase Storage
+          const roomImagesRef = storage.ref('rooms/' + roomId);
+          const images = await roomImagesRef.listAll();
+          for (let item of images.items) {
+            await item.delete();
+          }
+          await roomsRef.child(roomId).remove();
+        }
+      }
+    }
+
+    // Delete user from Firebase Authentication
+    await user.delete();
+    alert('Your account has been deleted.');
+    window.location.href = 'login.html'; // Redirect to login
+  } catch (error) {
+    alert('Error deleting account: ' + error.message);
+  }
+}
+
+function showDeleteAccountDialog() {
+  if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+    deleteAccount();
+  }
+}
+
+function logout() {
+  auth.signOut().then(() => {
+    window.location.href = 'login.html'; // Redirect to login page
+  });
+}
