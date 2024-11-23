@@ -7,14 +7,14 @@
   <link rel="stylesheet" href="profile.css">
 </head>
 <body>
-  <div id="profile-container">
+  <div id="profile-container" style="display: none;"> <!-- Initially hidden -->
     <div id="profile-header">
       <h1>Profile</h1>
     </div>
     <div id="profile-body">
       <!-- Profile Picture -->
       <div id="profile-picture-container">
-        profilePicture.src = 'https://example.com/path/to/default-profile-pic.jpg'; 
+        <img id="profile-picture" src="default-profile-pic.jpg" alt="Profile Picture" />
       </div>
 
       <!-- Name and Email -->
@@ -29,9 +29,5 @@
   </div>
 
   <script type="module" src="profile.js"></script>
-<script type="module" src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
-<script type="module" src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"></script>
-<script type="module" src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"></script>
-<script type="module" src="https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js"></script>
 </body>
 </html>
