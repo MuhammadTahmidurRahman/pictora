@@ -1,80 +1,127 @@
+/* General body styling */
 body {
-    font-family: Arial, sans-serif;
-    background-image: url('hpbg1.png');
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100vh;
-    margin: 0;
-  }
-  
-  .container {
-    background: rgba(255, 255, 255, 0.85);
-    padding: 20px;
-    width: 300px;
-    border-radius: 15px;
-    text-align: center;
-    margin: auto;
-  }
-  
-  h1 {
-    font-size: 24px;
-    color: #000;
-  }
-  
-  button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 15px;
-    background-color: black;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-  
-  button:hover {
-    background-color: #333;
-  }
-  
-  input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    background-color: rgba(255, 255, 255, 0.7);
-    color: #000;
-  }
-  
-  input::placeholder {
-    color: rgba(0, 0, 0, 0.7);
-  }
-  
-  input:focus {
-    outline: none;
-    border: 1px solid #555;
-  }
-  
-  .navbar {
-    display: flex;
-    justify-content: space-around;
-    background-color: #f9f9f9;
-    padding: 10px 0;
-    border-top: 1px solid #ccc;
-  }
-  
-  .navbar button {
-    background-color: black;
-    color: white;
-    border-radius: 50px;
-    width: 45%;
-  }
-  
-  .navbar button:hover {
-    background-color: #333;
-  }
-  
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(to bottom, #84a9c0, #f0f4f8); /* Blue gradient background */
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Main container styling */
+.container {
+  backdrop-filter: blur(12px); /* Blur effect */
+  background: rgba(255, 255, 255, 0.6); /* Slightly transparent */
+  padding: 40px; /* Proper padding */
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Add depth */
+  width: 300px; /* Fixed width for consistent look */
+}
+
+/* Heading style */
+h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Input styling */
+input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: rgba(255, 255, 255, 0.9); /* Slight transparency */
+  transition: border-color 0.3s ease;
+}
+
+/* Placeholder text color */
+input::placeholder {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* Focused input styling */
+input:focus {
+  outline: none;
+  border-color: #666;
+}
+
+/* Button styling */
+button {
+  background-color: black;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #444;
+}
+
+/* Navbar styling */
+.navbar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center; /* Center the menu */
+  padding: 15px 0;
+  background: rgba(0, 0, 0, 0.8); /* Black with transparency */
+}
+
+/* Three-dot menu styling */
+.menu {
+  position: relative;
+}
+
+.menu-toggle {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.dropdown {
+  display: none;
+  position: absolute;
+  bottom: 50px; /* Adjust to show above the button */
+  right: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  padding: 10px 0;
+  text-align: center;
+}
+
+.dropdown button {
+  background: none;
+  border: none;
+  padding: 10px 20px;
+  width: 100%;
+  font-size: 16px;
+  color: #333;
+  cursor: pointer;
+}
+
+.dropdown button:hover {
+  background: #f0f0f0;
+}
+
+/* Show the dropdown when the class is added */
+.dropdown.show {
+  display: block;
+}
