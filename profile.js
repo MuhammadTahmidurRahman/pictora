@@ -23,12 +23,11 @@ const storage = getStorage(app);
 
 // Check if the user is logged in using onAuthStateChanged
 onAuthStateChanged(auth, (user) => {
-  console.log("Auth state changed. User:", user); // Debugging
   if (user) {
-    // User is logged in, fetch and display profile data
+    console.log("User is logged in:", user);
     fetchUserProfile(user);
   } else {
-    // No user is logged in, redirect to login page
+    console.log("No user logged in.");
     window.location.href = "login.html";
   }
 });
