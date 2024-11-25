@@ -58,6 +58,12 @@ window.registerUser = async function () {
     alert("Please fill up all the information boxes.");
     return;
   }
+
+  if (!emailRegex.test(email)) {
+    alert("Wrong email. Please type again.");
+    return;
+  }
+  
   if (password.length < 8) {
     alert("The password must be 8 characters long.");
     return;
@@ -105,8 +111,13 @@ window.registerUser = async function () {
 };
 
 // Google Sign-In function with image upload validation
+// Google Sign-In function with account selection and image upload validation
 window.signInWithGoogle = async function () {
   const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({
+    prompt: "select_account", // Ensures the user is prompted to select an account
+  });
+
   const imageFile = document.getElementById("image").files[0];
 
   if (!imageFile) {
@@ -145,3 +156,4 @@ window.signInWithGoogle = async function () {
     alert("Google Sign-In failed. Please try again.");
   }
 };
+
