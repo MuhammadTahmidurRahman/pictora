@@ -22,147 +22,99 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const database = getDatabase(app);
-const storage = getStorage(app);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const database = firebase.database();
+const storage = firebase.storage();
 
-// State variables
-let imageFile = null;
-let isUploading = false;
+document.addEventListener("DOMContentLoaded", () => {
+  const nameInput = document.getElementById("name");
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const confirmPasswordInput = document.getElementById("confirm-password");
+  const uploadImageButton = document.getElementById("upload-image-btn");
+  const signupButton = document.getElementById("signup-btn");
+  const googleSignupButton = document.getElementById("google-signup-btn");
+  let selectedImageFile = null;
 
-// Handle file selection
-document.getElementById("uploadImageButton").addEventListener("click", async () => {
-  const permissionGranted = await checkStoragePermission();
-  if (!permissionGranted) {
-    showAlert("Permission is required to access storage");
-    return;
-  }
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/*";
-  input.onchange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      imageFile = file;
-      document.getElementById("uploadStatus").innerText = "Photo selected";
-    }
-  };
-  input.click();
-});
-
-// Upload image to Firebase Storage
-async function uploadImage(image) {
-  if (!image) {
-    showAlert("Please select an image first.");
-    return null;
-  }
-
-  const fileName = `${Date.now()}_${image.name}`;
-  const imageRef = storageRef(storage, `uploads/${fileName}`);
-
-  try {
-    isUploading = true;
-    const snapshot = await uploadBytes(imageRef, image);
-    const downloadURL = await getDownloadURL(snapshot.ref);
-    isUploading = false;
-    showAlert("Image uploaded successfully!");
-    return downloadURL;
-  } catch (error) {
-    isUploading = false;
-    showAlert(`Failed to upload image: ${error.message}`);
-    return null;
-  }
-}
-
-// Register user
-document.getElementById("signUpButton").addEventListener("click", async () => {
-  const name = document.getElementById("nameInput").value.trim();
-  const email = document.getElementById("emailInput").value.trim();
-  const password = document.getElementById("passwordInput").value.trim();
-  const confirmPassword = document.getElementById("confirmPasswordInput").value.trim();
-
-  if (!name || !email || !password || !confirmPassword) {
-    showAlert("Please fill up all the information box properly.");
-    return;
-  }
-
-  if (!imageFile) {
-    showAlert("Please upload your photo.");
-    return;
-  }
-
-  if (password !== confirmPassword) {
-    showAlert("Passwords do not match.");
-    return;
-  }
-
-  if (password.length < 6) {
-    showAlert("Password must be at least 6 characters long.");
-    return;
-  }
-
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-
-    const imageUrl = await uploadImage(imageFile);
-    if (!imageUrl) return;
-
-    await set(ref(database, `users/${user.uid}`), {
-      name: name,
-      email: email,
-      photo: imageUrl,
+  // Toggle password visibility
+  document.querySelectorAll(".toggle").forEach((toggle, idx) => {
+    toggle.addEventListener("click", () => {
+      const input = idx === 0 ? passwordInput : confirmPasswordInput;
+      input.type = input.type === "password" ? "text" : "password";
     });
+  });
 
-    window.location.href = "create_or_join_room.html";
-  } catch (error) {
-    if (error.code === "auth/email-already-in-use") {
-      showAlert("Email or Google account already exists. Please log in.");
-    } else {
-      showAlert(`Failed to register: ${error.message}`);
+  // Handle image upload
+  uploadImageButton.addEventListener("click", () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.addEventListener("change", (event) => {
+      selectedImageFile = event.target.files[0];
+      uploadImageButton.textContent = "Photo Selected";
+    });
+    input.click();
+  });
+
+  // Upload image to Firebase
+  const uploadImage = async () => {
+    if (!selectedImageFile) {
+      alert("Please select an image.");
+      return null;
     }
-  }
-});
+    const fileName = `${Date.now()}-${selectedImageFile.name}`;
+    const storageRef = storage.ref(`uploads/${fileName}`);
+    const snapshot = await storageRef.put(selectedImageFile);
+    return await snapshot.ref.getDownloadURL();
+  };
 
-// Google Sign-In
-document.getElementById("googleSignInButton").addEventListener("click", async () => {
-  if (!imageFile) {
-    showAlert("Please upload an image before signing up with Google.");
-    return;
-  }
+  // Sign up logic
+  signupButton.addEventListener("click", async () => {
+    const name = nameInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+    const confirmPassword = confirmPasswordInput.value.trim();
 
-  try {
-    const provider = new GoogleAuthProvider();
-    const googleSignIn = new GoogleSignIn();
-
-    const googleUser = await googleSignIn.signIn();
-    if (!googleUser) {
-      showAlert("No Google account selected.");
+    if (!name || !email || !password || !confirmPassword) {
+      alert("Please fill all fields.");
       return;
     }
-
-    const credential = GoogleAuthProvider.credential(
-      googleUser.getAuthResponse().id_token
-    );
-
-    const userCredential = await signInWithCredential(auth, credential);
-
-    if (userCredential.additionalUserInfo.isNewUser) {
-      const imageUrl = await uploadImage(imageFile);
-      if (!imageUrl) return;
-
-      await set(ref(database, `users/${userCredential.user.uid}`), {
-        name: googleUser.profileObj.name || "N/A",
-        email: googleUser.profileObj.email,
-        photo: imageUrl,
-      });
-
-      window.location.href = "create_or_join_room.html";
-    } else {
-      showAlert("Email or Google account already exists. Please log in.");
+    if (!selectedImageFile) {
+      alert("Please upload a photo.");
+      return;
     }
-  } catch (error) {
-    showAlert(`Failed to sign in with Google: ${error.message}`);
-  }
+    if (password !== confirmPassword) {
+      alert("Passwords do not match.");
+      return;
+    }
+    try {
+      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+      const user = userCredential.user;
+      const imageUrl = await uploadImage();
+      if (!imageUrl) return;
+      await database.ref(`users/${user.uid}`).set({ name, email, photo: imageUrl });
+      alert("Sign up successful!");
+    } catch (error) {
+      alert(error.message);
+    }
+  });
+
+  // Google sign-up logic
+  googleSignupButton.addEventListener("click", async () => {
+    if (!selectedImageFile) {
+      alert("Please upload an image.");
+      return;
+    }
+    const provider = new firebase.auth.GoogleAuthProvider();
+    try {
+      const result = await auth.signInWithPopup(provider);
+      const user = result.user;
+      const imageUrl = await uploadImage();
+      await database.ref(`users/${user.uid}`).set({ name: user.displayName, email: user.email, photo: imageUrl });
+      alert("Google Sign-Up successful!");
+    } catch (error) {
+      alert(error.message);
+    }
+  });
 });
