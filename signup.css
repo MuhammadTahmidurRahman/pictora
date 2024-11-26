@@ -5,14 +5,17 @@
     box-sizing: border-box;
   }
 
-body, html {
-  width: 100%;
-  height: 100%;
-  font-family: 'Inter', Arial, sans-serif;
-  color: #333;
-}
-
-.background-image {
+  body, html {
+    width: 100%;
+    height: 100%;
+    font-family: 'Inter', Arial, sans-serif;
+    background: url('hpbg1.png') no-repeat center center fixed; /* Use the image only */
+    background-size: cover; /* Ensure the image covers the entire page */
+    background-position: center center; /* Center the image */
+    color: #333;
+  }
+  
+/*.background-image {
   position: absolute;
   top: 0;
   left: 0;
@@ -21,7 +24,7 @@ body, html {
   object-fit: cover;
   opacity: 0.8;
   z-index: 1;
-}
+}*/
 
 .signup-page {
   display: flex;
