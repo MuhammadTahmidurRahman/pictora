@@ -1,18 +1,26 @@
 /* General reset */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body, html {
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+  }
+  
 
-body, html {
+/*body, html {
   width: 100%;
   height: 100%;
   font-family: 'Inter', Arial, sans-serif;
-  background: url('hpbg1.png') no-repeat center center fixed; /* Add this line */
-  background-size: cover; /* Add this line */
+  background: url('hpbg1.png') no-repeat center center fixed; /* Add this line 
+  background-size: cover; /* Add this line 
   color: #333;
-}
+}*/
 
 /*body, html {
   width: 100%;
