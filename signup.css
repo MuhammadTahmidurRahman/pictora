@@ -9,8 +9,18 @@ body, html {
   width: 100%;
   height: 100%;
   font-family: 'Inter', Arial, sans-serif;
-  background: linear-gradient(to bottom right, #eef3fa, #cfd8e3);
   color: #333;
+}
+
+.background-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.8;
+  z-index: 1;
 }
 
 .signup-page {
@@ -164,14 +174,5 @@ input:focus {
 }
 
   
-  /*.background-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.8;
-    z-index: 1;
-  }
+  
   
