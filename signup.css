@@ -26,7 +26,7 @@ body, html {
 }
 
 .content {
-  background: #ffffff;
+  background: transparent;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border-radius: 16px;
   width: 100%;
