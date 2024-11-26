@@ -9,9 +9,18 @@ body, html {
   width: 100%;
   height: 100%;
   font-family: 'Inter', Arial, sans-serif;
-  background: linear-gradient(to bottom right, #eef3fa, #cfd8e3);
+  background: url('hpbg1.png') no-repeat center center fixed; /* Add this line */
+  background-size: cover; /* Add this line */
   color: #333;
 }
+
+/*body, html {
+  width: 100%;
+  height: 100%;
+  font-family: 'Inter', Arial, sans-serif;
+  background: linear-gradient(to bottom right, #eef3fa, #cfd8e3);
+  color: #333;
+}*/
 
 .signup-page {
   display: flex;
