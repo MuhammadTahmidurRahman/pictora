@@ -45,7 +45,8 @@ const editButton = document.getElementById("editButton");
 const deleteButton = document.getElementById("deleteButton");
 const logoutButton = document.getElementById("logoutButton");
 
-// Fetch user profile data
+// Firebase initialization code remains the same...
+
 // Fetch user profile data
 function fetchUserProfile() {
   const user = auth.currentUser;
@@ -55,9 +56,13 @@ function fetchUserProfile() {
       .then((snapshot) => {
         if (snapshot.exists()) {
           const userData = snapshot.val();
-          profileImage.src = userData.photo || 'default-avatar.png'; // Display photo or fallback if null
-          nameField.value = userData.name || 'No Name'; // Set name in the field
-          emailField.value = user.email || 'No Email'; // Set email in the field
+          console.log(userData); // Log data for debugging
+
+          // Set profile picture
+          profileImage.src = userData.photo || 'default-avatar.png'; // Fallback image if photo is null
+          // Set name and email fields
+          nameField.value = userData.name || 'No Name'; // Set name in the input field
+          emailField.value = user.email || 'No Email'; // Set email in the input field
         } else {
           console.error("No data available for this user");
         }
@@ -69,6 +74,17 @@ function fetchUserProfile() {
     console.error("User not authenticated");
   }
 }
+
+// Listen for authentication state changes
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    fetchUserProfile(); // Fetch profile data if user is logged in
+  } else {
+    console.error("User not logged in");
+    window.location.href = "login.html"; // Redirect to login page if not authenticated
+  }
+});
+
 
 // Edit name logic
 editButton.addEventListener("click", () => {
@@ -150,12 +166,3 @@ logoutButton.addEventListener("click", () => {
     });
 });
 
-// Listen for auth state changes and fetch profile data if logged in
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    fetchUserProfile();
-  } else {
-    console.error("User not logged in.");
-    window.location.href = "login.html"; // Redirect to login if not authenticated
-  }
-});
