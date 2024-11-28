@@ -1,10 +1,26 @@
-// Firebase Configuration
+// Import necessary Firebase services
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  updateProfile,
+  signOut,
+  deleteUser
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import {
+  getStorage,
+  ref as storageRef,
+  deleteObject
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import {
+  getDatabase,
+  ref as dbRef,
+  get,
+  update,
+  remove
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// Firebase config
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
   authDomain: "pictora-7f0ad.firebaseapp.com",
@@ -17,113 +33,125 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const database = getDatabase(app);
-const storage = getStorage(app);
+const auth = getAuth();
+const database = getDatabase();
+const storage = getStorage();
 
-// Check if the user is logged in using onAuthStateChanged
-onAuthStateChanged(auth, (user) => {
+// DOM elements
+const profileImage = document.getElementById("profileImage");
+const nameField = document.getElementById("profileName");
+const emailField = document.getElementById("profileEmail");
+const editButton = document.getElementById("editButton");
+const deleteButton = document.getElementById("deleteButton");
+const logoutButton = document.getElementById("logoutButton");
+
+// Fetch user profile data
+function fetchUserProfile() {
+  const user = auth.currentUser;
   if (user) {
-    console.log("User is logged in:", user);
-    fetchUserProfile(user);
+    const userRef = dbRef(database, `users/${user.uid}`);
+    get(userRef)
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          profileImage.src = userData.photo || ''; // Display photo or fallback if null
+          nameField.textContent = userData.name || 'No Name';
+          emailField.textContent = user.email || 'No Email';
+        } else {
+          console.error("No data available");
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching profile data:", error);
+      });
   } else {
-    console.log("No user logged in.");
-    window.location.href = "login.html";
+    console.error("User not authenticated");
+  }
+}
+
+// Edit name logic
+editButton.addEventListener("click", () => {
+  const user = auth.currentUser;
+  if (!user) {
+    console.error("User not authenticated");
+    return;
+  }
+
+  const newName = prompt("Enter your new name:");
+  if (newName) {
+    updateProfile(user, { displayName: newName })
+      .then(() => {
+        const userRef = dbRef(database, `users/${user.uid}`);
+        update(userRef, { name: newName })
+          .then(() => {
+            fetchUserProfile(); // Refresh profile data
+          })
+          .catch((error) => {
+            console.error("Error updating database name:", error);
+          });
+      })
+      .catch((error) => {
+        console.error("Error updating profile:", error);
+      });
   }
 });
 
-// Fetch and display user profile data from Firebase
-async function fetchUserProfile(user) {
-  console.log("Fetching user profile for:", user.uid); // Debugging
-  const userRef = ref(database, 'users/' + user.uid);
-  const snapshot = await get(userRef);
+// Delete account logic
+deleteButton.addEventListener("click", () => {
+  const user = auth.currentUser;
+  if (!user) {
+    console.error("User not authenticated");
+    return;
+  }
 
-  if (snapshot.exists()) {
-    const userData = snapshot.val();
-    console.log("User data fetched:", userData); // Debugging
+  if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+    const userId = user.uid;
+    const userRef = dbRef(database, `users/${userId}`);
+    const profileImagePath = user.photoURL;
 
-    // Display profile name
-    document.getElementById('profile-name').textContent = userData.name || 'No Name';
-    document.getElementById('profile-email').textContent = user.email || 'No Email';
+    // Remove user data from the database
+    remove(userRef)
+      .then(() => {
+        // Delete profile image from storage, if it exists
+        if (profileImagePath) {
+          const imageRef = storageRef(storage, profileImagePath);
+          deleteObject(imageRef).catch((error) => {
+            console.error("Error deleting profile image from storage:", error);
+          });
+        }
 
-    // Display the profile picture if it exists
-    const profilePicture = document.getElementById('profile-picture');
-    if (userData.photo) {
-      // If a photo URL exists in Firebase, set it as the profile picture
-      profilePicture.src = userData.photo;
-    } else {
-      // Otherwise, show a default profile picture
-      profilePicture.src = 'default-profile-pic.jpg';
-    }
+        // Delete the user account
+        deleteUser(user)
+          .then(() => {
+            window.location.href = "login.html"; // Redirect to login
+          })
+          .catch((error) => {
+            console.error("Error deleting account:", error);
+          });
+      })
+      .catch((error) => {
+        console.error("Error removing user data:", error);
+      });
+  }
+});
 
-    // Show the profile container after fetching data
-    document.getElementById('profile-container').style.display = 'block';
+// Logout logic
+logoutButton.addEventListener("click", () => {
+  signOut(auth)
+    .then(() => {
+      window.location.href = "login.html"; // Redirect to login
+    })
+    .catch((error) => {
+      console.error("Error signing out:", error);
+    });
+});
+
+// Listen for auth state changes and fetch profile data if logged in
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    fetchUserProfile();
   } else {
-    console.log('User data not found in database');
+    console.error("User not logged in");
+    window.location.href = "login.html"; // Redirect to login if not authenticated
   }
-}
-
-// Update the user's display name
-async function updateDisplayName(newName) {
-  try {
-    await auth.currentUser.updateProfile({ displayName: newName });
-
-    const userRef = ref(database, 'users/' + auth.currentUser.uid);
-    await update(userRef, { name: newName });
-  } catch (error) {
-    alert('Error updating display name: ' + error.message);
-  }
-}
-
-// Event listeners for buttons
-document.getElementById('edit-name-btn').addEventListener('click', showEditNameDialog);
-document.getElementById('delete-account-btn').addEventListener('click', showDeleteAccountDialog);
-document.getElementById('logout-btn').addEventListener('click', logout);
-
-// Show dialog to edit name
-function showEditNameDialog() {
-  const newName = prompt('Enter your new name:', auth.currentUser.displayName || '');
-  if (newName && newName !== auth.currentUser.displayName) {
-    updateDisplayName(newName);
-  }
-}
-
-// Delete user account
-async function deleteAccount() {
-  try {
-    // Delete user profile image from Firebase Storage if it exists
-    const userRef = ref(database, 'users/' + auth.currentUser.uid);
-    const userData = (await get(userRef)).val();
-
-    if (userData.photo) {
-      const photoRef = storageRef(storage, userData.photo);
-      await deleteObject(photoRef);
-    }
-
-    // Remove user data from Realtime Database
-    await remove(userRef);
-
-    // Delete the user from Firebase Authentication
-    await auth.currentUser.delete();
-    alert('Your account has been deleted.');
-
-    // Redirect to login page after account deletion
-    window.location.href = 'login.html';
-  } catch (error) {
-    alert('Error deleting account: ' + error.message);
-  }
-}
-
-// Confirm and delete the account
-function showDeleteAccountDialog() {
-  if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-    deleteAccount();
-  }
-}
-
-// Log out the user
-function logout() {
-  auth.signOut().then(() => {
-    window.location.href = 'login.html'; // Redirect to login page
-  });
-}
+});
