@@ -46,6 +46,7 @@ const deleteButton = document.getElementById("deleteButton");
 const logoutButton = document.getElementById("logoutButton");
 
 // Fetch user profile data
+// Fetch user profile data
 function fetchUserProfile() {
   const user = auth.currentUser;
   if (user) {
@@ -54,19 +55,18 @@ function fetchUserProfile() {
       .then((snapshot) => {
         if (snapshot.exists()) {
           const userData = snapshot.val();
-          profileImage.src = userData.photo || "default-avatar.png"; // Fallback if no photo
-          nameField.value = userData.name || "No Name";
-          emailField.value = user.email || "No Email";
+          profileImage.src = userData.photo || 'default-avatar.png'; // Display photo or fallback if null
+          nameField.value = userData.name || 'No Name'; // Set name in the field
+          emailField.value = user.email || 'No Email'; // Set email in the field
         } else {
-          console.error("No user data found in the database.");
+          console.error("No data available for this user");
         }
       })
       .catch((error) => {
         console.error("Error fetching profile data:", error);
       });
   } else {
-    console.error("User not authenticated.");
-    window.location.href = "login.html"; // Redirect to login
+    console.error("User not authenticated");
   }
 }
 
