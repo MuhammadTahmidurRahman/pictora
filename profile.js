@@ -1,24 +1,8 @@
 // Import necessary Firebase services
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import {
-  getAuth,
-  onAuthStateChanged,
-  updateProfile,
-  signOut,
-  deleteUser
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import {
-  getStorage,
-  ref as storageRef,
-  deleteObject
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import {
-  getDatabase,
-  ref as dbRef,
-  get,
-  update,
-  remove
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getAuth, onAuthStateChanged, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getDatabase, ref as dbRef, get, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -33,19 +17,16 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const database = getDatabase(app);
-const storage = getStorage(app);
+const auth = getAuth();
+const database = getDatabase();
+const storage = getStorage();
 
 // DOM elements
 const profileImage = document.getElementById("profileImage");
 const nameField = document.getElementById("profileName");
 const emailField = document.getElementById("profileEmail");
 const editButton = document.getElementById("editButton");
-const deleteButton = document.getElementById("deleteButton");
 const logoutButton = document.getElementById("logoutButton");
-
-// Firebase initialization code remains the same...
 
 // Fetch user profile data
 function fetchUserProfile() {
@@ -56,15 +37,19 @@ function fetchUserProfile() {
       .then((snapshot) => {
         if (snapshot.exists()) {
           const userData = snapshot.val();
-          console.log(userData); // Log data for debugging
-
-          // Set profile picture
-          profileImage.src = userData.photo || 'default-avatar.png'; // Fallback image if photo is null
-          // Set name and email fields
-          nameField.value = userData.name || 'No Name'; // Set name in the input field
-          emailField.value = user.email || 'No Email'; // Set email in the input field
+          nameField.textContent = userData.name || 'No Name';
+          emailField.textContent = user.email || 'No Email';
+          if (userData.photo) {
+            getDownloadURL(storageRef(storage, userData.photo))
+              .then((url) => {
+                profileImage.src = url; // Set profile image from Firebase Storage
+              })
+              .catch((error) => console.error("Error fetching photo URL:", error));
+          } else {
+            profileImage.src = "default-avatar.png"; // Set default avatar if no photo
+          }
         } else {
-          console.error("No data available for this user");
+          console.error("No user data found.");
         }
       })
       .catch((error) => {
@@ -72,19 +57,9 @@ function fetchUserProfile() {
       });
   } else {
     console.error("User not authenticated");
+    window.location.href = "login.html"; // Redirect if user not authenticated
   }
 }
-
-// Listen for authentication state changes
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    fetchUserProfile(); // Fetch profile data if user is logged in
-  } else {
-    console.error("User not logged in");
-    window.location.href = "login.html"; // Redirect to login page if not authenticated
-  }
-});
-
 
 // Edit name logic
 editButton.addEventListener("click", () => {
@@ -101,7 +76,6 @@ editButton.addEventListener("click", () => {
         const userRef = dbRef(database, `users/${user.uid}`);
         update(userRef, { name: newName })
           .then(() => {
-            alert("Name updated successfully.");
             fetchUserProfile(); // Refresh profile data
           })
           .catch((error) => {
@@ -114,51 +88,10 @@ editButton.addEventListener("click", () => {
   }
 });
 
-// Delete account logic
-deleteButton.addEventListener("click", () => {
-  const user = auth.currentUser;
-  if (!user) {
-    console.error("User not authenticated");
-    return;
-  }
-
-  if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-    const userId = user.uid;
-    const userRef = dbRef(database, `users/${userId}`);
-    const profileImagePath = user.photoURL;
-
-    // Remove user data from the database
-    remove(userRef)
-      .then(() => {
-        // Delete profile image from storage, if it exists
-        if (profileImagePath) {
-          const imageRef = storageRef(storage, profileImagePath);
-          deleteObject(imageRef).catch((error) => {
-            console.error("Error deleting profile image from storage:", error);
-          });
-        }
-
-        // Delete the user account
-        deleteUser(user)
-          .then(() => {
-            alert("Account deleted successfully.");
-            window.location.href = "login.html"; // Redirect to login
-          })
-          .catch((error) => {
-            console.error("Error deleting account:", error);
-          });
-      })
-      .catch((error) => {
-        console.error("Error removing user data:", error);
-      });
-  }
-});
-
 // Logout logic
 logoutButton.addEventListener("click", () => {
   signOut(auth)
     .then(() => {
-      alert("Logged out successfully.");
       window.location.href = "login.html"; // Redirect to login
     })
     .catch((error) => {
@@ -166,3 +99,12 @@ logoutButton.addEventListener("click", () => {
     });
 });
 
+// Listen for auth state changes and fetch profile data if logged in
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    fetchUserProfile(); // Fetch user profile if authenticated
+  } else {
+    console.error("User not logged in");
+    window.location.href = "login.html"; // Redirect to login if not authenticated
+  }
+});
