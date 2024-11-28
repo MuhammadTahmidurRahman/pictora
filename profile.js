@@ -33,9 +33,9 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const database = getDatabase();
-const storage = getStorage();
+const auth = getAuth(app);
+const database = getDatabase(app);
+const storage = getStorage(app);
 
 // DOM elements
 const profileImage = document.getElementById("profileImage");
@@ -54,18 +54,19 @@ function fetchUserProfile() {
       .then((snapshot) => {
         if (snapshot.exists()) {
           const userData = snapshot.val();
-          profileImage.src = userData.photo || ''; // Display photo or fallback if null
-          nameField.textContent = userData.name || 'No Name';
-          emailField.textContent = user.email || 'No Email';
+          profileImage.src = userData.photo || "default-avatar.png"; // Fallback if no photo
+          nameField.value = userData.name || "No Name";
+          emailField.value = user.email || "No Email";
         } else {
-          console.error("No data available");
+          console.error("No user data found in the database.");
         }
       })
       .catch((error) => {
         console.error("Error fetching profile data:", error);
       });
   } else {
-    console.error("User not authenticated");
+    console.error("User not authenticated.");
+    window.location.href = "login.html"; // Redirect to login
   }
 }
 
@@ -84,6 +85,7 @@ editButton.addEventListener("click", () => {
         const userRef = dbRef(database, `users/${user.uid}`);
         update(userRef, { name: newName })
           .then(() => {
+            alert("Name updated successfully.");
             fetchUserProfile(); // Refresh profile data
           })
           .catch((error) => {
@@ -123,6 +125,7 @@ deleteButton.addEventListener("click", () => {
         // Delete the user account
         deleteUser(user)
           .then(() => {
+            alert("Account deleted successfully.");
             window.location.href = "login.html"; // Redirect to login
           })
           .catch((error) => {
@@ -139,6 +142,7 @@ deleteButton.addEventListener("click", () => {
 logoutButton.addEventListener("click", () => {
   signOut(auth)
     .then(() => {
+      alert("Logged out successfully.");
       window.location.href = "login.html"; // Redirect to login
     })
     .catch((error) => {
@@ -151,7 +155,7 @@ onAuthStateChanged(auth, (user) => {
   if (user) {
     fetchUserProfile();
   } else {
-    console.error("User not logged in");
+    console.error("User not logged in.");
     window.location.href = "login.html"; // Redirect to login if not authenticated
   }
 });
