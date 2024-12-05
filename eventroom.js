@@ -120,9 +120,6 @@ if (user.uid === hostId) {
   }
 }
 
-<button onclick="window.location.href='arrange-photos.html'">Arrange Photos</button>
-
-
 // Add functionality to the Upload Photos button
 document.getElementById("uploadPhotoButton").addEventListener("click", async () => {
   const user = auth.currentUser;
