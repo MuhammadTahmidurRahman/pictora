@@ -127,6 +127,7 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
     return;
   }
 
+  
   const eventCode = new URLSearchParams(window.location.search).get("eventCode");
   const folderPath = `rooms/${eventCode}/${user.uid}`;
 
@@ -315,5 +316,6 @@ onAuthStateChanged(auth, (user) => {
 });//previous file
 
 arrangePhotoButton.addEventListener("click", () => {
-  window.location.href = 'arrange-photos.html';
+  // Redirect to arrange-photos.html with the eventCode in the query string
+  window.location.href = `arrange-photos.html?eventCode=${encodeURIComponent(eventCode)}`;
 });
