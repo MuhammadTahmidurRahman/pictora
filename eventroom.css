@@ -68,6 +68,21 @@ body {
     color: #ccc;
   }
   
+  .arrange-photo-button {
+    background-color: #28a745; /* Green background */
+    color: white;
+    font-size: 16px;
+    margin-top: 10px;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .arrange-photo-button:hover {
+    background-color: #218838;
+  }
+  
   /* Guest list styles */
   #guestList, #manualGuestList {
     padding: 0;

@@ -145,9 +145,8 @@ function listenForUserProfileChanges() {
   });
 }
 
-// Initialize listener for profile changes
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    listenForUserProfileChanges();  // Start listening for profile changes
+    listenForUserProfileChanges(); 
   }
 });

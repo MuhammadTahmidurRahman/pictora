@@ -1,24 +1,8 @@
 // Import necessary Firebase services
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import {
-  getAuth,
-  onAuthStateChanged,
-  updateProfile,
-  signOut,
-  deleteUser
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import {
-  getStorage,
-  ref as storageRef,
-  deleteObject
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import {
-  getDatabase,
-  ref as dbRef,
-  get,
-  update,
-  remove
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getAuth, onAuthStateChanged, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getDatabase, ref as dbRef, get, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -42,7 +26,6 @@ const profileImage = document.getElementById("profileImage");
 const nameField = document.getElementById("profileName");
 const emailField = document.getElementById("profileEmail");
 const editButton = document.getElementById("editButton");
-const deleteButton = document.getElementById("deleteButton");
 const logoutButton = document.getElementById("logoutButton");
 
 // Fetch user profile data
@@ -54,11 +37,19 @@ function fetchUserProfile() {
       .then((snapshot) => {
         if (snapshot.exists()) {
           const userData = snapshot.val();
-          profileImage.src = userData.photo || ''; // Display photo or fallback if null
           nameField.textContent = userData.name || 'No Name';
           emailField.textContent = user.email || 'No Email';
+          if (userData.photo) {
+            getDownloadURL(storageRef(storage, userData.photo))
+              .then((url) => {
+                profileImage.src = url; // Set profile image from Firebase Storage
+              })
+              .catch((error) => console.error("Error fetching photo URL:", error));
+          } else {
+            profileImage.src = "default-avatar.png"; // Set default avatar if no photo
+          }
         } else {
-          console.error("No data available");
+          console.error("No user data found.");
         }
       })
       .catch((error) => {
@@ -66,6 +57,7 @@ function fetchUserProfile() {
       });
   } else {
     console.error("User not authenticated");
+    window.location.href = "login.html"; // Redirect if user not authenticated
   }
 }
 
@@ -96,45 +88,6 @@ editButton.addEventListener("click", () => {
   }
 });
 
-// Delete account logic
-deleteButton.addEventListener("click", () => {
-  const user = auth.currentUser;
-  if (!user) {
-    console.error("User not authenticated");
-    return;
-  }
-
-  if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-    const userId = user.uid;
-    const userRef = dbRef(database, `users/${userId}`);
-    const profileImagePath = user.photoURL;
-
-    // Remove user data from the database
-    remove(userRef)
-      .then(() => {
-        // Delete profile image from storage, if it exists
-        if (profileImagePath) {
-          const imageRef = storageRef(storage, profileImagePath);
-          deleteObject(imageRef).catch((error) => {
-            console.error("Error deleting profile image from storage:", error);
-          });
-        }
-
-        // Delete the user account
-        deleteUser(user)
-          .then(() => {
-            window.location.href = "login.html"; // Redirect to login
-          })
-          .catch((error) => {
-            console.error("Error deleting account:", error);
-          });
-      })
-      .catch((error) => {
-        console.error("Error removing user data:", error);
-      });
-  }
-});
-
 // Logout logic
 logoutButton.addEventListener("click", () => {
   signOut(auth)
@@ -149,7 +102,7 @@ logoutButton.addEventListener("click", () => {
 // Listen for auth state changes and fetch profile data if logged in
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    fetchUserProfile();
+    fetchUserProfile(); // Fetch user profile if authenticated
   } else {
     console.error("User not logged in");
     window.location.href = "login.html"; // Redirect to login if not authenticated

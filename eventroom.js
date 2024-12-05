@@ -85,6 +85,24 @@ async function loadEventRoom(eventCode) {
         }
       }
 
+      // Add "Add Member" button for the host
+if (user.uid === hostId) {
+  const addMemberButton = document.createElement("button");
+  addMemberButton.textContent = "Add Member";
+  addMemberButton.classList.add("add-member-button");
+  addMemberButton.addEventListener("click", () => {
+    toggleDialog(true);
+  });
+  hostActions.appendChild(addMemberButton);
+
+  // Add "Arrange Photo" button for the host
+  const arrangePhotoButton = document.createElement("button");
+  arrangePhotoButton.textContent = "Arrange Photo";
+  arrangePhotoButton.id = "arrangePhotoButton";
+  arrangePhotoButton.classList.add("arrange-photo-button");
+  hostActions.appendChild(arrangePhotoButton);
+}
+
       // Load guests list
       const participants = roomData.participants || {};
       const guests = Object.entries(participants).filter(([key]) => key !== hostId);
@@ -295,4 +313,4 @@ onAuthStateChanged(auth, (user) => {
     alert("Please log in to access the event room.");
     window.location.href = "login.html";
   }
-});
+});//previous file
