@@ -313,3 +313,7 @@ onAuthStateChanged(auth, (user) => {
     window.location.href = "login.html";
   }
 });//previous file
+
+arrangePhotoButton.addEventListener("click", () => {
+  window.location.href = 'arrange-photos.html';
+});
