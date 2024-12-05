@@ -313,5 +313,3 @@ onAuthStateChanged(auth, (user) => {
     window.location.href = "login.html";
   }
 });//previous file
-
-<button onclick="window.location.href='arrange-photos.html'">Arrange Photos</button>
