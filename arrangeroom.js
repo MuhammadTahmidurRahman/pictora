@@ -1,8 +1,7 @@
 // Firebase Initialization
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref as dbRef, get, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { getStorage, ref as storageRef, listAll, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { getStorage, ref as storageRef, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Firebase Config
 const firebaseConfig = {
@@ -16,12 +15,11 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
-const database = getDatabase();
 const storage = getStorage();
 
 // Load Photos
 async function loadPhotos(eventCode) {
-  const folderPath = `rooms/${eventCode}/host`;
+  const folderPath = `rooms/${eventCode}/host`;  // Path for the room photos
   const folderRef = storageRef(storage, folderPath);
   const photoContainer = document.getElementById("photoContainer");
 
@@ -30,6 +28,7 @@ async function loadPhotos(eventCode) {
     photoContainer.innerHTML = "";
 
     const photoItems = []; // Store photo items for reordering
+    const allPaths = [];  // Array to hold all photo paths
 
     for (const itemRef of listResult.items) {
       const photoUrl = await getDownloadURL(itemRef);
@@ -47,16 +46,21 @@ async function loadPhotos(eventCode) {
       // Add delete functionality
       photoItem.querySelector(".delete-btn").addEventListener("click", async () => {
         await deletePhoto(itemRef.fullPath);
-        loadPhotos(eventCode);
+        loadPhotos(eventCode); // Reload photos after deletion
       });
 
       photoItems.push(photoItem);
+      allPaths.push(itemRef.fullPath); // Add photo path to the array
     }
 
     // Append photos to container
     photoItems.forEach((item) => {
       photoContainer.appendChild(item);
     });
+
+    // After loading all photos, send them to the backend for sorting
+    sendSortedPhotos(eventCode, allPaths); 
+
   } catch (error) {
     console.error("Error loading photos:", error);
   }
@@ -75,29 +79,6 @@ async function deletePhoto(photoPath) {
   }
 }
 
-// Drag-and-Drop Reordering
-function enableDragAndDrop() {
-  const photoContainer = document.getElementById("photoContainer");
-  let draggedItem = null;
-
-  photoContainer.addEventListener("dragstart", (e) => {
-    draggedItem = e.target;
-    e.target.style.opacity = "0.5";
-  });
-
-  photoContainer.addEventListener("dragend", (e) => {
-    e.target.style.opacity = "1";
-  });
-
-  photoContainer.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    const closestItem = document.elementFromPoint(e.clientX, e.clientY);
-    if (closestItem && closestItem !== draggedItem && closestItem.classList.contains("photo-item")) {
-      photoContainer.insertBefore(draggedItem, closestItem);
-    }
-  });
-}
-
 // Send Sorted Photos to Flask (ngrok URL)
 async function sendSortedPhotos(eventCode, sortedPaths) {
   const ngrokUrl = "https://c61f-34-125-41-195.ngrok-free.app/"; // Replace with your actual ngrok URL
@@ -112,7 +93,6 @@ async function sendSortedPhotos(eventCode, sortedPaths) {
   const result = await response.json();
   if (result.success) {
     alert("Photos sorted successfully.");
-    loadPhotos(eventCode); // Reload photos after sorting
   } else {
     alert("Failed to sort photos.");
   }
@@ -123,26 +103,7 @@ onAuthStateChanged(auth, (user) => {
   if (user) {
     const eventCode = new URLSearchParams(window.location.search).get("eventCode");
     if (eventCode) {
-      loadPhotos(eventCode);
-      enableDragAndDrop();
-
-      // Ensure the button exists before adding the event listener
-      const arrangePhotosBtn = document.getElementById("arrangePhotosBtn");
-      if (arrangePhotosBtn) {
-        arrangePhotosBtn.addEventListener("click", () => {
-          const sortedPaths = []; // Collect sorted image paths
-
-          const photoItems = document.querySelectorAll(".photo-item");
-          photoItems.forEach((item) => {
-            sortedPaths.push(item.dataset.path);
-          });
-
-          // Send sorted photos to Flask backend
-          sendSortedPhotos(eventCode, sortedPaths);
-        });
-      } else {
-        console.error("Arrange Photos button not found!");
-      }
+      loadPhotos(eventCode); // Load and sort photos when eventCode is available
     } else {
       alert("Event code is missing.");
     }
