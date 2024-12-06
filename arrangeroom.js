@@ -29,6 +29,8 @@ async function loadPhotos(eventCode) {
     const listResult = await listAll(folderRef);
     photoContainer.innerHTML = "";
 
+    const photoItems = []; // Store photo items for reordering
+
     for (const itemRef of listResult.items) {
       const photoUrl = await getDownloadURL(itemRef);
 
@@ -48,8 +50,13 @@ async function loadPhotos(eventCode) {
         loadPhotos(eventCode);
       });
 
-      photoContainer.appendChild(photoItem);
+      photoItems.push(photoItem);
     }
+
+    // Append photos to container
+    photoItems.forEach((item) => {
+      photoContainer.appendChild(item);
+    });
   } catch (error) {
     console.error("Error loading photos:", error);
   }
@@ -91,6 +98,26 @@ function enableDragAndDrop() {
   });
 }
 
+// Send Sorted Photos to Flask (ngrok URL)
+async function sendSortedPhotos(eventCode, sortedPaths) {
+  const ngrokUrl = "YOUR_NGROK_URL_HERE"; // Replace with your actual ngrok URL
+  const response = await fetch(`${ngrokUrl}/sort_photos`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ eventCode, sortedPaths }),
+  });
+
+  const result = await response.json();
+  if (result.success) {
+    alert("Photos sorted successfully.");
+    loadPhotos(eventCode); // Reload photos after sorting
+  } else {
+    alert("Failed to sort photos.");
+  }
+}
+
 // Initialize Arrange Room Page
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -98,6 +125,19 @@ onAuthStateChanged(auth, (user) => {
     if (eventCode) {
       loadPhotos(eventCode);
       enableDragAndDrop();
+
+      // Add event listener for "Arrange Photos" button
+      document.getElementById("arrangePhotosBtn").addEventListener("click", () => {
+        const sortedPaths = []; // Collect sorted image paths
+
+        const photoItems = document.querySelectorAll(".photo-item");
+        photoItems.forEach((item) => {
+          sortedPaths.push(item.dataset.path);
+        });
+
+        // Send sorted photos to Flask backend
+        sendSortedPhotos(eventCode, sortedPaths);
+      });
     } else {
       alert("Event code is missing.");
     }
