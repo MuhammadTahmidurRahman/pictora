@@ -83,21 +83,22 @@ async function loadEventRoom(eventCode) {
           hostActions.appendChild(addMemberButton);
         }
 
-       // Add "Arrange Photo" button for the host
-if (user.uid === hostId) {
-  const arrangePhotoButton = document.createElement("button");
-  arrangePhotoButton.textContent = "Arrange Photo";
-  arrangePhotoButton.id = "arrangePhotoButton";
-  arrangePhotoButton.classList.add("arrange-photo-button");
-  hostActions.appendChild(arrangePhotoButton);
+        // Add "Arrange Photo" button for the host
+        if (user.uid === hostId) {
+          const arrangePhotoButton = document.createElement("button");
+          arrangePhotoButton.textContent = "Arrange Photo";
+          arrangePhotoButton.id = "arrangePhotoButton";
+          arrangePhotoButton.classList.add("arrange-photo-button");
+          hostActions.appendChild(arrangePhotoButton);
 
-  // Add event listener to the Arrange Photo button
-  arrangePhotoButton.addEventListener("click", function() {
-    console.log("Arrange Photos clicked!");
-    // Redirect to arrangeroom.html
-    window.location.href = "arrangeroom.html?eventCode=" + eventCode;
-  });
-}
+          // Add event listener to the Arrange Photo button
+          arrangePhotoButton.addEventListener("click", function() {
+            console.log("Arrange Photos clicked!");
+            // You can call your photo sorting function here
+            // Example: sendSortedPhotos(eventCode, sortedPaths);
+          });
+        }
+      }
 
       // Load guests list
       const participants = roomData.participants || {};
