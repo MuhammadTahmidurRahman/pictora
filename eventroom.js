@@ -315,7 +315,16 @@ onAuthStateChanged(auth, (user) => {
   }
 });//previous file
 
-arrangePhotoButton.addEventListener("click", () => {
-  // Redirect to arrange-photos.html with the eventCode in the query string
-  window.location.href = `arrange-photos.html?eventCode=${encodeURIComponent(eventCode)}`;
-});
+const arrangePhotoButton = document.getElementById('arrangePhotoButton');
+
+// Check if the button is found
+if (arrangePhotoButton) {
+  arrangePhotoButton.addEventListener('click', function() {
+    // Your code to start sorting photos goes here
+    console.log('Arrange Photos clicked!');
+    // Call the function to handle photo sorting
+    // sendSortedPhotos(eventCode, sortedPaths); // Example of how you might call the function
+  });
+} else {
+  console.error('Arrange Photo button not found!');
+}
