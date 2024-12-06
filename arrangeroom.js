@@ -100,7 +100,7 @@ function enableDragAndDrop() {
 
 // Send Sorted Photos to Flask (ngrok URL)
 async function sendSortedPhotos(eventCode, sortedPaths) {
-  const ngrokUrl = "YOUR_NGROK_URL_HERE"; // Replace with your actual ngrok URL
+  const ngrokUrl = "https://c61f-34-125-41-195.ngrok-free.app/"; // Replace with your actual ngrok URL
   const response = await fetch(`${ngrokUrl}/sort_photos`, {
     method: "POST",
     headers: {
