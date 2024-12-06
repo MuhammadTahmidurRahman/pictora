@@ -82,25 +82,23 @@ async function loadEventRoom(eventCode) {
           });
           hostActions.appendChild(addMemberButton);
         }
+
+        // Add "Arrange Photo" button for the host
+        if (user.uid === hostId) {
+          const arrangePhotoButton = document.createElement("button");
+          arrangePhotoButton.textContent = "Arrange Photo";
+          arrangePhotoButton.id = "arrangePhotoButton";
+          arrangePhotoButton.classList.add("arrange-photo-button");
+          hostActions.appendChild(arrangePhotoButton);
+
+          // Add event listener to the Arrange Photo button
+          arrangePhotoButton.addEventListener("click", function() {
+            console.log("Arrange Photos clicked!");
+            // You can call your photo sorting function here
+            // Example: sendSortedPhotos(eventCode, sortedPaths);
+          });
+        }
       }
-
-      // Add "Add Member" button for the host
-if (user.uid === hostId) {
-  const addMemberButton = document.createElement("button");
-  addMemberButton.textContent = "Add Member";
-  addMemberButton.classList.add("add-member-button");
-  addMemberButton.addEventListener("click", () => {
-    toggleDialog(true);
-  });
-  hostActions.appendChild(addMemberButton);
-
-  // Add "Arrange Photo" button for the host
-  const arrangePhotoButton = document.createElement("button");
-  arrangePhotoButton.textContent = "Arrange Photo";
-  arrangePhotoButton.id = "arrangePhotoButton";
-  arrangePhotoButton.classList.add("arrange-photo-button");
-  hostActions.appendChild(arrangePhotoButton);
-}
 
       // Load guests list
       const participants = roomData.participants || {};
@@ -127,7 +125,6 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
     return;
   }
 
-  
   const eventCode = new URLSearchParams(window.location.search).get("eventCode");
   const folderPath = `rooms/${eventCode}/${user.uid}`;
 
@@ -229,102 +226,56 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
     return;
   }
 
-  const participantId = `${eventCode}_${Date.now()}`;
-  const folderPath = `rooms/${eventCode}/${participantId}`;
-  const storagePath = `uploads/${participantId}`;
-
+  const participantRef = dbRef(database, `rooms/${eventCode}/manualParticipants`);
+  const newGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${guestEmail}`);
+  
   try {
-    // Upload the guest photo to storage
-    const fileRef = storageRef(storage, storagePath);
-    await uploadBytes(fileRef, guestPhoto);
-    const photoUrl = await getDownloadURL(fileRef);  // Get the download URL for the uploaded photo
+    const storagePath = `rooms/${eventCode}/${guestEmail}`;
+    const photoRef = storageRef(storage, `${storagePath}/${guestPhoto.name}`);
+    await uploadBytes(photoRef, guestPhoto);
+    const photoUrl = await getDownloadURL(photoRef);
 
-    // Now, update the manual guest with the photo URL and folder path
-    const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${participantId}`);
-    await update(manualGuestRef, {
+    await update(newGuestRef, {
       name: guestName,
-      email: guestEmail,
-      photoUrl,
-      folderPath,
+      photoUrl: photoUrl,
     });
-
-    // Ensure the profile picture is fetched from `photoUrl` and uploaded to the manual participant's folder
-    const response = await fetch(photoUrl); // Fetch the uploaded profile photo using its URL
-    const blob = await response.blob();  // Convert the fetched image to a Blob
-    const participantImageRef = storageRef(storage, `${folderPath}/${guestName.replace(/\s+/g, "_")}_profilePhoto.jpg`);  // Save with dynamic file name
-
-    // Upload the profile picture to the folder path
-    await uploadBytes(participantImageRef, blob);
-
-    alert("Guest added successfully and profile picture uploaded.");
-    toggleDialog(false);
-    loadEventRoom(eventCode);
+    alert("Guest added successfully!");
   } catch (error) {
     console.error("Error adding guest:", error);
     alert("Failed to add guest.");
   }
 });
 
-
 // Delete Manual Guest
 async function deleteManualGuest(eventCode, guestId, folderPath) {
+  const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${guestId}`);
+  const folderRef = storageRef(storage, `rooms/${eventCode}/${folderPath}`);
+
   try {
-    const guestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${guestId}`);
-    await remove(guestRef);
+    // Delete guest from Firebase Database
+    await remove(manualGuestRef);
 
-    const folderRef = storageRef(storage, folderPath);
+    // Delete all files in the folder if any exist
     const listResult = await listAll(folderRef);
-    for (const itemRef of listResult.items) {
-      await deleteObject(itemRef);
+    for (const item of listResult.items) {
+      await deleteObject(item);
     }
 
-    alert("Guest deleted successfully.");
-    loadEventRoom(eventCode);
+    alert("Manual guest and their photos deleted.");
   } catch (error) {
-    console.error("Error deleting guest:", error);
-    alert("Failed to delete guest.");
+    console.error("Error deleting manual guest:", error);
+    alert("Failed to delete manual guest.");
   }
 }
 
-// Toggle Add Guest Dialog
+// Toggle Dialog for adding guest
 function toggleDialog(show) {
-  const dialog = document.getElementById("addGuestDialog");
-  dialog.classList.toggle("hidden", !show);
-
-  // Clear previous inputs
-  if (show) {
-    document.getElementById("guestName").value = "";
-    document.getElementById("guestEmail").value = "";
-    document.getElementById("guestPhoto").value = null;
-  }
+  const dialog = document.getElementById("guestDialog");
+  dialog.style.display = show ? "block" : "none";
 }
 
-// Check Authentication and Load Event Room
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    const eventCode = new URLSearchParams(window.location.search).get("eventCode");
-    if (eventCode) {
-      loadEventRoom(eventCode);
-    } else {
-      alert("Event Code is missing!");
-      window.location.href = "join_event.html";
-    }
-  } else {
-    alert("Please log in to access the event room.");
-    window.location.href = "login.html";
-  }
-});//previous file
-
-const arrangePhotoButton = document.getElementById('arrangePhotoButton');
-
-// Check if the button is found
-if (arrangePhotoButton) {
-  arrangePhotoButton.addEventListener('click', function() {
-    // Your code to start sorting photos goes here
-    console.log('Arrange Photos clicked!');
-    // Call the function to handle photo sorting
-    // sendSortedPhotos(eventCode, sortedPaths); // Example of how you might call the function
-  });
-} else {
-  console.error('Arrange Photo button not found!');
+// Initialize the page with event code from URL
+const eventCode = new URLSearchParams(window.location.search).get("eventCode");
+if (eventCode) {
+  loadEventRoom(eventCode);
 }
