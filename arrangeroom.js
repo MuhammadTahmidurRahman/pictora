@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref as storageRef, listAll, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Firebase Config
 const firebaseConfig = {
@@ -60,9 +60,6 @@ async function loadPhotos(eventCode) {
       photoContainer.appendChild(item);
     });
 
-    // After loading all photos, send them to the backend for sorting
-    sendSortedPhotos(eventCode, allPaths); 
-
   } catch (error) {
     console.error("Error loading photos:", error);
   }
@@ -81,35 +78,28 @@ async function deletePhoto(photoPath) {
   }
 }
 
-// Send Sorted Photos to Flask (ngrok URL)
-async function sendSortedPhotos(eventCode, sortedPaths) {
-  const ngrokUrl = "https://c61f-34-125-41-195.ngrok-free.app/"; // Replace with your actual ngrok URL
-  const response = await fetch(`${ngrokUrl}/sort_photos`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ eventCode, sortedPaths }),
-  });
-
-  const result = await response.json();
-  if (result.success) {
-    alert("Photos sorted successfully.");
-  } else {
-    alert("Failed to sort photos.");
-  }
-}
-
-// Update sortPhotoRequest field when host visits the page
+// Update sortPhotoRequest field and increment it when host visits the page
 async function updateSortPhotoRequest(eventCode) {
   const hostRef = ref(database, `rooms/${eventCode}/host`);
-  await set(hostRef, {
-    sortPhotoRequest: 1.0,  // Update the field to a decimal value
-  }).then(() => {
-    console.log("sortPhotoRequest field updated to 1.0.");
-  }).catch((error) => {
+
+  try {
+    // Get the current sortPhotoRequest value
+    const snapshot = await get(hostRef);
+    let currentSortValue = snapshot.exists() ? snapshot.val().sortPhotoRequest : 0.0;
+
+    // Increment the value by 1
+    const newSortValue = currentSortValue + 1.0;
+
+    // Update the sortPhotoRequest field in the database
+    await set(hostRef, {
+      sortPhotoRequest: newSortValue,
+    });
+
+    console.log(`sortPhotoRequest field updated to ${newSortValue}.`);
+
+  } catch (error) {
     console.error("Error updating sortPhotoRequest field:", error);
-  });
+  }
 }
 
 // Initialize Arrange Room Page
@@ -118,7 +108,7 @@ onAuthStateChanged(auth, (user) => {
     const eventCode = new URLSearchParams(window.location.search).get("eventCode");
     if (eventCode) {
       loadPhotos(eventCode); // Load and sort photos when eventCode is available
-      updateSortPhotoRequest(eventCode);  // Update sortPhotoRequest when host visits the page
+      updateSortPhotoRequest(eventCode);  // Increment and update sortPhotoRequest each time
     } else {
       alert("Event code is missing.");
     }
