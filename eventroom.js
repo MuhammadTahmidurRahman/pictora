@@ -96,6 +96,7 @@ async function loadEventRoom(eventCode) {
             console.log("Arrange Photos clicked!");
             // You can call your photo sorting function here
             // Example: sendSortedPhotos(eventCode, sortedPaths);
+            window.location.href = "arrangeroom.html?eventCode=" + eventCode;
           });
         }
       }
