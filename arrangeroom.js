@@ -1,7 +1,8 @@
 // Firebase Initialization
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getStorage, ref as storageRef, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { getStorage, ref as storageRef, listAll, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Firebase Config
 const firebaseConfig = {
@@ -16,6 +17,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const storage = getStorage();
+const database = getDatabase(app);
 
 // Load Photos
 async function loadPhotos(eventCode) {
@@ -38,7 +40,7 @@ async function loadPhotos(eventCode) {
       photoItem.classList.add("photo-item");
       photoItem.dataset.path = itemRef.fullPath;
 
-      photoItem.innerHTML = `
+      photoItem.innerHTML = `  
         <img src="${photoUrl}" alt="Photo" />
         <button class="delete-btn">Delete</button>
       `;
@@ -98,12 +100,25 @@ async function sendSortedPhotos(eventCode, sortedPaths) {
   }
 }
 
+// Update sortPhotoRequest field when host visits the page
+async function updateSortPhotoRequest(eventCode) {
+  const hostRef = ref(database, `rooms/${eventCode}/host`);
+  await set(hostRef, {
+    sortPhotoRequest: 1.0,  // Update the field to a decimal value
+  }).then(() => {
+    console.log("sortPhotoRequest field updated to 1.0.");
+  }).catch((error) => {
+    console.error("Error updating sortPhotoRequest field:", error);
+  });
+}
+
 // Initialize Arrange Room Page
 onAuthStateChanged(auth, (user) => {
   if (user) {
     const eventCode = new URLSearchParams(window.location.search).get("eventCode");
     if (eventCode) {
       loadPhotos(eventCode); // Load and sort photos when eventCode is available
+      updateSortPhotoRequest(eventCode);  // Update sortPhotoRequest when host visits the page
     } else {
       alert("Event code is missing.");
     }
