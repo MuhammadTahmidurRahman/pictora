@@ -126,18 +126,23 @@ onAuthStateChanged(auth, (user) => {
       loadPhotos(eventCode);
       enableDragAndDrop();
 
-      // Add event listener for "Arrange Photos" button
-      document.getElementById("arrangePhotosBtn").addEventListener("click", () => {
-        const sortedPaths = []; // Collect sorted image paths
+      // Ensure the button exists before adding the event listener
+      const arrangePhotosBtn = document.getElementById("arrangePhotosBtn");
+      if (arrangePhotosBtn) {
+        arrangePhotosBtn.addEventListener("click", () => {
+          const sortedPaths = []; // Collect sorted image paths
 
-        const photoItems = document.querySelectorAll(".photo-item");
-        photoItems.forEach((item) => {
-          sortedPaths.push(item.dataset.path);
+          const photoItems = document.querySelectorAll(".photo-item");
+          photoItems.forEach((item) => {
+            sortedPaths.push(item.dataset.path);
+          });
+
+          // Send sorted photos to Flask backend
+          sendSortedPhotos(eventCode, sortedPaths);
         });
-
-        // Send sorted photos to Flask backend
-        sendSortedPhotos(eventCode, sortedPaths);
-      });
+      } else {
+        console.error("Arrange Photos button not found!");
+      }
     } else {
       alert("Event code is missing.");
     }
