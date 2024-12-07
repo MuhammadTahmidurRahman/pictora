@@ -18,11 +18,13 @@ const auth = getAuth();
 const storage = getStorage();
 const database = getDatabase(app);
 
-// Load Photos and Event Details
+// Load Event Details and Photos
 async function loadEventDetails(eventCode) {
   const eventRef = ref(database, `rooms/${eventCode}`);
   const eventSnapshot = await get(eventRef);
   const eventData = eventSnapshot.val();
+
+  console.log("Event Data: ", eventData); // Debugging
 
   if (eventData) {
     document.getElementById("eventName").innerText = eventData.eventName;
@@ -38,11 +40,13 @@ async function loadEventDetails(eventCode) {
   }
 }
 
-// Load Guest List
+// Load Guests
 async function loadGuests(eventCode) {
   const guestsRef = ref(database, `rooms/${eventCode}/guests`);
   const guestSnapshot = await get(guestsRef);
   const guestData = guestSnapshot.val();
+
+  console.log("Guests Data: ", guestData); // Debugging
 
   const guestListContainer = document.getElementById("guestList");
   guestListContainer.innerHTML = ""; // Clear the list
@@ -53,25 +57,6 @@ async function loadGuests(eventCode) {
       const guestItem = document.createElement("li");
       guestItem.innerText = `${guest.name} (${guest.email})`;
       guestListContainer.appendChild(guestItem);
-    });
-  }
-}
-
-// Load Manual Guest List
-async function loadManualGuests(eventCode) {
-  const manualGuestsRef = ref(database, `rooms/${eventCode}/manualGuests`);
-  const manualGuestSnapshot = await get(manualGuestsRef);
-  const manualGuestData = manualGuestSnapshot.val();
-
-  const manualGuestListContainer = document.getElementById("manualGuestList");
-  manualGuestListContainer.innerHTML = ""; // Clear the list
-
-  if (manualGuestData) {
-    Object.keys(manualGuestData).forEach((guestId) => {
-      const guest = manualGuestData[guestId];
-      const guestItem = document.createElement("li");
-      guestItem.innerText = `${guest.name} (${guest.email})`;
-      manualGuestListContainer.appendChild(guestItem);
     });
   }
 }
@@ -126,8 +111,9 @@ async function deletePhoto(photoPath) {
 onAuthStateChanged(auth, (user) => {
   if (user) {
     const eventCode = new URLSearchParams(window.location.search).get("eventCode");
+    console.log("Event Code: ", eventCode); // Debugging
     if (eventCode) {
-      loadEventDetails(eventCode); // Load event and details
+      loadEventDetails(eventCode); // Load event details and photos
     } else {
       alert("Event code is missing.");
     }
