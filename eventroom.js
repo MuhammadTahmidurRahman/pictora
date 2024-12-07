@@ -317,5 +317,5 @@ onAuthStateChanged(auth, (user) => {
 
 arrangePhotoButton.addEventListener("click", () => {
   // Redirect to arrange-photos.html with the eventCode in the query string
-  window.location.href = `arrange-photos.html?eventCode=${encodeURIComponent(eventCode)}`;
+  window.location.href = `arrangeroom.html?eventCode=${encodeURIComponent(eventCode)}`;
 });
