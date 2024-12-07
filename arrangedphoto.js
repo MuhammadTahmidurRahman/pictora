@@ -115,6 +115,37 @@ async function loadEventRoom(eventCode) {
     console.error("Error loading event room:", error);
   }
 }
+function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, isManual = false) {
+  const guestItem = document.createElement("li");
+
+  // Create guest profile elements
+  const guestName = document.createElement("span");
+  guestName.textContent = guestData.name || "Guest";
+  guestItem.appendChild(guestName);
+
+  const guestPhoto = document.createElement("img");
+  guestPhoto.src = guestData.photoUrl || "default-avatar.png";
+  guestItem.appendChild(guestPhoto);
+
+  // Add folder icon for guests if they have uploaded photos
+  if (guestData.folderPath) {
+    const guestFolderIcon = document.createElement("button");
+    guestFolderIcon.textContent = "📁";
+    guestFolderIcon.classList.add("folder-icon");
+
+    if (guestId === currentUserId) {
+      guestFolderIcon.addEventListener("click", () => {
+        window.location.href = `photogallery.html?eventCode=${encodeURIComponent(eventCode)}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)}`;
+      });
+    } else {
+      guestFolderIcon.disabled = true;
+    }
+
+    guestItem.appendChild(guestFolderIcon);
+  }
+
+  return guestItem;
+}
 
 // Load Guests and Display Their Profile Pictures and Folder Icons
 function loadGuests(guests, currentUserId, hostId, eventCode) {
