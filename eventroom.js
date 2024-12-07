@@ -73,15 +73,32 @@ async function loadEventRoom(eventCode) {
         }
 
         // Add "Add Member" button for the host
-        if (user.uid === hostId) {
-          const addMemberButton = document.createElement("button");
-          addMemberButton.textContent = "Add Member";
-          addMemberButton.classList.add("add-member-button");
-          addMemberButton.addEventListener("click", () => {
-            toggleDialog(true);
-          });
-          hostActions.appendChild(addMemberButton);
-        }
+        // Add "Arrange Photo" button for the host
+if (user.uid === hostId) {
+  const arrangePhotoButton = document.createElement("button");
+  arrangePhotoButton.textContent = "Arrange Photo";
+  arrangePhotoButton.classList.add("arrange-photo-button");
+
+  arrangePhotoButton.addEventListener("click", () => {
+    // Redirect to arrange_photos.html with eventCode
+    window.location.href = `arrangedphoto.html?eventCode=${encodeURIComponent(eventCode)}`;
+  });
+
+  hostActions.appendChild(arrangePhotoButton);
+}
+
+
+// Add "Add Member" button for the host
+if (user.uid === hostId) {
+  const addMemberButton = document.createElement("button");
+  addMemberButton.textContent = "Add Member";
+  addMemberButton.classList.add("add-member-button");
+  addMemberButton.addEventListener("click", () => {
+    toggleDialog(true);
+  });
+  hostActions.appendChild(addMemberButton);
+}
+
       }
 
       // Load guests list
@@ -93,12 +110,6 @@ async function loadEventRoom(eventCode) {
       // Load manual guests
       const manualGuests = roomData.manualParticipants || {};
       loadManualGuests(Object.entries(manualGuests), user.uid, hostId, eventCode);
-
-      // Ensure the host can see all participant folders and their images
-      if (user.uid === hostId) {
-        displayAllParticipantFolders(participants, eventCode);
-      }
-
     } else {
       alert("Room does not exist.");
     }
@@ -107,52 +118,39 @@ async function loadEventRoom(eventCode) {
   }
 }
 
-// Modify the Upload Guests Logic to Store Folder Path in the Database
-document.getElementById("addGuestButton").addEventListener("click", async () => {
-  const guestName = document.getElementById("guestName").value.trim();
-  const guestEmail = document.getElementById("guestEmail").value.trim();
-  const guestPhoto = document.getElementById("guestPhoto").files[0];  // This is the image to upload
-  const eventCode = new URLSearchParams(window.location.search).get("eventCode");
-
-  if (!guestName || !guestEmail || !guestPhoto) {
-    alert("All fields are required.");
+// Add functionality to the Upload Photos button
+document.getElementById("uploadPhotoButton").addEventListener("click", async () => {
+  const user = auth.currentUser;
+  if (!user) {
+    alert("Please log in to upload photos.");
     return;
   }
 
-  const participantId = `${eventCode}_${Date.now()}`;
-  const folderPath = `rooms/${eventCode}/${participantId}`;
-  const storagePath = `uploads/${participantId}`;
+  const eventCode = new URLSearchParams(window.location.search).get("eventCode");
+  const folderPath = `rooms/${eventCode}/${user.uid}`;
 
-  try {
-    // Upload the guest photo to storage
-    const fileRef = storageRef(storage, storagePath);
-    await uploadBytes(fileRef, guestPhoto);
-    const photoUrl = await getDownloadURL(fileRef);  // Get the download URL for the uploaded photo
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.multiple = true;
 
-    // Now, update the manual guest with the photo URL and folder path
-    const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${participantId}`);
-    await update(manualGuestRef, {
-      name: guestName,
-      email: guestEmail,
-      photoUrl,
-      folderPath,
-    });
+  input.addEventListener("change", async () => {
+    const files = input.files;
+    if (files.length === 0) return;
 
-    // Ensure the profile picture is fetched from `photoUrl` and uploaded to the manual participant's folder
-    const response = await fetch(photoUrl); // Fetch the uploaded profile photo using its URL
-    const blob = await response.blob();  // Convert the fetched image to a Blob
-    const participantImageRef = storageRef(storage, `${folderPath}/${guestName.replace(/\s+/g, "_")}_profilePhoto.jpg`);  // Save with dynamic file name
+    try {
+      for (const file of files) {
+        const fileRef = storageRef(storage, `${folderPath}/${file.name}`);
+        await uploadBytes(fileRef, file);
+      }
+      alert("Photos uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading photos:", error);
+      alert("Failed to upload photos.");
+    }
+  });
 
-    // Upload the profile picture to the folder path
-    await uploadBytes(participantImageRef, blob);
-
-    alert("Guest added successfully and profile picture uploaded.");
-    toggleDialog(false);
-    loadEventRoom(eventCode);
-  } catch (error) {
-    console.error("Error adding guest:", error);
-    alert("Failed to add guest.");
-  }
+  input.click();
 });
 
 // Load Guests and Display Their Profile Pictures and Folder Icons
@@ -265,6 +263,7 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
   }
 });
 
+
 // Delete Manual Guest
 async function deleteManualGuest(eventCode, guestId, folderPath) {
   try {
@@ -298,28 +297,6 @@ function toggleDialog(show) {
   }
 }
 
-// Display all participant folders and images for the host
-async function displayAllParticipantFolders(participants, eventCode) {
-  const foldersContainer = document.getElementById("foldersContainer");
-  foldersContainer.innerHTML = '';
-
-  for (const [participantId, participantData] of Object.entries(participants)) {
-    if (participantData.folderPath) {
-      const folderButton = document.createElement("button");
-      folderButton.textContent = participantData.name;
-      folderButton.classList.add("folder-icon");
-      
-      folderButton.addEventListener("click", async () => {
-        window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
-          eventCode
-        )}&folderName=${encodeURIComponent(participantData.folderPath)}&userId=${encodeURIComponent(participantId)}`;
-      });
-
-      foldersContainer.appendChild(folderButton);
-    }
-  }
-}
-
 // Check Authentication and Load Event Room
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -334,4 +311,4 @@ onAuthStateChanged(auth, (user) => {
     alert("Please log in to access the event room.");
     window.location.href = "login.html";
   }
-});
+});//previous file
