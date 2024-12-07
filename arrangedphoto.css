@@ -1,4 +1,11 @@
-body {
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
@@ -47,13 +54,14 @@ body {
   }
   
   li {
-    background-color: #ffffff;
-    padding: 10px;
-    border: 1px solid #ddd;
-    margin-bottom: 10px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    background-color: #ffffff;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
   
   img {
@@ -80,6 +88,10 @@ body {
     display: block;
   }
   
+  .dialog-content {
+    padding: 20px;
+  }
+  
   #imageGallery {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -90,5 +102,53 @@ body {
     width: 100%;
     height: auto;
     border-radius: 5px;
+  }
+  
+  #downloadAllButton {
+    background-color: #28a745;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 15px;
+  }
+  
+  #downloadAllButton:hover {
+    background-color: #218838;
+  }
+  
+  /* Ensure dialog close button is styled */
+  #closeNoPhotosDialogButton {
+    background-color: #dc3545;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  #closeNoPhotosDialogButton:hover {
+    background-color: #c82333;
+  }
+  
+  /* Media Queries for responsiveness */
+  @media (max-width: 600px) {
+    #imageGallery {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  /* Styling for the back button */
+  #backButton {
+    background-color: #6c757d;
+    color: white;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+  
+  #backButton:hover {
+    background-color: #5a6268;
   }
   
