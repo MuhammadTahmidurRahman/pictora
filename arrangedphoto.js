@@ -1,32 +1,32 @@
-import { getStorage, ref, listAll, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.21.0/firebase-storage.js';
-import { getDatabase, ref as dbRef, get } from 'https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js';
+import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js';
+import { getStorage, ref as storageRef, listAll, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.21.0/firebase-storage.js';
 
-// Firebase configuration (replace with your Firebase config)
+// Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  databaseURL: "YOUR_DATABASE_URL",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
+    authDomain: "pictora-7f0ad.firebaseapp.com",
+    projectId: "pictora-7f0ad",
+    storageBucket: "pictora-7f0ad.appspot.com",
+    messagingSenderId: "155732133141",
+    databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app",
+    appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const storage = getStorage(app);
 const database = getDatabase(app);
+const storage = getStorage(app);
 
-// Event Code from URL or some context (replace with actual logic)
-const eventCode = 'event123';
+// Get event code dynamically (replace with actual logic)
+const eventCode = 'event123';  // Example event code
 
 let participants = [];
 let manualParticipants = [];
 
-// Fetch participants and manual guests data from Firebase
+// Fetch participants from Firebase
 async function fetchParticipants() {
-  const participantsRef = dbRef(database, `rooms/${eventCode}/participants`);
+  const participantsRef = ref(database, `rooms/${eventCode}/participants`);
   const snapshot = await get(participantsRef);
 
   if (snapshot.exists()) {
@@ -41,8 +41,9 @@ async function fetchParticipants() {
   }
 }
 
+// Fetch manual participants from Firebase
 async function fetchManualParticipants() {
-  const manualParticipantsRef = dbRef(database, `rooms/${eventCode}/manualParticipants`);
+  const manualParticipantsRef = ref(database, `rooms/${eventCode}/manualParticipants`);
   const snapshot = await get(manualParticipantsRef);
 
   if (snapshot.exists()) {
@@ -57,7 +58,7 @@ async function fetchManualParticipants() {
   }
 }
 
-// Render participants and manual guests
+// Render the participant list
 function renderParticipants() {
   const participantList = document.getElementById('participantList');
   participantList.innerHTML = '';
@@ -72,6 +73,7 @@ function renderParticipants() {
   });
 }
 
+// Render the manual guest list
 function renderManualParticipants() {
   const manualGuestList = document.getElementById('manualGuestList');
   manualGuestList.innerHTML = '';
@@ -86,9 +88,9 @@ function renderManualParticipants() {
   });
 }
 
-// Fetch and display images for the selected participant
+// Fetch images from Firebase Storage
 async function fetchImages(folderPath) {
-  const folderRef = ref(storage, folderPath);
+  const folderRef = storageRef(storage, folderPath);
   const listResult = await listAll(folderRef);
   const imageUrls = [];
 
@@ -100,6 +102,7 @@ async function fetchImages(folderPath) {
   return imageUrls;
 }
 
+// Show the image gallery in a dialog
 function showImageGallery(images) {
   const imageGallery = document.getElementById('imageGallery');
   imageGallery.innerHTML = '';
@@ -113,7 +116,7 @@ function showImageGallery(images) {
   dialog.classList.add('visible');
 }
 
-// Handle "View Photos" button click
+// Handle the "View Photos" button click
 document.body.addEventListener('click', async (e) => {
   if (e.target.classList.contains('viewPhotosButton')) {
     const folderPath = e.target.getAttribute('data-folder');
@@ -128,23 +131,22 @@ document.body.addEventListener('click', async (e) => {
   }
 });
 
-// Handle closing the "No Photos" dialog
+// Close the "No Photos" dialog
 document.getElementById('closeNoPhotosDialogButton').addEventListener('click', () => {
   const noPhotosDialog = document.getElementById('noPhotosDialog');
   noPhotosDialog.classList.remove('visible');
 });
 
-// Handle downloading images as a ZIP (implement the download logic as needed)
+// Download all images
 document.getElementById('downloadAllButton').addEventListener('click', () => {
-  // Implement the ZIP download functionality here
-  alert('Download logic not yet implemented');
+  // Logic for downloading all images can be added here.
 });
 
-// Handle back button click
+// Back Button Event
 document.getElementById('backButton').addEventListener('click', () => {
   window.history.back();
 });
 
-// Fetch initial data
+// Initialize the app
 fetchParticipants();
 fetchManualParticipants();
