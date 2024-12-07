@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arranged Photo</title>
+  <link rel="stylesheet" href="arrangedphoto.css">
+</head>
+<body>
+  <div id="arrangedPhotoContainer">
+    <header>
+      <h1>Arranged Photo</h1>
+      <button id="backButton">Back</button>
+    </header>
+
+    <section id="participantsSection">
+      <h2>Participants</h2>
+      <ul id="participantList"></ul>
+    </section>
+
+    <section id="manualGuestsSection">
+      <h2>Manual Guests</h2>
+      <ul id="manualGuestList"></ul>
+    </section>
+
+    <div id="imageGalleryDialog" class="dialog hidden">
+      <div class="dialog-content">
+        <div id="imageGallery"></div>
+        <button id="downloadAllButton">Download All</button>
+      </div>
+    </div>
+
+    <div id="noPhotosDialog" class="dialog hidden">
+      <div class="dialog-content">
+        <p>No photos uploaded for this participant.</p>
+        <button id="closeNoPhotosDialogButton">Close</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="arrangedphoto.js"></script>
+</body>
+</html>
