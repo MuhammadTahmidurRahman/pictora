@@ -1,8 +1,8 @@
 // Firebase Initialization
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref as dbRef, get, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { getStorage, ref as storageRef, listAll, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Firebase Config
 const firebaseConfig = {
@@ -16,18 +16,21 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
-const database = getDatabase();
 const storage = getStorage();
+const database = getDatabase(app);
 
 // Load Photos
 async function loadPhotos(eventCode) {
-  const folderPath = `rooms/${eventCode}/host`;
+  const folderPath = `rooms/${eventCode}/host`;  // Path for the room photos
   const folderRef = storageRef(storage, folderPath);
   const photoContainer = document.getElementById("photoContainer");
 
   try {
     const listResult = await listAll(folderRef);
     photoContainer.innerHTML = "";
+
+    const photoItems = []; // Store photo items for reordering
+    const allPaths = [];  // Array to hold all photo paths
 
     for (const itemRef of listResult.items) {
       const photoUrl = await getDownloadURL(itemRef);
@@ -37,7 +40,7 @@ async function loadPhotos(eventCode) {
       photoItem.classList.add("photo-item");
       photoItem.dataset.path = itemRef.fullPath;
 
-      photoItem.innerHTML = `
+      photoItem.innerHTML = `  
         <img src="${photoUrl}" alt="Photo" />
         <button class="delete-btn">Delete</button>
       `;
@@ -45,11 +48,18 @@ async function loadPhotos(eventCode) {
       // Add delete functionality
       photoItem.querySelector(".delete-btn").addEventListener("click", async () => {
         await deletePhoto(itemRef.fullPath);
-        loadPhotos(eventCode);
+        loadPhotos(eventCode); // Reload photos after deletion
       });
 
-      photoContainer.appendChild(photoItem);
+      photoItems.push(photoItem);
+      allPaths.push(itemRef.fullPath); // Add photo path to the array
     }
+
+    // Append photos to container
+    photoItems.forEach((item) => {
+      photoContainer.appendChild(item);
+    });
+
   } catch (error) {
     console.error("Error loading photos:", error);
   }
@@ -68,27 +78,28 @@ async function deletePhoto(photoPath) {
   }
 }
 
-// Drag-and-Drop Reordering
-function enableDragAndDrop() {
-  const photoContainer = document.getElementById("photoContainer");
-  let draggedItem = null;
+// Update sortPhotoRequest field and increment it when host visits the page
+async function updateSortPhotoRequest(eventCode) {
+  const hostRef = ref(database, `rooms/${eventCode}/host`);
 
-  photoContainer.addEventListener("dragstart", (e) => {
-    draggedItem = e.target;
-    e.target.style.opacity = "0.5";
-  });
+  try {
+    // Get the current sortPhotoRequest value
+    const snapshot = await get(hostRef);
+    let currentSortValue = snapshot.exists() ? snapshot.val().sortPhotoRequest : 0.0;
 
-  photoContainer.addEventListener("dragend", (e) => {
-    e.target.style.opacity = "1";
-  });
+    // Increment the value by 1
+    const newSortValue = currentSortValue + 1.0;
 
-  photoContainer.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    const closestItem = document.elementFromPoint(e.clientX, e.clientY);
-    if (closestItem && closestItem !== draggedItem && closestItem.classList.contains("photo-item")) {
-      photoContainer.insertBefore(draggedItem, closestItem);
-    }
-  });
+    // Update the sortPhotoRequest field in the database
+    await set(hostRef, {
+      sortPhotoRequest: newSortValue,
+    });
+
+    console.log(`sortPhotoRequest field updated to ${newSortValue}.`);
+
+  } catch (error) {
+    console.error("Error updating sortPhotoRequest field:", error);
+  }
 }
 
 // Initialize Arrange Room Page
@@ -96,8 +107,8 @@ onAuthStateChanged(auth, (user) => {
   if (user) {
     const eventCode = new URLSearchParams(window.location.search).get("eventCode");
     if (eventCode) {
-      loadPhotos(eventCode);
-      enableDragAndDrop();
+      loadPhotos(eventCode); // Load and sort photos when eventCode is available
+      updateSortPhotoRequest(eventCode);  // Increment and update sortPhotoRequest each time
     } else {
       alert("Event code is missing.");
     }
