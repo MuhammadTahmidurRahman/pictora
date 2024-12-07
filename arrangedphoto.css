@@ -1,104 +1,154 @@
-/* General Styling */
+/* General styling */
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f7fc;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f4f9;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+#eventRoomContainer {
+  width: 90%;
+  max-width: 600px;
+  background: #fff;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow-y: auto; /* Enable scrolling */
+}
+
+/* Scrollable list styles */
+.scrollable-list {
+  max-height: 150px;
+  overflow-y: auto;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  list-style-type: none;
 }
 
-/* Event Details */
-.event-details {
-  background-color: #fff;
-  width: 80%;
-  max-width: 900px;
-  margin-top: 20px;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.event-details h2 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.event-details p {
-  font-size: 16px;
-  color: #555;
-}
-
-.host-details {
-  margin-top: 20px;
-  display: flex;
-  align-items: center;
-}
-
-.host-details h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.host-details img {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  margin-left: 15px;
-  object-fit: cover;
-}
-
-/* Photo Container */
-#photoContainer {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.photo-item {
-  position: relative;
-  width: 150px;
-  height: 150px;
-  overflow: hidden;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.photo-item img {
+/* Button styles */
+button {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.photo-item .delete-btn {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background-color: rgba(255, 0, 0, 0.6);
-  color: white;
+  padding: 10px;
+  margin: 10px 0;
+  background: #333;
+  color: #fff;
   border: none;
-  padding: 5px;
-  border-radius: 50%;
+  border-radius: 5px;
   cursor: pointer;
 }
 
-.photo-item .delete-btn:hover {
-  background-color: red;
+button:hover {
+  background: #555;
 }
 
-/* Guest List */
-ul {
-  list-style-type: none;
+/* Host photo styles */
+#hostPhoto {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin: 10px auto;
+  display: block;
+  object-fit: cover; /* Ensure proper scaling */
+}
+
+/* Folder icon styles */
+.folder-icon {
+  margin-left: 10px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-size: 18px;
+}
+
+.folder-icon:disabled {
+  cursor: not-allowed;
+  color: #ccc;
+}
+
+
+/* Guest list styles */
+#guestList, #manualGuestList {
   padding: 0;
-  margin: 20px 0;
+  margin: 10px 0;
 }
 
-li {
+#guestList li, #manualGuestList li {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  padding: 10px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+/* Guest photo styles */
+.guest-photo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
+  object-fit: cover; /* Ensure proper scaling */
+}
+
+/* Dialog styles */
+.dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dialog.hidden {
+  display: none;
+}
+
+.dialog-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.dialog-content input {
+  width: 90%;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+/* Buttons in the dialog */
+.dialog-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.dialog-buttons button {
+  width: 45%;
+}
+
+.add-member-button {
+  background-color: #007BFF;
+  color: white;
   font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.delete-guest-button {
+  background-color: #ff4c4c;
+  color: white;
+  font-size: 14px;
+  margin-left: 10px;
 }
