@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js';
-import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js';
+import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js';
 import { getStorage, ref as storageRef, listAll, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.21.0/firebase-storage.js';
 
 // Firebase configuration
@@ -137,16 +137,48 @@ document.getElementById('closeNoPhotosDialogButton').addEventListener('click', (
   noPhotosDialog.classList.remove('visible');
 });
 
-// Download all images
-document.getElementById('downloadAllButton').addEventListener('click', () => {
-  // Logic for downloading all images can be added here.
-});
-
 // Back Button Event
 document.getElementById('backButton').addEventListener('click', () => {
   window.history.back();
 });
 
-// Initialize the app
-fetchParticipants();
-fetchManualParticipants();
+// Function to update the sortPhotoRequest value
+async function updateSortPhotoRequest(eventCode) {
+  const hostRef = ref(database, `rooms/${eventCode}/host`);
+
+  try {
+    // Get the current sortPhotoRequest value
+    const snapshot = await get(hostRef);
+    let currentSortValue = snapshot.exists() ? snapshot.val().sortPhotoRequest : 0.0;
+
+    // Increment the value by 1
+    const newSortValue = currentSortValue + 1.0;
+
+    // Update the sortPhotoRequest field in the database
+    await set(hostRef, {
+      sortPhotoRequest: newSortValue,
+    });
+
+    console.log(`sortPhotoRequest field updated to ${newSortValue}.`);
+
+  } catch (error) {
+    console.error("Error updating sortPhotoRequest field:", error);
+  }
+}
+
+// Initialize Arrange Room Page
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    const eventCode = new URLSearchParams(window.location.search).get("eventCode");
+    if (eventCode) {
+      fetchParticipants();
+      fetchManualParticipants();
+      updateSortPhotoRequest(eventCode);  // Increment and update sortPhotoRequest each time
+    } else {
+      alert("Event code is missing.");
+    }
+  } else {
+    alert("Please log in to access this page.");
+    window.location.href = "login.html";
+  }
+});
