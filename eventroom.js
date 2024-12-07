@@ -227,12 +227,10 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
   const storagePath = `uploads/${participantId}`;
 
   try {
-    // Upload the guest photo to storage
     const photoRef = storageRef(storage, storagePath);
     await uploadBytes(photoRef, guestPhoto);
     const photoUrl = await getDownloadURL(photoRef);
 
-    // Add guest information to database
     const participantRef = dbRef(database, `rooms/${eventCode}/participants/${participantId}`);
     await set(participantRef, {
       name: guestName,
@@ -242,37 +240,43 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
     });
 
     alert("Guest added successfully!");
-
-    // Optionally, clear the form fields
-    document.getElementById("guestName").value = "";
-    document.getElementById("guestEmail").value = "";
-    document.getElementById("guestPhoto").value = "";
   } catch (error) {
     console.error("Error adding guest:", error);
     alert("Failed to add guest.");
   }
 });
 
-// Delete Manual Guest
-async function deleteManualGuest(eventCode, guestId, folderPath) {
+// Update sortPhotoRequest field
+async function updateSortPhotoRequest(eventCode) {
+  const hostRef = dbRef(database, `rooms/${eventCode}/host`);
+
   try {
-    // Delete the guest from the database
-    const guestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${guestId}`);
-    await remove(guestRef);
+    const snapshot = await get(hostRef);
+    let currentSortValue = snapshot.exists() ? snapshot.val().sortPhotoRequest : 0.0;
 
-    // Delete the guest's folder and data from storage if applicable
-    const guestFolderRef = storageRef(storage, folderPath);
-    await deleteObject(guestFolderRef);
+    const newSortValue = currentSortValue + 1.0;
+    await set(hostRef, {
+      sortPhotoRequest: newSortValue,
+    });
 
-    alert("Guest deleted successfully.");
+    console.log(`sortPhotoRequest field updated to ${newSortValue}.`);
   } catch (error) {
-    console.error("Error deleting manual guest:", error);
-    alert("Failed to delete guest.");
+    console.error("Error updating sortPhotoRequest field:", error);
   }
 }
 
-// Execute room loading
-const eventCode = new URLSearchParams(window.location.search).get("eventCode");
-if (eventCode) {
-  loadEventRoom(eventCode);
-}
+// Execute page loading
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    const eventCode = new URLSearchParams(window.location.search).get("eventCode");
+    if (eventCode) {
+      loadEventRoom(eventCode);
+      updateSortPhotoRequest(eventCode);
+    } else {
+      alert("Event code is missing.");
+    }
+  } else {
+    alert("Please log in to access this page.");
+    window.location.href = "login.html";
+  }
+});
