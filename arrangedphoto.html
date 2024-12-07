@@ -3,45 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arranged Photo</title>
+  <title>Arrange Photos</title>
   <link rel="stylesheet" href="arrangedphoto.css">
+  <button id="backButton" onclick="window.history.back();">Back</button>
 </head>
-<button id="backButton" onclick="window.history.back();">Back</button>
-
 <body>
-  <div id="arrangedPhotoContainer">
-    <header>
-      <h1>Arranged Photo</h1>
-      <button id="backButton">Back</button>
-    </header>
-
-    <section id="participantsSection">
-      <h2>Participants</h2>
-      <ul id="participantList"></ul>
-    </section>
-
-    <section id="manualGuestsSection">
-      <h2>Manual Guests</h2>
-      <ul id="manualGuestList"></ul>
-    </section>
-
-    <!-- Image Gallery Dialog -->
-    <div id="imageGalleryDialog" class="dialog hidden">
-      <div class="dialog-content">
-        <div id="imageGallery"></div>
-        <button id="downloadAllButton">Download All</button>
-      </div>
-    </div>
-
-    <!-- No Photos Dialog -->
-    <div id="noPhotosDialog" class="dialog hidden">
-      <div class="dialog-content">
-        <p>No photos uploaded for this participant.</p>
-        <button id="closeNoPhotosDialogButton">Close</button>
-      </div>
+  <div class="event-details">
+    <h2 id="roomName">Event Room Name</h2>
+    <p id="roomCode">Code: </p>
+    <div class="host-details">
+      <h3 id="hostName">Host Name</h3>
+      <img id="hostPhoto" src="fallback.png" alt="Host Photo">
     </div>
   </div>
 
-  <script type="module" src="arrangedphoto.js"></script>
+  <h3>Guests</h3>
+  <ul id="guestList"></ul>
+
+  <h3>Manual Guests</h3>
+  <ul id="manualGuestList"></ul>
+
+  <div id="photoContainer"></div>
+
+  <script src="arrangedphoto.js"></script>
 </body>
 </html>
+
+
