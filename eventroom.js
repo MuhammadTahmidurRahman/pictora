@@ -72,7 +72,6 @@ async function loadEventRoom(eventCode) {
           hostActions.appendChild(hostFolderIcon);
         }
 
-        // Add "Add Member" button for the host
         // Add "Arrange Photo" button for the host
         if (user.uid === hostId) {
           const arrangePhotoButton = document.createElement("button");
@@ -99,13 +98,13 @@ async function loadEventRoom(eventCode) {
         }
       }
 
-      // Load guests list
+      // Load participants (guests)
       const participants = roomData.participants || {};
       const guests = Object.entries(participants).filter(([key]) => key !== hostId);
 
       loadGuests(guests, user.uid, hostId, eventCode);
 
-      // Load manual guests
+      // Load manual participants
       const manualGuests = roomData.manualParticipants || {};
       loadManualGuests(Object.entries(manualGuests), user.uid, hostId, eventCode);
     } else {
@@ -235,23 +234,26 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
     await uploadBytes(fileRef, guestPhoto);
     const photoUrl = await getDownloadURL(fileRef);  // Get the download URL for the uploaded photo
 
-    // Now, update the participant in the database
-    const participantRef = dbRef(database, `rooms/${eventCode}/participants/${participantId}`);
-    await update(participantRef, {
+    // Now, update the manual guest with the photo URL and folder path
+    const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${participantId}`);
+    await update(manualGuestRef, {
       name: guestName,
       email: guestEmail,
       photoUrl,
-      folderPath,  // Store the folder path for the guest
+      folderPath,
     });
 
-    // Upload the profile photo to the guest's folder
-    const response = await fetch(photoUrl); // Fetch the uploaded photo using its URL
+    // Ensure the profile picture is fetched from `photoUrl` and uploaded to the manual participant's folder
+    const response = await fetch(photoUrl); // Fetch the uploaded profile photo using its URL
     const blob = await response.blob();  // Convert the fetched image to a Blob
-    const participantImageRef = storageRef(storage, `${folderPath}/${guestName.replace(/\s+/g, "_")}_profilePhoto.jpg`);
+    const participantImageRef = storageRef(storage, `${folderPath}/${guestName.replace(/\s+/g, "_")}_profilePhoto.jpg`);  // Save with dynamic file name
+
+    // Upload the profile picture to the folder path
     await uploadBytes(participantImageRef, blob);
 
     alert("Guest added successfully and profile picture uploaded.");
-    loadEventRoom(eventCode);  // Reload the event room to reflect changes
+    toggleDialog(false);
+    loadEventRoom(eventCode);
   } catch (error) {
     console.error("Error adding guest:", error);
     alert("Failed to add guest.");
