@@ -243,15 +243,7 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
       folderPath,
     });
 
-    // Ensure the profile picture is fetched from `photoUrl` and uploaded to the manual participant's folder
-    const response = await fetch(photoUrl); // Fetch the uploaded profile photo using its URL
-    const blob = await response.blob();  // Convert the fetched image to a Blob
-    const participantImageRef = storageRef(storage, `${folderPath}/${guestName.replace(/\s+/g, "_")}_profilePhoto.jpg`);  // Save with dynamic file name
-
-    // Upload the profile picture to the folder path
-    await uploadBytes(participantImageRef, blob);
-
-    alert("Guest added successfully and profile picture uploaded.");
+    alert("Guest added successfully.");
     toggleDialog(false);
     loadEventRoom(eventCode);
   } catch (error) {
