@@ -3,30 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arrange Photos</title>
-  <link rel="stylesheet" href="arrangedphoto.css">
+  <title>Arranged Photos</title>
+  <link rel="stylesheet" href="arrangedphoto.css"> <!-- Link to your CSS file -->
   <button id="backButton" onclick="window.history.back();">Back</button>
 </head>
 <body>
   <div class="event-details">
-    <h2 id="roomName">Event Room Name</h2>
-    <p id="roomCode">Code: </p>
+    <h2 id="eventName"></h2>
+    <p id="eventCode"></p>
+
     <div class="host-details">
-      <h3 id="hostName">Host Name</h3>
-      <img id="hostPhoto" src="fallback.png" alt="Host Photo">
+      <img id="hostPhoto" src="" alt="Host Photo">
+      <h3 id="hostName"></h3>
     </div>
   </div>
 
-  <h3>Guests</h3>
-  <ul id="guestList"></ul>
-
-  <h3>Manual Guests</h3>
-  <ul id="manualGuestList"></ul>
-
   <div id="photoContainer"></div>
 
-  <script src="arrangedphoto.js"></script>
+  <h3>Guest List</h3>
+  <ul id="guestList"></ul>
+
+  <h3>Manual Guest List</h3>
+  <ul id="manualGuestList"></ul>
+
+  <script src="arrangedphoto.js"></script> <!-- Link to your JS file -->
 </body>
 </html>
+
+  
+
 
 

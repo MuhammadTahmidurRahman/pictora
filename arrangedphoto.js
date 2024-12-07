@@ -18,139 +18,121 @@ const auth = getAuth();
 const storage = getStorage();
 const database = getDatabase(app);
 
-// Load Event Room and Data
-async function loadEventRoom(eventCode) {
-  try {
-    const roomRef = ref(database, `rooms/${eventCode}`);
-    const snapshot = await get(roomRef);
-    if (snapshot.exists()) {
-      const roomData = snapshot.val();
+// Load Photos and Event Details
+async function loadEventDetails(eventCode) {
+  const eventRef = ref(database, `rooms/${eventCode}`);
+  const eventSnapshot = await get(eventRef);
+  const eventData = eventSnapshot.val();
 
-      // Display room name and code
-      document.getElementById("roomName").textContent = roomData.roomName || "Event Room";
-      document.getElementById("roomCode").textContent = `Code: ${eventCode}`;
+  if (eventData) {
+    document.getElementById("eventName").innerText = eventData.eventName;
+    document.getElementById("eventCode").innerText = `Event Code: ${eventCode}`;
 
-      const user = auth.currentUser;
-
-      // Load host information
-      const hostId = roomData.hostId;
-      const hostData = roomData.participants[hostId];
-      if (hostData) {
-        document.getElementById("hostName").textContent = hostData.name || "Host";
-        document.getElementById("hostPhoto").src = hostData.photoUrl || "fallback.png";
-      }
-
-      // Load guests list (Guests and Manual Guests)
-      const participants = roomData.participants || {};
-      const guests = Object.entries(participants).filter(([key]) => key !== hostId);
-      loadGuests(guests, user.uid, hostId, eventCode);
-
-      const manualGuests = roomData.manualParticipants || {};
-      loadManualGuests(Object.entries(manualGuests), user.uid, hostId, eventCode);
-    } else {
-      alert("Room does not exist.");
-    }
-  } catch (error) {
-    console.error("Error loading event room:", error);
+    const hostDetails = eventData.host;
+    document.getElementById("hostName").innerText = hostDetails.name;
+    document.getElementById("hostPhoto").src = hostDetails.photoUrl;
+    loadGuests(eventCode);
+    loadPhotos(eventCode);
+  } else {
+    console.error("Event data not found.");
   }
 }
 
-// Load Guests and Display Their Profile Pictures and Folder Icons
-function loadGuests(guests, currentUserId, hostId, eventCode) {
-  const guestListElem = document.getElementById("guestList");
-  guestListElem.innerHTML = "";
+// Load Guest List
+async function loadGuests(eventCode) {
+  const guestsRef = ref(database, `rooms/${eventCode}/guests`);
+  const guestSnapshot = await get(guestsRef);
+  const guestData = guestSnapshot.val();
 
-  guests.forEach(([guestId, guestData]) => {
-    const guestItem = createGuestItem(guestId, guestData, currentUserId, hostId, eventCode);
-    guestListElem.appendChild(guestItem);
-  });
-}
+  const guestListContainer = document.getElementById("guestList");
+  guestListContainer.innerHTML = ""; // Clear the list
 
-// Load Manual Guests
-function loadManualGuests(manualGuests, currentUserId, hostId, eventCode) {
-  const manualGuestListElem = document.getElementById("manualGuestList");
-  manualGuestListElem.innerHTML = "";
-
-  manualGuests.forEach(([guestId, guestData]) => {
-    const guestItem = createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, true);
-    manualGuestListElem.appendChild(guestItem);
-  });
-}
-
-// Create a Guest or Manual Guest List Item
-function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, isManual = false) {
-  const guestItem = document.createElement("li");
-  guestItem.classList.add("guest-item");
-  guestItem.innerHTML = `
-    <img class="guest-photo" src="${guestData.photoUrl}" alt="Guest Photo" />
-    <span class="guest-name">${guestData.name}</span>
-  `;
-
-  if (guestData.folderPath) {
-    const folderIcon = document.createElement("button");
-    folderIcon.textContent = "📁";
-    folderIcon.classList.add("folder-icon");
-
-    if (currentUserId === hostId || currentUserId === guestId) {
-      folderIcon.addEventListener("click", () => {
-        window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
-          eventCode
-        )}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)}`;
-      });
-    } else {
-      folderIcon.disabled = true;
-    }
-
-    guestItem.appendChild(folderIcon);
-  }
-
-  if (isManual && currentUserId === hostId) {
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete Guest";
-    deleteButton.classList.add("delete-guest-button");
-    deleteButton.addEventListener("click", async () => {
-      await deleteManualGuest(eventCode, guestId, guestData.folderPath);
+  if (guestData) {
+    Object.keys(guestData).forEach((guestId) => {
+      const guest = guestData[guestId];
+      const guestItem = document.createElement("li");
+      guestItem.innerText = `${guest.name} (${guest.email})`;
+      guestListContainer.appendChild(guestItem);
     });
-    guestItem.appendChild(deleteButton);
   }
-
-  return guestItem;
 }
 
-// Delete Manual Guest
-async function deleteManualGuest(eventCode, guestId, folderPath) {
+// Load Manual Guest List
+async function loadManualGuests(eventCode) {
+  const manualGuestsRef = ref(database, `rooms/${eventCode}/manualGuests`);
+  const manualGuestSnapshot = await get(manualGuestsRef);
+  const manualGuestData = manualGuestSnapshot.val();
+
+  const manualGuestListContainer = document.getElementById("manualGuestList");
+  manualGuestListContainer.innerHTML = ""; // Clear the list
+
+  if (manualGuestData) {
+    Object.keys(manualGuestData).forEach((guestId) => {
+      const guest = manualGuestData[guestId];
+      const guestItem = document.createElement("li");
+      guestItem.innerText = `${guest.name} (${guest.email})`;
+      manualGuestListContainer.appendChild(guestItem);
+    });
+  }
+}
+
+// Load Photos
+async function loadPhotos(eventCode) {
+  const folderPath = `rooms/${eventCode}/host`; // Path for the room photos
+  const folderRef = storageRef(storage, folderPath);
+  const photoContainer = document.getElementById("photoContainer");
+
   try {
-    const guestRef = ref(database, `rooms/${eventCode}/manualParticipants/${guestId}`);
-    await remove(guestRef);
-
-    const folderRef = storageRef(storage, folderPath);
     const listResult = await listAll(folderRef);
-    for (const itemRef of listResult.items) {
-      await deleteObject(itemRef);
-    }
+    photoContainer.innerHTML = ""; // Clear existing photos
 
-    alert("Guest deleted successfully.");
-    loadEventRoom(eventCode);
+    for (const itemRef of listResult.items) {
+      const photoUrl = await getDownloadURL(itemRef);
+
+      // Create photo thumbnail
+      const photoItem = document.createElement("div");
+      photoItem.classList.add("photo-item");
+      photoItem.innerHTML = `
+        <img src="${photoUrl}" alt="Photo">
+        <button class="delete-btn">Delete</button>
+      `;
+
+      // Add delete functionality
+      photoItem.querySelector(".delete-btn").addEventListener("click", async () => {
+        await deletePhoto(itemRef.fullPath);
+        loadPhotos(eventCode); // Reload photos after deletion
+      });
+
+      photoContainer.appendChild(photoItem);
+    }
   } catch (error) {
-    console.error("Error deleting guest:", error);
-    alert("Failed to delete guest.");
+    console.error("Error loading photos:", error);
   }
 }
 
-// Initialize Arrange Room Page
+// Delete Photo
+async function deletePhoto(photoPath) {
+  const photoRef = storageRef(storage, photoPath);
+  try {
+    await deleteObject(photoRef);
+    alert("Photo deleted successfully.");
+  } catch (error) {
+    console.error("Error deleting photo:", error);
+    alert("Failed to delete photo.");
+  }
+}
+
+// Initialize the Page
 onAuthStateChanged(auth, (user) => {
   if (user) {
     const eventCode = new URLSearchParams(window.location.search).get("eventCode");
     if (eventCode) {
-      loadEventRoom(eventCode); // Load event data and guests
+      loadEventDetails(eventCode); // Load event and details
     } else {
       alert("Event code is missing.");
-      window.location.href = "join_event.html";
     }
   } else {
     alert("Please log in to access this page.");
     window.location.href = "login.html";
   }
 });
-
-// Load Photos
