@@ -72,6 +72,7 @@ async function loadEventRoom(eventCode) {
           hostActions.appendChild(hostFolderIcon);
         }
 
+        // Add "Add Member" button for the host
         // Add "Arrange Photo" button for the host
         if (user.uid === hostId) {
           const arrangePhotoButton = document.createElement("button");
@@ -234,18 +235,23 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
     await uploadBytes(fileRef, guestPhoto);
     const photoUrl = await getDownloadURL(fileRef);  // Get the download URL for the uploaded photo
 
-    // Now, update the manual guest with the photo URL and folder path
-    const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${participantId}`);
-    await update(manualGuestRef, {
+    // Now, update the participant in the database
+    const participantRef = dbRef(database, `rooms/${eventCode}/participants/${participantId}`);
+    await update(participantRef, {
       name: guestName,
       email: guestEmail,
       photoUrl,
-      folderPath,
+      folderPath,  // Store the folder path for the guest
     });
 
-    alert("Guest added successfully.");
-    toggleDialog(false);
-    loadEventRoom(eventCode);
+    // Upload the profile photo to the guest's folder
+    const response = await fetch(photoUrl); // Fetch the uploaded photo using its URL
+    const blob = await response.blob();  // Convert the fetched image to a Blob
+    const participantImageRef = storageRef(storage, `${folderPath}/${guestName.replace(/\s+/g, "_")}_profilePhoto.jpg`);
+    await uploadBytes(participantImageRef, blob);
+
+    alert("Guest added successfully and profile picture uploaded.");
+    loadEventRoom(eventCode);  // Reload the event room to reflect changes
   } catch (error) {
     console.error("Error adding guest:", error);
     alert("Failed to add guest.");
