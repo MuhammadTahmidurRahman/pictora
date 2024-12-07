@@ -81,7 +81,7 @@ if (user.uid === hostId) {
 
   arrangePhotoButton.addEventListener("click", () => {
     // Redirect to arrange_photos.html with eventCode
-    window.location.href = `arrange_photos.html?eventCode=${encodeURIComponent(eventCode)}`;
+    window.location.href = `arrangedphoto.html?eventCode=${encodeURIComponent(eventCode)}`;
   });
 
   hostActions.appendChild(arrangePhotoButton);
