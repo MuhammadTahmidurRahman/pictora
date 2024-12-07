@@ -20,12 +20,38 @@ const auth = getAuth();
 const database = getDatabase();
 const storage = getStorage();
 
-// Back button functionality
-document.getElementById("backButton").addEventListener("click", () => {
-  window.location.href = "join_event.html";
-});
-document.getElementById("closeDialogButton").addEventListener("click", () => {
-  toggleDialog(false);  // Close the dialog
+// Wait for the DOM content to be fully loaded
+document.addEventListener("DOMContentLoaded", () => {
+  // Back button functionality
+  const backButton = document.getElementById("backButton");
+  if (backButton) {
+    backButton.addEventListener("click", () => {
+      window.location.href = "eventroom.html";
+    });
+  }
+
+  const closeDialogButton = document.getElementById("closeDialogButton");
+  if (closeDialogButton) {
+    closeDialogButton.addEventListener("click", () => {
+      toggleDialog(false);  // Close the dialog
+    });
+  }
+
+  // Check authentication and load event room
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      const eventCode = new URLSearchParams(window.location.search).get("eventCode");
+      if (eventCode) {
+        loadEventRoom(eventCode);
+      } else {
+        alert("Event Code is missing!");
+        window.location.href = "join_event.html";
+      }
+    } else {
+      alert("Please log in to access the event room.");
+      window.location.href = "login.html";
+    }
+  });
 });
 
 // Load Event Room and Data
@@ -71,8 +97,6 @@ async function loadEventRoom(eventCode) {
 
           hostActions.appendChild(hostFolderIcon);
         }
-
-        // Remove Add Member button and Arrange Photo button (these are now removed)
       }
 
       // Load guests list
@@ -114,91 +138,4 @@ function loadManualGuests(manualGuests, currentUserId, hostId, eventCode) {
   });
 }
 
-// Create a Guest or Manual Guest List Item
-function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, isManual = false) {
-  const guestItem = document.createElement("li");
-  guestItem.classList.add("guest-item");
-  guestItem.innerHTML = `
-    <img class="guest-photo" src="${guestData.photoUrl}" alt="Guest Photo" />
-    <span class="guest-name">${guestData.name}</span>
-  `;
-
-  if (guestData.folderPath) {
-    const folderIcon = document.createElement("button");
-    folderIcon.textContent = "📁";
-    folderIcon.classList.add("folder-icon");
-
-    if (currentUserId === hostId || currentUserId === guestId) {
-      folderIcon.addEventListener("click", () => {
-        window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
-          eventCode
-        )}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)}`;
-      });
-    } else {
-      folderIcon.disabled = true;
-    }
-
-    guestItem.appendChild(folderIcon);
-  }
-
-  if (isManual && currentUserId === hostId) {
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete Guest";
-    deleteButton.classList.add("delete-guest-button");
-    deleteButton.addEventListener("click", async () => {
-      await deleteManualGuest(eventCode, guestId, guestData.folderPath);
-    });
-    guestItem.appendChild(deleteButton);
-  }
-
-  return guestItem;
-}
-
-// Delete Manual Guest
-async function deleteManualGuest(eventCode, guestId, folderPath) {
-  try {
-    const guestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${guestId}`);
-    await remove(guestRef);
-
-    const folderRef = storageRef(storage, folderPath);
-    const listResult = await listAll(folderRef);
-    for (const itemRef of listResult.items) {
-      await deleteObject(itemRef);
-    }
-
-    alert("Guest deleted successfully.");
-    loadEventRoom(eventCode);
-  } catch (error) {
-    console.error("Error deleting guest:", error);
-    alert("Failed to delete guest.");
-  }
-}
-
-// Toggle Add Guest Dialog
-function toggleDialog(show) {
-  const dialog = document.getElementById("addGuestDialog");
-  dialog.classList.toggle("hidden", !show);
-
-  // Clear previous inputs
-  if (show) {
-    document.getElementById("guestName").value = "";
-    document.getElementById("guestEmail").value = "";
-    document.getElementById("guestPhoto").value = null;
-  }
-}
-
-// Check Authentication and Load Event Room
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    const eventCode = new URLSearchParams(window.location.search).get("eventCode");
-    if (eventCode) {
-      loadEventRoom(eventCode);
-    } else {
-      alert("Event Code is missing!");
-      window.location.href = "join_event.html";
-    }
-  } else {
-    alert("Please log in to access the event room.");
-    window.location.href = "login.html";
-  }
-});
+//
