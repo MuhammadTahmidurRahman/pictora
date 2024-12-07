@@ -4,48 +4,48 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Event Room</title>
-<link rel="stylesheet" href="arrangedphoto.css">
+<link rel="stylesheet" href="eventroom.css">
 </head>
 <body>
   <div id="eventRoomContainer">
-    <div id="hostDetails">
-        <p>Host: <span id="hostName">John Doe</span></p>
-        <p>Email: <span id="hostEmail">johndoe@example.com</span></p>
+    <button id="backButton">Back</button>
+    <h1 id="roomName">Loading Room...</h1>
+    <p id="roomCode"></p>
+    
+    <!-- Host Section -->
+    <div id="hostInfo">
+      <h3>Host:</h3>
+      <p id="hostName"></p>
+      <img id="hostPhoto" src="" alt="Host Photo" />
+      <div id="hostActions"></div> <!-- Host actions go here -->
     </div>
-
-    <div id="guestListContainer">
-        <h3>Guests</h3>
-        <ul id="guestList">
-            <!-- Dynamic guest list will be populated here -->
-        </ul>
-    </div>
-
+    
+    <!-- Upload Photo Button -->
+    <button id="uploadPhotoButton">Upload Photos</button>
+    <button id="deleteRoomButton" style="display: none;">Delete Room</button>
+   
+    <!-- Guests Section -->
+    <h3>Guests:</h3>
+    <ul id="guestList" class="scrollable-list"></ul>
+    
     <!-- Manual Guests Section -->
-    <div id="manualGuestsSection">
-        <h3>Manual Guests</h3>
-        <ul id="manualGuests">
-            <!-- Dynamic manual guest list will be populated here -->
-        </ul>
+    <h3>Manual Guests:</h3>
+    <ul id="manualGuestList" class="scrollable-list"></ul>
+    
+    <!-- Add Guest Dialog -->
+    <div id="addGuestDialog" class="dialog hidden">
+      <div class="dialog-content">
+        <h3>Add New Guest</h3>
+        <input type="text" id="guestName" placeholder="Enter guest name" required />
+        <input type="email" id="guestEmail" placeholder="Enter guest email" required />
+        <input type="file" id="guestPhoto" accept="image/*" required />
+        <div class="dialog-buttons">
+          <button id="addGuestButton">Add Guest</button>
+          <button id="closeDialogButton">Cancel</button>
+        </div>
+      </div>
     </div>
-
-    <!-- Folder icons (can be accessed by host or the guest themselves) -->
-    <div id="foldersContainer">
-        <!-- Folder icons will be dynamically populated based on the user's role -->
-    </div>
-
-    <!-- Dialogs -->
-    <div id="guestDialog" class="dialog">
-        <label for="guestEmail">Enter Guest Email:</label>
-        <input type="email" id="guestEmail" placeholder="Guest Email">
-        <button id="addGuestBtn">Add Guest</button>
-        <button id="closeGuestDialogBtn">Close</button>
-    </div>
-
-    <div id="deleteDialog" class="dialog">
-        <p>Are you sure you want to delete this guest?</p>
-        <button id="deleteGuestBtn">Delete</button>
-        <button id="closeDeleteDialogBtn">Close</button>
-    </div>
-</div>
+  </div>
+<script type="module" src="eventroom.js"></script>
 </body>
 </html>
