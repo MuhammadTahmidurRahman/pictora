@@ -25,7 +25,7 @@ document.getElementById("backButton").addEventListener("click", () => {
   window.location.href = "join_event.html";
 });
 document.getElementById("closeDialogButton").addEventListener("click", () => {
-  toggleDialog(false); // Close the dialog
+  toggleDialog(false);  // Close the dialog
 });
 
 // Load Event Room and Data
@@ -74,36 +74,42 @@ async function loadEventRoom(eventCode) {
 
         // Add "Add Member" button for the host
         // Add "Arrange Photo" button for the host
-        if (user.uid === hostId) {
-          const arrangePhotoButton = document.createElement("button");
-          arrangePhotoButton.textContent = "Arrange Photo";
-          arrangePhotoButton.classList.add("arrange-photo-button");
+if (user.uid === hostId) {
+  const arrangePhotoButton = document.createElement("button");
+  arrangePhotoButton.textContent = "Arrange Photo";
+  arrangePhotoButton.classList.add("arrange-photo-button");
 
-          arrangePhotoButton.addEventListener("click", () => {
-            // Redirect to arrange_photos.html with eventCode
-            window.location.href = `arrangedphoto.html?eventCode=${encodeURIComponent(eventCode)}`;
-          });
+  arrangePhotoButton.addEventListener("click", () => {
+    // Redirect to arrange_photos.html with eventCode
+    window.location.href = `arrangedphoto.html?eventCode=${encodeURIComponent(eventCode)}`;
+  });
 
-          hostActions.appendChild(arrangePhotoButton);
+  hostActions.appendChild(arrangePhotoButton);
+}
 
-          const addMemberButton = document.createElement("button");
-          addMemberButton.textContent = "Add Member";
-          addMemberButton.classList.add("add-member-button");
-          addMemberButton.addEventListener("click", () => {
-            toggleDialog(true);
-          });
-          hostActions.appendChild(addMemberButton);
-        }
+
+// Add "Add Member" button for the host
+if (user.uid === hostId) {
+  const addMemberButton = document.createElement("button");
+  addMemberButton.textContent = "Add Member";
+  addMemberButton.classList.add("add-member-button");
+  addMemberButton.addEventListener("click", () => {
+    toggleDialog(true);
+  });
+  hostActions.appendChild(addMemberButton);
+}
+
       }
 
-      // Load participants list
+      // Load guests list
       const participants = roomData.participants || {};
-      const participantEntries = Object.entries(participants);
-      loadParticipants(participantEntries, user.uid, hostId, eventCode);
+      const guests = Object.entries(participants).filter(([key]) => key !== hostId);
 
-      // Load manual participants
-      const manualParticipants = roomData.manualParticipants || {};
-      loadManualGuests(Object.entries(manualParticipants), user.uid, hostId, eventCode);
+      loadGuests(guests, user.uid, hostId, eventCode);
+
+      // Load manual guests
+      const manualGuests = roomData.manualParticipants || {};
+      loadManualGuests(Object.entries(manualGuests), user.uid, hostId, eventCode);
     } else {
       alert("Room does not exist.");
     }
@@ -147,14 +153,14 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
   input.click();
 });
 
-// Load Participants and Display Their Profile Pictures and Folder Icons
-function loadParticipants(participantEntries, currentUserId, hostId, eventCode) {
-  const participantListElem = document.getElementById("participantList");
-  participantListElem.innerHTML = "";
+// Load Guests and Display Their Profile Pictures and Folder Icons
+function loadGuests(guests, currentUserId, hostId, eventCode) {
+  const guestListElem = document.getElementById("guestList");
+  guestListElem.innerHTML = "";
 
-  participantEntries.forEach(([participantId, participantData]) => {
-    const participantItem = createGuestItem(participantId, participantData, currentUserId, hostId, eventCode);
-    participantListElem.appendChild(participantItem);
+  guests.forEach(([guestId, guestData]) => {
+    const guestItem = createGuestItem(guestId, guestData, currentUserId, hostId, eventCode);
+    guestListElem.appendChild(guestItem);
   });
 }
 
@@ -209,6 +215,75 @@ function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, i
   return guestItem;
 }
 
+// Add Guest Button Logic
+document.getElementById("addGuestButton").addEventListener("click", async () => {
+  const guestName = document.getElementById("guestName").value.trim();
+  const guestEmail = document.getElementById("guestEmail").value.trim();
+  const guestPhoto = document.getElementById("guestPhoto").files[0];  // This is the image to upload
+  const eventCode = new URLSearchParams(window.location.search).get("eventCode");
+
+  if (!guestName || !guestEmail || !guestPhoto) {
+    alert("All fields are required.");
+    return;
+  }
+
+  const participantId = `${eventCode}_${Date.now()}`;
+  const folderPath = `rooms/${eventCode}/${participantId}`;
+  const storagePath = `uploads/${participantId}`;
+
+  try {
+    // Upload the guest photo to storage
+    const fileRef = storageRef(storage, storagePath);
+    await uploadBytes(fileRef, guestPhoto);
+    const photoUrl = await getDownloadURL(fileRef);  // Get the download URL for the uploaded photo
+
+    // Now, update the manual guest with the photo URL and folder path
+    const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${participantId}`);
+    await update(manualGuestRef, {
+      name: guestName,
+      email: guestEmail,
+      photoUrl,
+      folderPath,
+    });
+
+    // Ensure the profile picture is fetched from `photoUrl` and uploaded to the manual participant's folder
+    const response = await fetch(photoUrl); // Fetch the uploaded profile photo using its URL
+    const blob = await response.blob();  // Convert the fetched image to a Blob
+    const participantImageRef = storageRef(storage, `${folderPath}/${guestName.replace(/\s+/g, "_")}_profilePhoto.jpg`);  // Save with dynamic file name
+
+    // Upload the profile picture to the folder path
+    await uploadBytes(participantImageRef, blob);
+
+    alert("Guest added successfully and profile picture uploaded.");
+    toggleDialog(false);
+    loadEventRoom(eventCode);
+  } catch (error) {
+    console.error("Error adding guest:", error);
+    alert("Failed to add guest.");
+  }
+});
+
+
+// Delete Manual Guest
+async function deleteManualGuest(eventCode, guestId, folderPath) {
+  try {
+    const guestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${guestId}`);
+    await remove(guestRef);
+
+    const folderRef = storageRef(storage, folderPath);
+    const listResult = await listAll(folderRef);
+    for (const itemRef of listResult.items) {
+      await deleteObject(itemRef);
+    }
+
+    alert("Guest deleted successfully.");
+    loadEventRoom(eventCode);
+  } catch (error) {
+    console.error("Error deleting guest:", error);
+    alert("Failed to delete guest.");
+  }
+}
+
 // Toggle Add Guest Dialog
 function toggleDialog(show) {
   const dialog = document.getElementById("addGuestDialog");
@@ -236,4 +311,4 @@ onAuthStateChanged(auth, (user) => {
     alert("Please log in to access the event room.");
     window.location.href = "login.html";
   }
-});
+});//previous file
