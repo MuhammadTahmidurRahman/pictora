@@ -14,6 +14,7 @@ import {
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import { getDatabase, ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
+
 // Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
@@ -77,6 +78,7 @@ window.loginWithGoogle = async function () {
   }
 };
 
+
 // Listen to authentication state changes
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -96,8 +98,9 @@ function togglePassword(inputId) {
   passwordField.type = type;
 }
 
+
 // Add event listener for login button
 document.getElementById('login-button').addEventListener('click', loginUser);
 
-// Add event listener for Google sign-in button
-document.getElementById('googleSignInButton').addEventListener('click', loginWithGoogle);
+
+

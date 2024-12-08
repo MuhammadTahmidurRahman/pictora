@@ -1,4 +1,4 @@
-/* General styling */
+/* General Styling */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f4f4f9;
@@ -19,7 +19,7 @@ body {
   overflow-y: auto; /* Enable scrolling */
 }
 
-/* Scrollable list styles */
+/* Scrollable List Styling */
 .scrollable-list {
   max-height: 150px;
   overflow-y: auto;
@@ -28,7 +28,20 @@ body {
   list-style-type: none;
 }
 
-/* Button styles */
+.scrollable-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollable-list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+.scrollable-list::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+/* Button Styles */
 button {
   width: 100%;
   padding: 10px;
@@ -38,13 +51,19 @@ button {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-size: 14px;
 }
 
 button:hover {
   background: #555;
 }
 
-/* Host photo styles */
+/* Hidden Button */
+.hidden {
+  display: none !important;
+}
+
+/* Host Photo Styling */
 #hostPhoto {
   width: 100px;
   height: 100px;
@@ -54,28 +73,24 @@ button:hover {
   object-fit: cover; /* Ensure proper scaling */
 }
 
-/* Folder icon styles */
-.folder-icon {
-  margin-left: 10px;
-  cursor: pointer;
-  background: none;
-  border: none;
-  font-size: 18px;
+/* Host Photos Section */
+.photo-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+  margin: 15px 0;
 }
 
-.folder-icon:disabled {
-  cursor: not-allowed;
-  color: #ccc;
+.photo-thumbnail {
+  width: 100px;
+  height: 100px;
+  border-radius: 10px;
+  object-fit: cover;
 }
 
-
-/* Guest list styles */
-#guestList, #manualGuestList {
-  padding: 0;
-  margin: 10px 0;
-}
-
-#guestList li, #manualGuestList li {
+/* Guest List Styles */
+#guestList li,
+#manualGuestList li {
   display: flex;
   align-items: center;
   margin: 10px 0;
@@ -85,16 +100,15 @@ button:hover {
   border-radius: 8px;
 }
 
-/* Guest photo styles */
 .guest-photo {
   width: 50px;
   height: 50px;
   border-radius: 50%;
   margin-right: 10px;
-  object-fit: cover; /* Ensure proper scaling */
+  object-fit: cover;
 }
 
-/* Dialog styles */
+/* Dialog Styles */
 .dialog {
   position: fixed;
   top: 0;
@@ -128,7 +142,7 @@ button:hover {
   border-radius: 5px;
 }
 
-/* Buttons in the dialog */
+/* Dialog Buttons */
 .dialog-buttons {
   display: flex;
   justify-content: space-between;
@@ -139,6 +153,7 @@ button:hover {
   width: 45%;
 }
 
+/* Additional Button Styling */
 .add-member-button {
   background-color: #007BFF;
   color: white;
@@ -151,4 +166,44 @@ button:hover {
   color: white;
   font-size: 14px;
   margin-left: 10px;
+}
+
+/* Room Header Styles */
+#roomName {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+
+#roomCode {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Download Button Styling */
+/* Button styling for downloading photos */
+.download-button {
+  width: 100%;
+  padding: 10px;
+  background: #007BFF;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.download-button:hover {
+  background: #0056b3;
+}
+
+
+/* Add Guest Button */
+button#addGuestButton {
+  background-color: #007BFF;
+  color: #fff;
+}
+
+button#addGuestButton:hover {
+  background-color: #0056b3;
 }

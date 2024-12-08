@@ -1,26 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Event Room</title>
-<link rel="stylesheet" href="arrangedphoto.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Room</title>
+  <link rel="stylesheet" href="arrangedphoto.css">
 </head>
 <body>
   <div id="eventRoomContainer">
-    <button id="backButton">Back</button>
+    <!-- Back Button -->
+    <button id="backButton" class="button">Back</button>
+    
+    <!-- Room Information -->
     <h1 id="roomName">Loading Room...</h1>
     <p id="roomCode"></p>
     
     <!-- Host Section -->
     <div id="hostInfo">
       <h3>Host:</h3>
-      <p id="hostName"></p>
-      <img id="hostPhoto" src="" alt="Host Photo" />
-      <div id="hostActions"></div> <!-- Host actions go here -->
+      <p id="hostName">Host Name</p>
+      <img id="hostPhoto" src="" alt="Host Photo" class="photo-thumbnail" />
+      <div id="hostActions">
+        <!-- Add these buttons in the host section -->
+<button id="viewHostPhotoBtn"> View Host Photo</button>
+<button id="downloadHostPhotoBtn">📦 Download Host Photo</button>
+<div id="hostMessage"></div> <!-- Message for no photo available -->
+
+      </div>
     </div>
     
-   
+    <!-- Photos Section -->
+    <div id="hostPhotos" class="photo-container"></div>
+    
     <!-- Guests Section -->
     <h3>Guests:</h3>
     <ul id="guestList" class="scrollable-list"></ul>
@@ -29,9 +40,22 @@
     <h3>Manual Guests:</h3>
     <ul id="manualGuestList" class="scrollable-list"></ul>
     
+    <!-- Add Guest Dialog -->
+    <div id="addGuestDialog" class="dialog hidden">
+      <div class="dialog-content">
+        <h3>Add New Guest</h3>
+        <input type="text" id="guestName" placeholder="Enter guest name" required />
+        <input type="email" id="guestEmail" placeholder="Enter guest email" required />
+        <input type="file" id="guestPhoto" accept="image/*" required />
+        <div class="dialog-buttons">
+          <button id="addGuestButton" class="button">Add Guest</button>
+          <button id="closeDialogButton" class="button">Cancel</button>
+        </div>
       </div>
     </div>
   </div>
-<script type="module" src="arrangedphoto.js"></script>
+  
+  <!-- Scripts -->
+  <script type="module" src="arrangedphoto.js"></script>
 </body>
 </html>

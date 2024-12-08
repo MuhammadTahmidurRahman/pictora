@@ -111,21 +111,17 @@ window.registerUser = async function () {
 };
 
 // Google Sign-In function with image upload validation
-// Google Sign-In function with account selection and image upload validation
 window.signInWithGoogle = async function () {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({
     prompt: "select_account", // Ensures the user is prompted to select an account
   });
 
+  // Ensure the user has uploaded a profile image before signing up with Google
   const imageFile = document.getElementById("image").files[0];
 
-  if (!imageFile) {
-    alert("Please upload an image before signing up with Google.");
-    return;
-  }
-
   try {
+    // Sign in with Google
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
@@ -137,16 +133,27 @@ window.signInWithGoogle = async function () {
       return;
     }
 
-    // Upload profile image to Firebase Storage
-    const storageRef = ref(storage, `uploads/${user.uid}`);
-    await uploadBytes(storageRef, imageFile);
-    const imageUrl = await getDownloadURL(storageRef);
+    // Determine the image URL: if the user has a photo from Google, use that, otherwise, use the uploaded one
+    let imageUrl;
+    if (user.photoURL) {
+      // Use the Google profile photo
+      imageUrl = user.photoURL;
+    } else if (imageFile) {
+      // Upload the photo from the file input
+      const storageRef = ref(storage, `uploads/${user.uid}`);
+      await uploadBytes(storageRef, imageFile);  // Upload the image
+      imageUrl = await getDownloadURL(storageRef);  // Getting the image URL
+    } else {
+      // If there's no Google photo or uploaded photo, alert the user
+      alert("Please upload a profile image.");
+      return;
+    }
 
-    // Store user data in Realtime Database
+    // Store user data in Firebase Realtime Database, including photo URL
     await set(dbRef(database, `users/${user.uid}`), {
       email: user.email,
       name: user.displayName,
-      photo: imageUrl,
+      photo: imageUrl,  // Store the image URL here
     });
 
     alert("Google Sign-In successful and image uploaded!");
@@ -156,4 +163,3 @@ window.signInWithGoogle = async function () {
     alert("Google Sign-In failed. Please try again.");
   }
 };
-
