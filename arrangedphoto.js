@@ -149,34 +149,76 @@ function toggleDialog(show) {
 // Function to view host photo
 async function viewHostPhoto(hostData) {
   const hostMessage = document.getElementById("hostMessage");
-  if (hostData.photoUrl) {
-    // Open a new window or display the image in a modal
-    const img = document.createElement("img");
-    img.src = hostData.photoUrl;
-    img.alt = "Host Photo";
-    img.classList.add("photo-thumbnail");
-    hostMessage.innerHTML = ""; // Clear any previous message
-    hostMessage.appendChild(img);
+  const folderPath = hostData.photoFolderPath; // Assuming photoFolderPath is the folder path of the host's photos in Firebase Storage
+
+  if (folderPath) {
+    try {
+      const folderRef = storageRef(storage, folderPath);
+      const listResult = await listAll(folderRef);
+
+      if (listResult.items.length === 0) {
+        hostMessage.textContent = "No photos available for the host.";
+        return;
+      }
+
+      // Display first photo from the folder
+      const photoUrl = await getDownloadURL(listResult.items[0]);
+      const img = document.createElement("img");
+      img.src = photoUrl;
+      img.alt = "Host Photo";
+      img.classList.add("photo-thumbnail");
+      hostMessage.innerHTML = ""; // Clear any previous message
+      hostMessage.appendChild(img);
+    } catch (error) {
+      console.error("Error fetching host photo:", error);
+      hostMessage.textContent = "Failed to load host photo.";
+    }
   } else {
-    hostMessage.textContent = "No photo available for the host.";
+    hostMessage.textContent = "No photo folder available for the host.";
   }
 }
 
 // Function to download host photo
 async function downloadHostPhoto(hostData) {
   const hostMessage = document.getElementById("hostMessage");
-  if (hostData.photoUrl) {
-    // Create an anchor tag to download the image
-    const link = document.createElement("a");
-    link.href = hostData.photoUrl;
-    link.download = "host_photo.jpg"; // You can change the file name
-    link.click();
+  const folderPath = hostData.photoFolderPath; // Assuming photoFolderPath is the folder path of the host's photos in Firebase Storage
+
+  if (folderPath) {
+    try {
+      const folderRef = storageRef(storage, folderPath);
+      const listResult = await listAll(folderRef);
+
+      if (listResult.items.length === 0) {
+        hostMessage.textContent = "No photos available to download for the host.";
+        return;
+      }
+
+      const JSZip = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
+      const { saveAs } = await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js');
+      const zip = new JSZip();
+
+      // Loop through all photos in the folder and add them to the zip file
+      for (const itemRef of listResult.items) {
+        const photoUrl = await getDownloadURL(itemRef);
+        const response = await fetch(photoUrl);
+        const blob = await response.blob();
+        const fileName = itemRef.name;
+        zip.file(fileName, blob);
+      }
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      saveAs(zipBlob, "host_photos.zip");
+      alert("Host photos downloaded successfully.");
+    } catch (error) {
+      console.error("Error downloading host photos:", error);
+      hostMessage.textContent = "Failed to download host photos.";
+    }
   } else {
-    hostMessage.textContent = "No photo available to download for the host.";
+    hostMessage.textContent = "No photo folder available for the host.";
   }
 }
 
-// Load Event Room and Data
+// Modify loadEventRoom to handle the host photo buttons
 async function loadEventRoom(eventCode) {
   try {
     const roomRef = dbRef(database, `rooms/${eventCode}`);
@@ -196,6 +238,10 @@ async function loadEventRoom(eventCode) {
       if (hostData) {
         document.getElementById("hostName").textContent = hostData.name || "Host";
         document.getElementById("hostPhoto").src = hostData.photoUrl || "fallback.png";
+
+        // Add event listeners for the host photo buttons
+        document.getElementById("viewHostPhotoBtn").addEventListener("click", () => viewHostPhoto(hostData));
+        document.getElementById("downloadHostPhotoBtn").addEventListener("click", () => downloadHostPhoto(hostData));
       }
 
       // Load participants and manual participants
