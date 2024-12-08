@@ -1,18 +1,15 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { 
   getAuth, 
-  createUserWithEmailAndPassword, 
-  signInWithPopup, 
-  fetchSignInMethodsForEmail, 
-  GoogleAuthProvider, 
   signInWithEmailAndPassword, 
+  signInWithPopup, 
+  GoogleAuthProvider, 
   onAuthStateChanged, 
   setPersistence, 
   browserLocalPersistence, 
   signOut 
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import { getDatabase, ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref as dbRef, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -28,76 +25,86 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const storage = getStorage(app);
 const database = getDatabase(app);
 
-// Set persistence to local inside the login function
-// Function to handle email login
+// Email/Password Login Function
 async function loginUser() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
 
+  if (!email || !password) {
+    alert("Please enter both email and password.");
+    return;
+  }
+
   try {
-    await setPersistence(auth, browserLocalPersistence);
+    await setPersistence(auth, browserLocalPersistence); // Persist login session
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    console.log("User logged in:", userCredential.user);
-    window.location.href = "join_event.html";  // Redirect to event page on successful login
+    const user = userCredential.user;
+
+    // Verify if the user exists in Realtime Database
+    const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
+    if (userSnapshot.exists()) {
+      alert("Login successful!");
+      window.location.href = "join_event.html"; // Redirect on success
+    } else {
+      alert("No account found with this email. Please sign up.");
+      await signOut(auth); // Logout if user is not in the database
+      window.location.href = "signup.html";
+    }
   } catch (error) {
     console.error("Login error:", error.message);
     if (error.code === 'auth/user-not-found') {
-      alert("No account found with this email. Please sign up.");
+      alert("No account found for this email. Please sign up.");
+    } else if (error.code === 'auth/wrong-password') {
+      alert("Incorrect password. Please try again.");
     } else {
-      alert("Login failed. Please check your credentials.");
+      alert(`Login failed: ${error.message}`);
     }
   }
 }
 
-// Function to handle Google login and check if user exists
-window.loginWithGoogle = async function () {
+// Google Login Function
+async function loginWithGoogle() {
   try {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Check if the user exists in the Realtime Database
-    const userSnapshot = await get(dbRef(database, "users/" + user.uid));
+    // Check if the user exists in Realtime Database
+    const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
     if (userSnapshot.exists()) {
-      alert("Google sign-in successful");
-      window.location.href = 'join_event.html';  // Redirect to the event page
+      alert("Google sign-in successful!");
+      window.location.href = "join_event.html"; // Redirect on success
     } else {
-      // If user does not exist in the database, sign out and redirect to signup page
-      await signOut(auth);
       alert("No account found with this Google account. Please sign up.");
-      window.location.href = 'signup.html';  // Redirect to signup page
+      await signOut(auth); // Logout if user is not in the database
+      window.location.href = "signup.html";
     }
   } catch (error) {
-    console.error("Google sign-in failed:", error.message);
-    alert("Failed to sign in with Google. Please sign up.");
-    window.location.href = 'signup.html';  // Redirect to signup page if sign-in fails
+    console.error("Google sign-in error:", error.message);
+    alert("Failed to sign in with Google. Please try again.");
   }
-};
+}
 
-// Listen to authentication state changes
+// Auth State Listener
 onAuthStateChanged(auth, (user) => {
   if (user) {
     console.log("User is logged in.");
     if (window.location.pathname !== "/join_event.html") {
-      window.location.href = "join_event.html"; // Redirect only if not already on the target page
+      window.location.href = "join_event.html"; // Redirect to join_event.html if logged in
     }
   } else {
     console.log("No user is logged in.");
   }
 });
 
-// Toggle password visibility
+// Toggle Password Visibility
 function togglePassword(inputId) {
   const passwordField = document.getElementById(inputId);
-  const type = passwordField.type === "password" ? "text" : "password";
-  passwordField.type = type;
+  passwordField.type = passwordField.type === "password" ? "text" : "password";
 }
 
-// Add event listener for login button
+// Attach Event Listeners
 document.getElementById('login-button').addEventListener('click', loginUser);
-
-// Add event listener for Google sign-in button
 document.getElementById('googleSignInButton').addEventListener('click', loginWithGoogle);
