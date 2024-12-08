@@ -25,34 +25,6 @@ document.getElementById("backButton").addEventListener("click", () => {
   window.location.href = "join_event.html";
 });
 
-// Function to load and display guest list
-async function loadGuests(guests, containerId) {
-  const guestListContainer = document.getElementById(containerId);
-  guestListContainer.innerHTML = ""; // Clear previous list
-
-  guests.forEach(([guestId, guestData]) => {
-    const guestItem = document.createElement("li");
-    guestItem.innerHTML = `
-      <img src="${guestData.photoUrl || "fallback.png"}" alt="Guest Photo" class="guest-photo" />
-      <span>${guestData.name || "Unnamed Guest"}</span>
-      <button class="folder-icon" data-folder-path="${guestData.folderPath || ""}">
-        📁 View Photos
-      </button>
-    `;
-    guestListContainer.appendChild(guestItem);
-
-    // Add event listener to view photos
-    const folderButton = guestItem.querySelector(".folder-icon");
-    folderButton.addEventListener("click", () => {
-      if (guestData.folderPath) {
-        fetchAndDisplayPhotos(guestData.folderPath, "photoDialogContent");
-        toggleDialog(true); // Open photo dialog
-      } else {
-        alert("No photos available for this guest.");
-      }
-    });
-  });
-}
 
 async function downloadGuestPhotosAsZip(folderPath, guestName) {
   const JSZip = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
