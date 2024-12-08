@@ -299,7 +299,7 @@ async function loadPhotos(eventCode) {
       // Create photo thumbnail
       const photoItem = document.createElement("div");
       photoItem.classList.add("photo-item");
-      photoItem.dataset.path = itemRef.fullPath;
+      photoItem.dataset.path = itemRef.folderPath;
 
       photoItem.innerHTML = `  
         <img src="${photoUrl}" alt="Photo" />
@@ -309,13 +309,13 @@ async function loadPhotos(eventCode) {
       // Add delete functionality
       photoItem.querySelector(".delete-btn").addEventListener("click", async () => {
         if (confirm("Are you sure you want to delete this photo?")) {
-          await deletePhoto(itemRef.fullPath);
+          await deletePhoto(itemRef.folderPath);
           loadPhotos(eventCode); // Reload photos after deletion
         }
       });
 
       photoItems.push(photoItem);
-      allPaths.push(itemRef.fullPath); // Add photo path to the array
+      allPaths.push(itemRef.folderPath); // Add photo path to the array
     }
 
     // Append photos to container
