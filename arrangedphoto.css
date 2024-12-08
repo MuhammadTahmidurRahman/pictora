@@ -182,17 +182,21 @@ button:hover {
 }
 
 /* Download Button Styling */
+/* Button styling for downloading photos */
 .download-button {
-  background-color: #4CAF50;
-  color: white;
-  border-radius: 5px;
-  font-size: 14px;
+  width: 100%;
   padding: 10px;
+  background: #007BFF;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .download-button:hover {
-  background-color: #45A049;
+  background: #0056b3;
 }
+
 
 /* Add Guest Button */
 button#addGuestButton {
