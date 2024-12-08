@@ -105,22 +105,21 @@ button.login-button:hover, button.google-button:hover {
   background: #356ac3;
 }
 
-button.google-button {
-  background: white;
+.google-button {
+  width: 100%;
+  padding: 12px 0;
+  background: #ffffff;
   border: 1px solid #d1d9e6;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
   color: #4c8bf5;
+  margin-top: 16px;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-button.google-button::before {
-  content: '';
-  background: url('google-logo.png') no-repeat center/contain;
-  width: 20px;
-  height: 20px;
-  display: inline-block;
-  margin-right: 10px;
-}
-
-button.google-button:hover {
+.google-button:hover {
   background: #f7f9fc;
   color: #356ac3;
 }
