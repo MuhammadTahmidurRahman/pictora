@@ -4,7 +4,6 @@ import {
   signInWithEmailAndPassword, 
   signInWithPopup, 
   GoogleAuthProvider, 
-  onAuthStateChanged, 
   setPersistence, 
   browserLocalPersistence, 
   signOut 
@@ -27,6 +26,12 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
 
+// Function to check if a user exists in the database
+async function checkUserExists(uid) {
+  const userSnapshot = await get(dbRef(database, `users/${uid}`));
+  return userSnapshot.exists(); // Returns true if the user exists
+}
+
 // Email/Password Login Function
 async function loginUser() {
   const email = document.getElementById("email").value.trim();
@@ -42,9 +47,9 @@ async function loginUser() {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // Verify if the user exists in Realtime Database
-    const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
-    if (userSnapshot.exists()) {
+    // Check if user exists in the database
+    const userExists = await checkUserExists(user.uid);
+    if (userExists) {
       alert("Login successful!");
       window.location.href = "join_event.html"; // Redirect on success
     } else {
@@ -71,9 +76,9 @@ async function loginWithGoogle() {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Check if the user exists in Realtime Database
-    const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
-    if (userSnapshot.exists()) {
+    // Check if user exists in the database
+    const userExists = await checkUserExists(user.uid);
+    if (userExists) {
       alert("Google sign-in successful!");
       window.location.href = "join_event.html"; // Redirect on success
     } else {
@@ -87,24 +92,12 @@ async function loginWithGoogle() {
   }
 }
 
-// Auth State Listener
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log("User is logged in.");
-    if (window.location.pathname !== "/join_event.html") {
-      window.location.href = "join_event.html"; // Redirect to join_event.html if logged in
-    }
-  } else {
-    console.log("No user is logged in.");
-  }
-});
+// Attach Event Listeners
+document.getElementById('login-button').addEventListener('click', loginUser);
+document.getElementById('googleSignInButton').addEventListener('click', loginWithGoogle);
 
 // Toggle Password Visibility
 function togglePassword(inputId) {
   const passwordField = document.getElementById(inputId);
   passwordField.type = passwordField.type === "password" ? "text" : "password";
 }
-
-// Attach Event Listeners
-document.getElementById('login-button').addEventListener('click', loginUser);
-document.getElementById('googleSignInButton').addEventListener('click', loginWithGoogle);
