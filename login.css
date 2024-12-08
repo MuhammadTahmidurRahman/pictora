@@ -84,7 +84,7 @@ input:focus {
   cursor: pointer;
 }
 
-button.login-button, button.google-button {
+button.login-button {
   width: 100%;
   padding: 12px 0;
   background: #4c8bf5;
