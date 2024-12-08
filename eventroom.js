@@ -73,21 +73,6 @@ async function loadEventRoom(eventCode) {
         }
 
         // Add "Add Member" button for the host
-        // Add "Arrange Photo" button for the host
-        if (user.uid === hostId) {
-          const arrangePhotoButton = document.createElement("button");
-          arrangePhotoButton.textContent = "Arrange Photo";
-          arrangePhotoButton.classList.add("arrange-photo-button");
-
-          arrangePhotoButton.addEventListener("click", () => {
-            // Redirect to arrange_photos.html with eventCode
-            window.location.href = `arrangedphoto.html?eventCode=${encodeURIComponent(eventCode)}`;
-          });
-
-          hostActions.appendChild(arrangePhotoButton);
-        }
-
-        // Add "Add Member" button for the host
         if (user.uid === hostId) {
           const addMemberButton = document.createElement("button");
           addMemberButton.textContent = "Add Member";
@@ -99,13 +84,13 @@ async function loadEventRoom(eventCode) {
         }
       }
 
-      // Load guests list
+      // Load participants
       const participants = roomData.participants || {};
       const guests = Object.entries(participants).filter(([key]) => key !== hostId);
 
       loadGuests(guests, user.uid, hostId, eventCode);
 
-      // Load manual guests
+      // Load manual participants
       const manualGuests = roomData.manualParticipants || {};
       loadManualGuests(Object.entries(manualGuests), user.uid, hostId, eventCode);
     } else {
@@ -127,8 +112,8 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
     return;
   }
 
-  const participantId = `${eventCode}_${Date.now()}`;
-  const folderPath = `rooms/${eventCode}/${participantId}`;
+  const participantId = `${eventCode}_${Date.now()}`; // Unique ID for participant
+  const folderPath = `rooms/${eventCode}/participants/${participantId}`;  // Store in participants path
 
   try {
     // Get the profile photo URL from the current user's auth data
@@ -232,47 +217,27 @@ function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, i
 // Delete Manual Guest
 async function deleteManualGuest(eventCode, guestId, folderPath) {
   try {
-    const guestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${guestId}`);
-    await remove(guestRef);
+    const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${guestId}`);
+    await remove(manualGuestRef);
 
-    const folderRef = storageRef(storage, folderPath);
-    const listResult = await listAll(folderRef);
-    for (const itemRef of listResult.items) {
-      await deleteObject(itemRef);
-    }
+    // Delete the folder from Firebase Storage if the photo exists
+    const participantImageRef = storageRef(storage, `${folderPath}`);
+    await deleteObject(participantImageRef);
 
-    alert("Guest deleted successfully.");
+    alert("Manual guest deleted successfully.");
     loadEventRoom(eventCode);
   } catch (error) {
-    console.error("Error deleting guest:", error);
+    console.error("Error deleting manual guest:", error);
     alert("Failed to delete guest.");
   }
 }
 
-// Toggle Add Guest Dialog
-function toggleDialog(show) {
+// Toggle dialog visibility
+function toggleDialog(visible) {
   const dialog = document.getElementById("addGuestDialog");
-  dialog.classList.toggle("hidden", !show);
-
-  // Clear previous inputs
-  if (show) {
-    document.getElementById("guestName").value = "";
-    document.getElementById("guestEmail").value = "";
-  }
+  dialog.style.display = visible ? "block" : "none";
 }
 
-// Check Authentication and Load Event Room
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    const eventCode = new URLSearchParams(window.location.search).get("eventCode");
-    if (eventCode) {
-      loadEventRoom(eventCode);
-    } else {
-      alert("Event Code is missing!");
-      window.location.href = "join_event.html";
-    }
-  } else {
-    alert("Please log in to access the event room.");
-    window.location.href = "login.html";
-  }
-});
+// Initialize event loading when the page is loaded
+const eventCode = new URLSearchParams(window.location.search).get("eventCode");
+loadEventRoom(eventCode);
