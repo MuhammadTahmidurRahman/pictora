@@ -72,29 +72,20 @@ async function loginUser() {
 // Google Login Function
 async function loginWithGoogle() {
   try {
-    const clientId = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"; // Replace with your Google Client ID
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
 
-    google.accounts.id.initialize({
-      client_id: clientId,
-      callback: async (response) => {
-        const credential = GoogleAuthProvider.credential(response.credential);
-        const userCredential = await signInWithCredential(auth, credential);
-        const user = userCredential.user;
-
-        // Check if user exists in the database
-        const userExists = await checkUserExists(user.uid);
-        if (userExists) {
-          alert("Google sign-in successful!");
-          window.location.href = "join_event.html"; // Redirect on success
-        } else {
-          alert("No account found with this Google account. Please sign up.");
-          await signOut(auth); // Logout if user is not in the database
-          window.location.href = "signup.html";
-        }
-      },
-    });
-
-    google.accounts.id.prompt(); // Show the account picker
+    // Check if user exists in the database
+    const userExists = await checkUserExists(user.uid);
+    if (userExists) {
+      alert("Google sign-in successful!");
+      window.location.href = "join_event.html"; // Redirect on success
+    } else {
+      alert("No account found with this Google account. Please sign up.");
+      await signOut(auth); // Logout if user is not in the database
+      window.location.href = "signup.html";
+    }
   } catch (error) {
     console.error("Google sign-in error:", error.message);
     alert("Failed to sign in with Google. Please try again.");
