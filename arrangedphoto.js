@@ -54,6 +54,78 @@ async function loadGuests(guests, containerId) {
   });
 }
 
+async function downloadGuestPhotosAsZip(folderPath, guestName) {
+  const JSZip = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
+  const { saveAs } = await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js');
+  const zip = new JSZip();
+
+  try {
+    const folderRef = storageRef(storage, folderPath);
+    const listResult = await listAll(folderRef);
+
+    if (listResult.items.length === 0) {
+      alert("No photos available for this guest.");
+      return;
+    }
+
+    for (const itemRef of listResult.items) {
+      const photoUrl = await getDownloadURL(itemRef);
+      const response = await fetch(photoUrl);
+      const blob = await response.blob();
+      const fileName = itemRef.name;
+      zip.file(fileName, blob);
+    }
+
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    saveAs(zipBlob, `${guestName}_Photos.zip`);
+    alert("Photos downloaded successfully.");
+  } catch (error) {
+    console.error("Error downloading photos:", error);
+    alert("Failed to download photos.");
+  }
+}
+
+async function loadGuests(guests, containerId) {
+  const guestListContainer = document.getElementById(containerId);
+  guestListContainer.innerHTML = ""; // Clear previous list
+
+  guests.forEach(([guestId, guestData]) => {
+    const guestItem = document.createElement("li");
+    guestItem.innerHTML = `
+      <img src="${guestData.photoUrl || "fallback.png"}" alt="Guest Photo" class="guest-photo" />
+      <span>${guestData.name || "Unnamed Guest"}</span>
+      <button class="folder-icon" data-folder-path="${guestData.folderPath || ""}">
+        📁 View Photos
+      </button>
+      <button class="download-button" data-folder-path="${guestData.folderPath || ""}">
+        📦 Download Photos
+      </button>
+    `;
+    guestListContainer.appendChild(guestItem);
+
+    // Add event listener to view photos
+    const folderButton = guestItem.querySelector(".folder-icon");
+    folderButton.addEventListener("click", () => {
+      if (guestData.folderPath) {
+        fetchAndDisplayPhotos(guestData.folderPath, "photoDialogContent");
+        toggleDialog(true); // Open photo dialog
+      } else {
+        alert("No photos available for this guest.");
+      }
+    });
+
+    // Add event listener to download photos
+    const downloadButton = guestItem.querySelector(".download-button");
+    downloadButton.addEventListener("click", () => {
+      if (guestData.folderPath) {
+        downloadGuestPhotosAsZip(guestData.folderPath, guestData.name || "Unnamed Guest");
+      } else {
+        alert("No photos available for this guest.");
+      }
+    });
+  });
+}
+
 // Function to load and display manual guest list
 async function loadManualGuests(manualGuests, containerId) {
   const manualGuestListContainer = document.getElementById(containerId);
