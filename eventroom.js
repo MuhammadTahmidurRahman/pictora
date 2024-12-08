@@ -74,6 +74,20 @@ async function loadEventRoom(eventCode) {
 
         // Add "Add Member" button for the host
         if (user.uid === hostId) {
+          const arrangePhotoButton = document.createElement("button");
+          arrangePhotoButton.textContent = "Arrange Photo";
+          arrangePhotoButton.classList.add("arrange-photo-button");
+
+          arrangePhotoButton.addEventListener("click", () => {
+            // Redirect to arrange_photos.html with eventCode
+            window.location.href = `arrangedphoto.html?eventCode=${encodeURIComponent(eventCode)}`;
+          });
+
+          hostActions.appendChild(arrangePhotoButton);
+        }
+
+        // Add "Add Member" button for the host
+        if (user.uid === hostId) {
           const addMemberButton = document.createElement("button");
           addMemberButton.textContent = "Add Member";
           addMemberButton.classList.add("add-member-button");
@@ -82,15 +96,16 @@ async function loadEventRoom(eventCode) {
           });
           hostActions.appendChild(addMemberButton);
         }
+
       }
 
-      // Load participants
+      // Load guests list
       const participants = roomData.participants || {};
       const guests = Object.entries(participants).filter(([key]) => key !== hostId);
 
       loadGuests(guests, user.uid, hostId, eventCode);
 
-      // Load manual participants
+      // Load manual guests
       const manualGuests = roomData.manualParticipants || {};
       loadManualGuests(Object.entries(manualGuests), user.uid, hostId, eventCode);
     } else {
@@ -101,40 +116,73 @@ async function loadEventRoom(eventCode) {
   }
 }
 
-// Add Guest Button Logic
+// Add functionality to the Upload Photos button
+document.getElementById("uploadPhotoButton").addEventListener("click", async () => {
+  const user = auth.currentUser;
+  if (!user) {
+    alert("Please log in to upload photos.");
+    return;
+  }
+
+  const eventCode = new URLSearchParams(window.location.search).get("eventCode");
+  const folderPath = `rooms/${eventCode}/${user.uid}`;
+
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.multiple = true;
+
+  input.addEventListener("change", async () => {
+    const files = input.files;
+    if (files.length === 0) return;
+
+    try {
+      for (const file of files) {
+        const fileRef = storageRef(storage, `${folderPath}/${file.name}`);
+        await uploadBytes(fileRef, file);
+      }
+      alert("Photos uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading photos:", error);
+      alert("Failed to upload photos.");
+    }
+  });
+
+  input.click();
+});
+
+// Create a function to handle adding guests
 document.getElementById("addGuestButton").addEventListener("click", async () => {
   const guestName = document.getElementById("guestName").value.trim();
   const guestEmail = document.getElementById("guestEmail").value.trim();
+  const guestPhoto = document.getElementById("guestPhoto").files[0];  // This is the image to upload
   const eventCode = new URLSearchParams(window.location.search).get("eventCode");
 
-  if (!guestName || !guestEmail) {
+  if (!guestName || !guestEmail || !guestPhoto) {
     alert("All fields are required.");
     return;
   }
 
-  const participantId = `${eventCode}_${Date.now()}`; // Unique ID for participant
-  const folderPath = `rooms/${eventCode}/participants/${participantId}`;  // Store in participants path
+  const participantId = `${eventCode}_${Date.now()}`;
+  const folderPath = `rooms/${eventCode}/${participantId}`;
+  const storagePath = `uploads/${participantId}`;
 
   try {
-    // Get the profile photo URL from the current user's auth data
-    const user = auth.currentUser;
-    if (!user) {
-      alert("Please log in to add a guest.");
-      return;
-    }
+    // Upload the guest photo to storage
+    const fileRef = storageRef(storage, storagePath);
+    await uploadBytes(fileRef, guestPhoto);
+    const photoUrl = await getDownloadURL(fileRef);  // Get the download URL for the uploaded photo
 
-    const photoUrl = user.photoURL || "fallback.png"; // Use the current user's profile photo URL as default
-
-    // Now, update the participant with the photo URL and folder path
+    // Now, update the participant in the database
     const participantRef = dbRef(database, `rooms/${eventCode}/participants/${participantId}`);
     await update(participantRef, {
       name: guestName,
       email: guestEmail,
       photoUrl,
-      folderPath,
+      folderPath,  // Add the folder path for the participant
     });
 
-    // Upload the profile picture to the participant's folder path
+    // Ensure the profile picture is fetched from `photoUrl` and uploaded to the participant's folder
     const response = await fetch(photoUrl); // Fetch the uploaded profile photo using its URL
     const blob = await response.blob();  // Convert the fetched image to a Blob
     const participantImageRef = storageRef(storage, `${folderPath}/${guestName.replace(/\s+/g, "_")}_profilePhoto.jpg`);  // Save with dynamic file name
@@ -168,76 +216,48 @@ function loadManualGuests(manualGuests, currentUserId, hostId, eventCode) {
   manualGuestListElem.innerHTML = "";
 
   manualGuests.forEach(([guestId, guestData]) => {
-    const guestItem = createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, true);
+    const guestItem = createGuestItem(guestId, guestData, currentUserId, hostId, eventCode);
     manualGuestListElem.appendChild(guestItem);
   });
 }
 
-// Create a Guest or Manual Guest List Item
-function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, isManual = false) {
-  const guestItem = document.createElement("li");
+// Create Guest Item Element
+function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode) {
+  const guestItem = document.createElement("div");
   guestItem.classList.add("guest-item");
-  guestItem.innerHTML = `
-    <img class="guest-photo" src="${guestData.photoUrl}" alt="Guest Photo" />
-    <span class="guest-name">${guestData.name}</span>
-  `;
 
+  const guestPhoto = document.createElement("img");
+  guestPhoto.src = guestData.photoUrl || "default-avatar.png";
+  guestPhoto.alt = guestData.name;
+
+  const guestName = document.createElement("span");
+  guestName.textContent = guestData.name || "Guest";
+
+  guestItem.appendChild(guestPhoto);
+  guestItem.appendChild(guestName);
+
+  // Show folder icon if the guest has a folder path
   if (guestData.folderPath) {
     const folderIcon = document.createElement("button");
     folderIcon.textContent = "📁";
     folderIcon.classList.add("folder-icon");
-
-    if (currentUserId === hostId || currentUserId === guestId) {
-      folderIcon.addEventListener("click", () => {
-        window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
-          eventCode
-        )}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)}`;
-      });
-    } else {
-      folderIcon.disabled = true;
-    }
-
-    guestItem.appendChild(folderIcon);
-  }
-
-  if (isManual && currentUserId === hostId) {
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete";
-    deleteButton.classList.add("delete-guest-button");
-    deleteButton.addEventListener("click", () => {
-      deleteManualGuest(eventCode, guestId, guestData.folderPath);
+    folderIcon.addEventListener("click", () => {
+      window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
+        eventCode
+      )}&folderName=${encodeURIComponent(guestData.folderPath)}&userId=${encodeURIComponent(guestId)}`;
     });
-
-    guestItem.appendChild(deleteButton);
+    guestItem.appendChild(folderIcon);
   }
 
   return guestItem;
 }
 
-// Delete Manual Guest
-async function deleteManualGuest(eventCode, guestId, folderPath) {
-  try {
-    const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${guestId}`);
-    await remove(manualGuestRef);
-
-    // Delete the folder from Firebase Storage if the photo exists
-    const participantImageRef = storageRef(storage, `${folderPath}`);
-    await deleteObject(participantImageRef);
-
-    alert("Manual guest deleted successfully.");
-    loadEventRoom(eventCode);
-  } catch (error) {
-    console.error("Error deleting manual guest:", error);
-    alert("Failed to delete guest.");
-  }
-}
-
-// Toggle dialog visibility
+// Function to toggle dialog visibility
 function toggleDialog(visible) {
   const dialog = document.getElementById("addGuestDialog");
   dialog.style.display = visible ? "block" : "none";
 }
 
-// Initialize event loading when the page is loaded
+// Initialize event loading
 const eventCode = new URLSearchParams(window.location.search).get("eventCode");
 loadEventRoom(eventCode);
