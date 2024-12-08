@@ -84,7 +84,7 @@ input:focus {
   cursor: pointer;
 }
 
-button.login-button {
+button.login-button, button.google-button {
   width: 100%;
   padding: 12px 0;
   background: #4c8bf5;
@@ -101,7 +101,7 @@ button.login-button {
   align-items: center;
 }
 
-button.login-button:hover, button.google-button:hover {
+button.login-button:hover {
   background: #356ac3;
 }
 
