@@ -136,3 +136,30 @@ window.signInWithGoogle = async function () {
     alert("Failed to sign in with Google. Please try again.");
   }
 };
+
+// Fetch user information after login
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    // Fetch the user data from Firebase Realtime Database
+    try {
+      const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
+      
+      if (userSnapshot.exists()) {
+        // Get user data
+        const userData = userSnapshot.val();
+        
+        // Display user data on the page (example)
+        document.getElementById("user-name").textContent = userData.name;
+        document.getElementById("user-email").textContent = userData.email;
+        document.getElementById("user-photo").src = userData.photo;
+      } else {
+        console.log("No user data found in the database.");
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  } else {
+    // Redirect to login page if no user is authenticated
+    window.location.href = "login.html";
+  }
+});
