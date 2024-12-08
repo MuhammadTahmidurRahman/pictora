@@ -22,7 +22,7 @@ const storage = getStorage();
 
 // Back button functionality
 document.getElementById("backButton").addEventListener("click", () => {
-  window.location.href = "join_event.html";
+  window.location.href = "eventroom.html";
 });
 
 
@@ -144,6 +144,36 @@ async function fetchAndDisplayPhotos(folderPath, containerId) {
 function toggleDialog(show) {
   const dialog = document.getElementById("photoDialog");
   dialog.style.display = show ? "flex" : "none";
+}
+
+// Function to view host photo
+async function viewHostPhoto(hostData) {
+  const hostMessage = document.getElementById("hostMessage");
+  if (hostData.photoUrl) {
+    // Open a new window or display the image in a modal
+    const img = document.createElement("img");
+    img.src = hostData.photoUrl;
+    img.alt = "Host Photo";
+    img.classList.add("photo-thumbnail");
+    hostMessage.innerHTML = ""; // Clear any previous message
+    hostMessage.appendChild(img);
+  } else {
+    hostMessage.textContent = "No photo available for the host.";
+  }
+}
+
+// Function to download host photo
+async function downloadHostPhoto(hostData) {
+  const hostMessage = document.getElementById("hostMessage");
+  if (hostData.photoUrl) {
+    // Create an anchor tag to download the image
+    const link = document.createElement("a");
+    link.href = hostData.photoUrl;
+    link.download = "host_photo.jpg"; // You can change the file name
+    link.click();
+  } else {
+    hostMessage.textContent = "No photo available to download for the host.";
+  }
 }
 
 // Load Event Room and Data
