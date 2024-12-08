@@ -1,5 +1,4 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-<<<<<<< Updated upstream
 import { 
   getAuth, 
   createUserWithEmailAndPassword, 
@@ -14,28 +13,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import { getDatabase, ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-=======
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-const auth = getAuth();
-
-onAuthStateChanged(auth, (user) => {
-  console.log("Auth state changed. Checking user status...");
-  if (user) {
-    console.log("User is logged in:", user);
-    // If user is logged in, we should be redirected to join_event
-    if (window.location.pathname === '/login.html') {
-      console.log("Redirecting to join_event...");
-      window.location.href = 'join_event.html'; // Redirect to event page
-    }
-  } else {
-    console.log("User is not logged in. Staying on login page.");
-    // If the user is not logged in, do not redirect.
-  }
-});
->>>>>>> Stashed changes
 
 // Firebase configuration
 const firebaseConfig = {
@@ -100,7 +78,7 @@ window.loginWithGoogle = async function () {
   }
 };
 
-<<<<<<< Updated upstream
+
 // Listen to authentication state changes
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -119,49 +97,10 @@ function togglePassword(inputId) {
   const type = passwordField.type === "password" ? "text" : "password";
   passwordField.type = type;
 }
-=======
-// Handle authentication state changes
-// Handle authentication state changes
-// Handle authentication state changes
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // User is signed in
-    console.log("User is signed in:", user);
->>>>>>> Stashed changes
+
 
 // Add event listener for login button
 document.getElementById('login-button').addEventListener('click', loginUser);
 
-<<<<<<< Updated upstream
-// Add event listener for Google sign-in button
-document.getElementById('googleSignInButton').addEventListener('click', loginWithGoogle);
-=======
-    // Only redirect if not already on 'signup.html' or 'login.html'
-    if (window.location.pathname !== '/signup.html' && window.location.pathname !== '/login.html') {
-      window.location.href = 'signup.html';
-    }
-  }
-});
 
-// Handle authentication state changes
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // User is signed in
-    console.log("User is signed in:", user);
 
-    // Redirect only if not already on 'join_event.html'
-    if (window.location.pathname !== '/join_event.html') {
-      window.location.href = 'join_event.html';
-    }
-  } else {
-    // User is signed out
-    console.log("User is signed out");
-
-    // Redirect to 'signup.html' only if not on 'signup.html' or 'login.html'
-    if (window.location.pathname !== '/signup.html' && window.location.pathname !== '/login.html') {
-      window.location.href = 'signup.html';
-    }
-  }
-});
-
->>>>>>> Stashed changes
