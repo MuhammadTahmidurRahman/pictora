@@ -116,16 +116,50 @@ async function loadGuests(guests, containerId) {
 }
 
 // Function to load manual guests into the DOM
+// Function to load manual guests into the DOM
 async function loadManualGuests(manualGuests, containerId) {
   const manualGuestListContainer = document.getElementById(containerId);
   manualGuestListContainer.innerHTML = ""; // Clear previous list
 
+  if (!manualGuests || manualGuests.length === 0) {
+    manualGuestListContainer.innerHTML = "<li>No manual guests available.</li>";
+    return;
+  }
+
   manualGuests.forEach(([guestId, guestData]) => {
     const guestItem = document.createElement("li");
     guestItem.innerHTML = `
+      <img src="${guestData.photoUrl || "fallback.png"}" alt="Manual Guest Photo" class="guest-photo" />
       <span>${guestData.name || "Unnamed Manual Guest"}</span>
+      <button class="folder-icon" data-folder-path="${guestData.folderPath || ""}">
+        📁 View Photos
+      </button>
+      <button class="download-button" data-folder-path="${guestData.folderPath || ""}">
+        📦 Download Photos
+      </button>
     `;
     manualGuestListContainer.appendChild(guestItem);
+
+    // Add event listener to view photos
+    const folderButton = guestItem.querySelector(".folder-icon");
+    folderButton.addEventListener("click", () => {
+      if (guestData.folderPath) {
+        fetchAndDisplayPhotos(guestData.folderPath, "photoDialogContent");
+        toggleDialog(true); // Open photo dialog
+      } else {
+        alert("No photos available for this manual guest.");
+      }
+    });
+
+    // Add event listener to download photos
+    const downloadButton = guestItem.querySelector(".download-button");
+    downloadButton.addEventListener("click", () => {
+      if (guestData.folderPath) {
+        downloadGuestPhotosAsZip(guestData.folderPath, guestData.name || "Unnamed Manual Guest");
+      } else {
+        alert("No photos available for this manual guest.");
+      }
+    });
   });
 }
 
@@ -299,7 +333,7 @@ async function loadPhotos(eventCode) {
       // Create photo thumbnail
       const photoItem = document.createElement("div");
       photoItem.classList.add("photo-item");
-      photoItem.dataset.path = itemRef.folderPath;
+      photoItem.dataset.path = itemRef.fullPath;
 
       photoItem.innerHTML = `  
         <img src="${photoUrl}" alt="Photo" />
@@ -309,13 +343,13 @@ async function loadPhotos(eventCode) {
       // Add delete functionality
       photoItem.querySelector(".delete-btn").addEventListener("click", async () => {
         if (confirm("Are you sure you want to delete this photo?")) {
-          await deletePhoto(itemRef.folderPath);
+          await deletePhoto(itemRef.fullPath);
           loadPhotos(eventCode); // Reload photos after deletion
         }
       });
 
       photoItems.push(photoItem);
-      allPaths.push(itemRef.folderPath); // Add photo path to the array
+      allPaths.push(itemRef.fullPath); // Add photo path to the array
     }
 
     // Append photos to container
