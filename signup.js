@@ -112,12 +112,14 @@ window.registerUser = async function () {
 
 // Google Sign-In function with image upload validation
 // Google Sign-In function with account selection and image upload validation
+// Google Sign-In function with image upload validation
 window.signInWithGoogle = async function () {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({
     prompt: "select_account", // Ensures the user is prompted to select an account
   });
 
+  // Ensure the user has uploaded a profile image before signing up with Google
   const imageFile = document.getElementById("image").files[0];
 
   if (!imageFile) {
@@ -126,6 +128,7 @@ window.signInWithGoogle = async function () {
   }
 
   try {
+    // Sign in with Google
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
@@ -137,16 +140,16 @@ window.signInWithGoogle = async function () {
       return;
     }
 
-    // Upload profile image to Firebase Storage
+    // Upload the profile image to Firebase Storage
     const storageRef = ref(storage, `uploads/${user.uid}`);
-    await uploadBytes(storageRef, imageFile);
-    const imageUrl = await getDownloadURL(storageRef);
+    await uploadBytes(storageRef, imageFile);  // Uploading the image
+    const imageUrl = await getDownloadURL(storageRef);  // Getting the image URL
 
-    // Store user data in Realtime Database
+    // Store user data in Firebase Realtime Database, including photo URL
     await set(dbRef(database, `users/${user.uid}`), {
       email: user.email,
       name: user.displayName,
-      photo: imageUrl,
+      photo: imageUrl,  // Store the image URL here
     });
 
     alert("Google Sign-In successful and image uploaded!");
@@ -156,4 +159,5 @@ window.signInWithGoogle = async function () {
     alert("Google Sign-In failed. Please try again.");
   }
 };
+
 
