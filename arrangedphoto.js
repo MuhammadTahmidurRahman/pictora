@@ -1,8 +1,19 @@
 // Import necessary Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref as dbRef, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { getStorage, ref as storageRef, getDownloadURL, listAll } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { 
+  getDatabase, 
+  ref as dbRef, 
+  get, 
+  set 
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { 
+  getStorage, 
+  ref as storageRef, 
+  getDownloadURL, 
+  listAll, 
+  deleteObject 
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Firebase Initialization
 const firebaseConfig = {
@@ -26,6 +37,11 @@ document.getElementById("backButton").addEventListener("click", () => {
 });
 
 
+/**
+ * Existing Functionality
+ */
+
+// Function to download guest photos as a ZIP file
 async function downloadGuestPhotosAsZip(folderPath, guestName) {
   const JSZip = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
   const { saveAs } = await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js');
@@ -57,6 +73,7 @@ async function downloadGuestPhotosAsZip(folderPath, guestName) {
   }
 }
 
+// Function to load guests into the DOM
 async function loadGuests(guests, containerId) {
   const guestListContainer = document.getElementById(containerId);
   guestListContainer.innerHTML = ""; // Clear previous list
@@ -98,7 +115,7 @@ async function loadGuests(guests, containerId) {
   });
 }
 
-// Function to load and display manual guest list
+// Function to load manual guests into the DOM
 async function loadManualGuests(manualGuests, containerId) {
   const manualGuestListContainer = document.getElementById(containerId);
   manualGuestListContainer.innerHTML = ""; // Clear previous list
@@ -112,7 +129,7 @@ async function loadManualGuests(manualGuests, containerId) {
   });
 }
 
-// Function to fetch photos and display them
+// Function to fetch and display photos in a dialog
 async function fetchAndDisplayPhotos(folderPath, containerId) {
   const photoContainer = document.getElementById(containerId);
   photoContainer.innerHTML = ""; // Clear any previous content
@@ -140,7 +157,7 @@ async function fetchAndDisplayPhotos(folderPath, containerId) {
   }
 }
 
-// Function to toggle the photo dialog
+// Function to toggle the photo dialog visibility
 function toggleDialog(show) {
   const dialog = document.getElementById("photoDialog");
   dialog.style.display = show ? "flex" : "none";
@@ -178,7 +195,7 @@ async function viewHostPhoto(hostData) {
   }
 }
 
-// Function to download host photo
+// Function to download host photos as a ZIP file
 async function downloadHostPhoto(hostData) {
   const hostMessage = document.getElementById("hostMessage");
   const folderPath = hostData.photoFolderPath; // Assuming photoFolderPath is the folder path of the host's photos in Firebase Storage
@@ -218,7 +235,7 @@ async function downloadHostPhoto(hostData) {
   }
 }
 
-// Modify loadEventRoom to handle the host photo buttons
+// Function to load event room details and participants
 async function loadEventRoom(eventCode) {
   try {
     const roomRef = dbRef(database, `rooms/${eventCode}`);
@@ -259,6 +276,11 @@ async function loadEventRoom(eventCode) {
   }
 }
 
+/**
+ * New Backend Connection Functionality
+ */
+
+// Function to load photos for arranging the room
 async function loadPhotos(eventCode) {
   const folderPath = `rooms/${eventCode}/host`;  // Path for the room photos
   const folderRef = storageRef(storage, folderPath);
@@ -286,8 +308,10 @@ async function loadPhotos(eventCode) {
 
       // Add delete functionality
       photoItem.querySelector(".delete-btn").addEventListener("click", async () => {
-        await deletePhoto(itemRef.fullPath);
-        loadPhotos(eventCode); // Reload photos after deletion
+        if (confirm("Are you sure you want to delete this photo?")) {
+          await deletePhoto(itemRef.fullPath);
+          loadPhotos(eventCode); // Reload photos after deletion
+        }
       });
 
       photoItems.push(photoItem);
@@ -299,12 +323,13 @@ async function loadPhotos(eventCode) {
       photoContainer.appendChild(item);
     });
 
-} catch (error) {
+  } catch (error) {
     console.error("Error loading photos:", error);
+    photoContainer.textContent = "Failed to load photos.";
   }
 }
 
-// Delete Photo
+// Function to delete a photo from Firebase Storage
 async function deletePhoto(photoPath) {
   const photoRef = storageRef(storage, photoPath);
 
@@ -318,43 +343,60 @@ async function deletePhoto(photoPath) {
 }
 
 // Update sortPhotoRequest field and increment it when host visits the page
-
 async function updateSortPhotoRequest(eventCode) {
-    const hostRef = ref(database, `rooms/${eventCode}/host`);
-  
-    try {
-      // Get the current sortPhotoRequest value
-      const snapshot = await get(hostRef);
-      let currentSortValue = snapshot.exists() ? snapshot.val().sortPhotoRequest : 0.0;
-  
-      // Increment the value by 1
-      const newSortValue = currentSortValue + 1.0;
-  
-      // Update the sortPhotoRequest field in the database
-      await set(hostRef, {
-        sortPhotoRequest: newSortValue,
-      });
-  
-      console.log(`sortPhotoRequest field updated to ${newSortValue}.`);
-  
-    } catch (error) {
-      console.error("Error updating sortPhotoRequest field:", error);
-    }
-  }
-  
-  // Initialize Arrange Room Page
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      const eventCode = new URLSearchParams(window.location.search).get("eventCode");
-      if (eventCode) {
-        loadPhotos(eventCode); // Load and sort photos when eventCode is available
-        updateSortPhotoRequest(eventCode);  // Increment and update sortPhotoRequest each time
-      } else {
-        alert("Event code is missing.");
-      }
-    } else {
-      alert("Please log in to access this page.");
-      window.location.href = "login.html";
-    }
-  });
+  const hostRef = dbRef(database, `rooms/${eventCode}/host`);
 
+  try {
+    // Get the current sortPhotoRequest value
+    const snapshot = await get(hostRef);
+    let currentSortValue = 0.0;
+
+    if (snapshot.exists()) {
+      const hostData = snapshot.val();
+      currentSortValue = hostData.sortPhotoRequest !== undefined ? hostData.sortPhotoRequest : 0.0;
+    }
+
+    // Increment the value by 1
+    const newSortValue = currentSortValue + 1.0;
+
+    // Update the sortPhotoRequest field in the database while preserving existing data
+    await set(hostRef, {
+      ...snapshot.val(),  // Preserve existing host data
+      sortPhotoRequest: newSortValue,
+    });
+
+    console.log(`sortPhotoRequest field updated to ${newSortValue}.`);
+
+  } catch (error) {
+    console.error("Error updating sortPhotoRequest field:", error);
+  }
+}
+
+/**
+ * Authentication and Initialization
+ */
+
+// Check Authentication and Initialize Page
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventCode = urlParams.get("eventCode");
+
+    if (eventCode) {
+      // Load Event Room Details
+      loadEventRoom(eventCode);
+
+      // Load and arrange photos for the room
+      loadPhotos(eventCode);
+
+      // Update sortPhotoRequest each time the host visits the page
+      updateSortPhotoRequest(eventCode);
+    } else {
+      alert("Event Code is missing!");
+      window.location.href = "join_event.html";
+    }
+  } else {
+    alert("Please log in to access the event room.");
+    window.location.href = "login.html";
+  }
+});
