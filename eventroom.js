@@ -59,9 +59,10 @@ async function loadEventRoom(eventCode) {
         // Add folder icon for host if they have uploaded photos
         if (hostData.folderPath) {
           const hostFolderIcon = document.createElement("button");
-          hostFolderIcon.textContent = "📁";
+          hostFolderIcon.setAttribute("aria-label", "Host Folder");
           hostFolderIcon.classList.add("folder-icon");
 
+          // No textContent as CSS handles the icon
           if (user.uid === hostId) {
             hostFolderIcon.addEventListener("click", () => {
               window.location.href = `photogallery.html?eventCode=${encodeURIComponent(
@@ -78,7 +79,7 @@ async function loadEventRoom(eventCode) {
         // Add "Arrange Photo" button for the host
         if (user.uid === hostId) {
           const arrangePhotoButton = document.createElement("button");
-          arrangePhotoButton.textContent = "Arrange Photo";
+          arrangePhotoButton.setAttribute("aria-label", "Arrange Photos");
           arrangePhotoButton.classList.add("arrange-photo-button");
 
           arrangePhotoButton.addEventListener("click", () => {
@@ -92,7 +93,7 @@ async function loadEventRoom(eventCode) {
         // Add "Add Member" button for the host
         if (user.uid === hostId) {
           const addMemberButton = document.createElement("button");
-          addMemberButton.textContent = "Add Member";
+          addMemberButton.setAttribute("aria-label", "Add Member");
           addMemberButton.classList.add("add-member-button");
           addMemberButton.addEventListener("click", () => {
             toggleDialog(true);
@@ -102,8 +103,9 @@ async function loadEventRoom(eventCode) {
 
         // View Sorted Photos button
         const sortedPhotoButton = document.createElement("button");
-        sortedPhotoButton.textContent = "View Sorted Photos";
-        sortedPhotoButton.classList.add("action-button");
+        sortedPhotoButton.setAttribute("aria-label", "View Sorted Photos");
+        sortedPhotoButton.classList.add("view-sorted-button"); // Corrected class name
+
         sortedPhotoButton.addEventListener("click", () => {
           if (user.uid === hostId) {
             // Host uses hostData.hostUploadedPhotoFolderPath + "/photos"
@@ -124,7 +126,6 @@ async function loadEventRoom(eventCode) {
           }
         });
         hostActions.appendChild(sortedPhotoButton);
-
       }
 
       // Load guests list
@@ -218,14 +219,17 @@ function loadManualGuests(manualGuests, currentUserId, hostId, eventCode) {
 function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, isManual = false) {
   const guestItem = document.createElement("li");
   guestItem.classList.add("guest-item");
+  
   guestItem.innerHTML = 
     `<img class="guest-photo" src="${guestData.photoUrl}" alt="Guest Photo" />
     <span class="guest-name">${guestData.name}</span>`;
-
+  
   if (guestData.folderPath) {
     const folderIcon = document.createElement("button");
-    folderIcon.textContent = "📁";
+    folderIcon.setAttribute("aria-label", "Guest Folder");
     folderIcon.classList.add("folder-icon");
+
+    // No textContent as CSS handles the icon
 
     if (currentUserId === hostId || currentUserId === guestId) {
       folderIcon.addEventListener("click", () => {
@@ -242,8 +246,9 @@ function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, i
 
   if (isManual && currentUserId === hostId) {
     const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete Guest";
+    deleteButton.setAttribute("aria-label", "Delete Guest");
     deleteButton.classList.add("delete-guest-button");
+    // No textContent as CSS handles the icon and hover text
     deleteButton.addEventListener("click", async () => {
       await deleteManualGuest(eventCode, guestId, guestData.folderPath);
     });

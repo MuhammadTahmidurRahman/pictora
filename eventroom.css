@@ -201,7 +201,7 @@ button:hover {
 }
 
 .view-sorted-button::before {
-  content: "🧩"; /* Sorted icon */
+  content: "⇆"; /* Sorted icon */
   font-size: 18px;
   display: block;
   margin-bottom: 3px;
@@ -272,7 +272,8 @@ h3 {
 
 /* Guest Lists */
 #guestList li,
-#manualGuestList li {
+#manualGuestList li,
+.guest-item {
   display: flex;
   align-items: center;
   margin: 10px 0;
@@ -338,12 +339,16 @@ h3 {
   width: 45%;
 }
 
+/* Delete Guest Button */
 .delete-guest-button {
   background: rgba(255,76,76,0.9);
   color: #fff;
   border: 1px solid #000;
   font-size: 14px;
   max-width: 180px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
 }
 
 .delete-guest-button:hover {
