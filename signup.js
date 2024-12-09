@@ -1,3 +1,5 @@
+// signup.js
+
 // Firebase imports and initialization
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { 
@@ -10,7 +12,7 @@ import {
   sendEmailVerification,
   signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import { getDatabase, ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 const firebaseConfig = {
@@ -28,51 +30,87 @@ const auth = getAuth();
 const storage = getStorage();
 const database = getDatabase();
 
-// Redirect authenticated users to join_event.html
-onAuthStateChanged(auth, (user) => {
+// Redirect authenticated users to join_event.html if their email is verified
+onAuthStateChanged(auth, async (user) => {
   if (user) {
-    // Optionally, check if email is verified
     if (user.emailVerified) {
       window.location.href = "join_event.html";
     } else {
       alert("Please verify your email before proceeding. A verification email has been sent to your email address.");
-      // Optionally, you can resend verification email
-      sendEmailVerification(user)
-        .then(() => {
-          alert("Verification email sent. Please check your inbox.");
-        })
-        .catch((error) => {
-          console.error("Error sending verification email:", error);
-          alert("Failed to send verification email. Please try again.");
-        });
+      // Optionally, resend verification email
+      try {
+        await sendEmailVerification(user);
+        alert("Verification email sent. Please check your inbox.");
+      } catch (error) {
+        console.error("Error sending verification email:", error);
+        alert("Failed to send verification email. Please try again.");
+      }
       // Sign out the user to prevent access without verification
-      signOut(auth);
+      await signOut(auth);
     }
   }
 });
 
-// Utility functions
+// Utility Functions
+
+/**
+ * Toggles the visibility of a password field.
+ * @param {string} fieldId - The ID of the password input field.
+ */
 window.togglePassword = function (fieldId) {
   const field = document.getElementById(fieldId);
-  field.type = field.type === "password" ? "text" : "password";
+  if (field) {
+    field.type = field.type === "password" ? "text" : "password";
+  } else {
+    console.error(`Password field with id '${fieldId}' not found.`);
+  }
 };
 
+/**
+ * Triggers the hidden file input to open the image picker.
+ */
 window.showImagePicker = function () {
-  document.getElementById("image").click();
+  const imageInput = document.getElementById("image");
+  if (imageInput) {
+    imageInput.click();
+  } else {
+    console.error("Image input element with id 'image' not found.");
+  }
 };
 
+/**
+ * Displays the selected image status.
+ * @param {HTMLElement} input - The file input element.
+ */
 window.displayImage = function (input) {
   const uploadText = document.getElementById("upload-text");
-  uploadText.textContent = input.files && input.files[0] ? "Photo selected" : "Upload your photo here";
+  if (uploadText) {
+    uploadText.textContent = input.files && input.files[0] ? "Photo selected" : "Upload your photo here";
+  } else {
+    console.error("Upload text element with id 'upload-text' not found.");
+  }
 };
 
-// Register User
+/**
+ * Navigates back to the previous page.
+ */
+window.goBack = function () {
+  window.history.back();
+};
+
+/**
+ * Registers a new user with email and password, uploads their profile image, and sends a verification email.
+ */
 window.registerUser = async function () {
   const name = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
   const confirmPassword = document.getElementById("confirm-password").value.trim();
-  const imageFile = document.getElementById("image").files[0];
+  const imageInput = document.getElementById("image");
+  const imageFile = imageInput ? imageInput.files[0] : null;
+
+  // Debugging: Check if imageFile is obtained correctly
+  console.log("Image File:", imageFile);
 
   // Validation checks
   if (!name || !email || !password || !confirmPassword || !imageFile) {
@@ -102,11 +140,26 @@ window.registerUser = async function () {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
+    // Ensure the user object exists
+    if (!user) {
+      alert("Failed to create user. Please try again.");
+      return;
+    }
+
     // Upload image to Firebase Storage
-    const storageRefPath = `uploads/${user.uid}`;
-    const storageRef = ref(storage, storageRefPath);
-    await uploadBytes(storageRef, imageFile);
-    const imageUrl = await getDownloadURL(storageRef);
+    // Include file extension in the storage path
+    const fileExtension = imageFile.name.split('.').pop();
+    const storagePath = `uploads/${user.uid}/profile.${fileExtension}`;
+    const imageStorageRef = storageRef(storage, storagePath);
+
+    // Debugging: Log storage path
+    console.log("Uploading image to:", storagePath);
+
+    await uploadBytes(imageStorageRef, imageFile);
+    const imageUrl = await getDownloadURL(imageStorageRef);
+
+    // Debugging: Log image URL
+    console.log("Image URL:", imageUrl);
 
     // Save user data to Firebase Realtime Database
     await set(dbRef(database, `users/${user.uid}`), {
@@ -118,7 +171,7 @@ window.registerUser = async function () {
     // Send email verification
     await sendEmailVerification(user);
     alert("Registration successful! A verification email has been sent to your email address. Please verify to proceed.");
-    
+
     // Sign out the user to prevent access without verification
     await signOut(auth);
 
@@ -130,10 +183,13 @@ window.registerUser = async function () {
   }
 };
 
-// Google Sign-In
+/**
+ * Signs in the user using Google Sign-In, uploads their profile image if new, and redirects accordingly.
+ */
 window.signInWithGoogle = async function () {
   const provider = new GoogleAuthProvider();
-  const imageFile = document.getElementById("image").files[0];
+  const imageInput = document.getElementById("image");
+  const imageFile = imageInput ? imageInput.files[0] : null;
 
   if (!imageFile) {
     alert("Please upload a profile image.");
@@ -141,8 +197,31 @@ window.signInWithGoogle = async function () {
   }
 
   try {
+    // Debugging: Log image file
+    console.log("Google Sign-In Image File:", imageFile);
+
+    // Upload image to Firebase Storage
+    const fileExtension = imageFile.name.split('.').pop();
+    const storagePath = `uploads/google/${Date.now()}.${fileExtension}`;
+    const imageStorageRef = storageRef(storage, storagePath);
+
+    // Debugging: Log storage path
+    console.log("Uploading Google image to:", storagePath);
+
+    await uploadBytes(imageStorageRef, imageFile);
+    const imageUrl = await getDownloadURL(imageStorageRef);
+
+    // Debugging: Log image URL
+    console.log("Google Image URL:", imageUrl);
+
+    // Sign in with Google
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
+
+    if (!user) {
+      alert("Failed to sign in with Google. Please try again.");
+      return;
+    }
 
     // Check if user exists in the database
     const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
@@ -151,12 +230,6 @@ window.signInWithGoogle = async function () {
       window.location.href = "join_event.html";
       return;
     }
-
-    // Upload image to Firebase Storage
-    const storageRefPath = `uploads/${user.uid}`;
-    const storageRef = ref(storage, storageRefPath);
-    await uploadBytes(storageRef, imageFile);
-    const imageUrl = await getDownloadURL(storageRef);
 
     // Save user data to Firebase Realtime Database
     await set(dbRef(database, `users/${user.uid}`), {
