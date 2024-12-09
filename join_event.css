@@ -7,64 +7,60 @@
 
 body {
   font-family: 'Inter', Arial, sans-serif;
-  background: linear-gradient(to right, #b3d1f0, #80b2e6);
+  background: url('hpbg1.png') no-repeat center center fixed;
   background-size: cover;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: space-between;
   height: 100vh;
   margin: 0;
 }
 
 .container {
-  background: rgba(255, 255, 255, 0.85); /* Increased opacity for better visibility */
-  padding: 48px; /* Increased padding */
+  background: rgba(255, 255, 255, 0.7); /* Semi-transparent white background */
+  padding: 32px;
   width: 100%;
-  max-width: 600px; /* Increased max-width */
-  border-radius: 24px; /* More rounded corners */
+  max-width: 450px;
+  border-radius: 16px;
   text-align: center;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(10px); /* Frosted glass effect */
+  margin: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
-  font-size: 28px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 600;
   color: #2d3a45;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 button {
   width: 100%;
-  padding: 14px 0;
+  padding: 12px 0;
   background: #4c8bf5;
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
-  margin-top: 20px;
+  margin-top: 16px;
   cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
-  box-shadow: 0 4px 15px rgba(76, 139, 245, 0.4);
+  transition: background 0.3s ease;
 }
 
 button:hover {
   background: #356ac3;
-  transform: translateY(-2px);
 }
 
 input {
   width: 100%;
-  padding: 14px 20px;
-  margin-bottom: 20px;
-  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border-radius: 8px;
   border: 1px solid #d1d9e6;
   background-color: #f7f9fc;
   color: #4a5568;
-  font-size: 16px;
-  transition: border 0.3s ease, box-shadow 0.3s ease;
+  font-size: 14px;
 }
 
 input::placeholder {
@@ -74,81 +70,30 @@ input::placeholder {
 input:focus {
   outline: none;
   border: 1px solid #4c8bf5;
-  box-shadow: 0 0 0 4px rgba(76, 139, 245, 0.2);
+  box-shadow: 0 0 0 3px rgba(76, 139, 245, 0.2);
 }
 
 .navbar {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.85);
-  padding: 20px 0;
+  justify-content: space-around;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 16px 0;
   border-top: 1px solid #d1d9e6;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-  position: fixed;
-  bottom: 0;
-  width: 100%;
 }
 
-.navbar .join-room-button {
-  flex: 1;
-  margin-right: 10px;
-}
-
-.navbar .profile-button {
-  width: 50px;
-  height: 50px;
+.navbar button {
+  width: 45%;
+  padding: 12px 0;
   background: #4c8bf5;
+  color: white;
   border: none;
-  border-radius: 50%;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  position: relative;
-  transition: background 0.3s ease, transform 0.2s ease;
-  box-shadow: 0 4px 15px rgba(76, 139, 245, 0.4);
+  transition: background 0.3s ease;
 }
 
-.navbar .profile-button:hover {
+.navbar button:hover {
   background: #356ac3;
-  transform: translateY(-2px);
-}
-
-.navbar .profile-button::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 22px;
-  height: 22px;
-  background: url('https://cdn-icons-png.flaticon.com/512/147/147144.png') no-repeat center center / contain;
-  transform: translate(-50%, -50%);
-}
-
-@media (max-width: 480px) {
-  .container {
-    max-width: 90%;
-    padding: 32px;
-  }
-
-  h1 {
-    font-size: 24px;
-  }
-
-  button, input {
-    font-size: 14px;
-    padding: 12px;
-  }
-
-  .navbar {
-    padding: 16px 0;
-  }
-
-  .navbar .profile-button {
-    width: 40px;
-    height: 40px;
-  }
-
-  .navbar .profile-button::after {
-    width: 16px;
-    height: 16px;
-  }
 }

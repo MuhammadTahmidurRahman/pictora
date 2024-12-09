@@ -2,11 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Join Event</title>
   <link rel="stylesheet" href="join_event.css">
-  <!-- Optionally include Font Awesome for profile icon -->
-  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrQkTyYkGlU+BPFo8Jzho96jvPe7ZtqJIKJwOtQp3Fm62bPNgrPLl5iAV4Py1Zppfr9bqG6Z0dN+6Yupmg==" crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
+  <script type="module" src="join_event.js"></script>
 </head>
 <body>
   <div class="container">
@@ -16,14 +15,7 @@
   </div>
   
   <div class="navbar">
-    <button class="join-room-button" onclick="document.getElementById('joinEventBtn').click();">Join</button>
-    <button class="profile-button" onclick="window.location.href='profile.html'" title="Profile"></button>
-    <!-- If using Font Awesome, you can place an icon inside the button:
-    <button class="profile-button" onclick="window.location.href='profile.html'" title="Profile"><i class="fas fa-user"></i></button>
-    -->
+    <button id="profileBtn" onclick="window.location.href='profile.html'">Profile</button>
   </div>
-
-  <!-- Optionally include Font Awesome JS for icons -->
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js" integrity="sha512-Fo3rlrQkTyYkGlU+BPFo8Jzho96jvPe7ZtqJIKJwOtQp3Fm62bPNgrPLl5iAV4Py1Zppfr9bqG6Z0dN+6Yupmg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
 </body>
 </html>
