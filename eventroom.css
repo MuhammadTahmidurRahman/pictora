@@ -9,6 +9,7 @@ body {
   height: 100vh;
 }
 
+/* Container Styling with Glass Effect */
 #eventRoomContainer {
   width: 90%;
   max-width: 600px; /* keep it 600px */
@@ -23,10 +24,44 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
+/* Button Styling - Updated to Match arrnagedphoto.css */
+button {
+  cursor: pointer;
+  font-size: 14px;
+  border: 1px solid #000; /* black outline */
+  border-radius: 5px;
+  padding: 8px 15px;
+  margin: 5px 0;
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap; 
+  background: rgba(48,127,226, 0.8);
+  color: #fff;
+  box-sizing: border-box;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background: rgba(35,99,183,0.8);
+}
+
+/* Override Specific Buttons if Necessary */
+
 /* Move back button to the right side */
 #backButton {
   float: right;
   margin-bottom: 10px;
+  /* Remove existing background and color to inherit from global button styles */
+  background: rgba(48,127,226, 0.8);
+  color: #fff;
+  border: 1px solid #000;
+  border-radius: 5px;
+  padding: 8px 15px;
+  font-size: 14px;
+}
+
+#backButton:hover {
+  background: rgba(35,99,183,0.8);
 }
 
 /* Scrollable List Styling */
@@ -47,6 +82,14 @@ body {
   border-radius: 10px;
 }
 
+.scrollable-list li {
+  padding: 8px;
+  margin: 5px 0;
+  background: rgba(247,250,255,0.9);
+  border: 1px solid #cde0f5;
+  border-radius: 8px;
+}
+
 /* Host Photo */
 #hostPhoto {
   width: 100px;
@@ -58,7 +101,7 @@ body {
   border: 2px solid #307fe2;
 }
 
-/* Four main buttons in one row (Folder, Arrange, Add, View Sorted) */
+/* Five Action Buttons Under Host Profile Picture - Adjusted to Rectangles */
 #hostActions {
   display: flex;
   justify-content: center;
@@ -66,14 +109,15 @@ body {
   margin-top: 10px;
 }
 
-/* Common styles for the four main buttons */
+/* Common styles for the five main buttons */
 #hostActions .folder-icon,
 #hostActions .arrange-photo-button,
 #hostActions .add-member-button,
-#hostActions .view-sorted-button {
-  width: 70px;
-  height: 70px;
-  padding: 5px;
+#hostActions .view-sorted-button,
+#uploadPhotoButton {
+  width: 100px; /* Increased width for rectangle shape */
+  height: 50px; /* Decreased height for smaller size */
+  padding: 5px 10px; /* Adjusted padding for better appearance */
   border: 1px solid #000;
   border-radius: 8px;
   background: rgba(48,127,226, 0.8);
@@ -81,27 +125,22 @@ body {
   box-sizing: border-box;
   text-align: center;
   cursor: pointer;
-  /* Display flex with column to put icon above text */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   line-height: 1.2;
+  font-size: 14px; /* Adjusted font size for readability */
+  transition: background 0.3s;
 }
 
-/* Hover effect */
 #hostActions .folder-icon:hover,
 #hostActions .arrange-photo-button:hover,
 #hostActions .add-member-button:hover,
-#hostActions .view-sorted-button:hover {
+#hostActions .view-sorted-button:hover,
+#uploadPhotoButton:hover {
   background: rgba(35,99,183,0.8);
 }
-
-/* Folder icon button: just show code "📁" as is (original design)
-   This means no pseudo-elements. The code sets textContent = "📁".
-   We do not set font-size:0 here, so the text "📁" displays as intended.
-   Just leave it as it is.
-*/
 
 /* Arrange button (was "Arrange Photo"): remove 'photo' reference */
 .arrange-photo-button {
@@ -157,15 +196,14 @@ body {
   line-height: 1;
 }
 
-/* Upload Photos Button below the four buttons */
+/* Upload Photos Button below the five buttons */
 #uploadPhotoButton {
+  /* Removed fixed width and height to inherit from the common styles above */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 70px;
-  height: 70px;
-  padding: 5px;
+  padding: 5px 10px;
   margin: 10px auto 0 auto; /* center it below the main row */
   border: 1px solid #000;
   border-radius: 8px;
@@ -174,8 +212,8 @@ body {
   box-sizing: border-box;
   text-align: center;
   cursor: pointer;
-  font-size: 0; /* hide original text if any */
-  line-height: 0;
+  font-size: 14px;
+  transition: background 0.3s;
 }
 
 #uploadPhotoButton:hover {
@@ -197,7 +235,13 @@ body {
   line-height: 1;
 }
 
-/* Guest Lists */
+/* Guests Section */
+h3 {
+  color: #333;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
 #guestList li,
 #manualGuestList li {
   display: flex;
@@ -259,6 +303,7 @@ body {
 .dialog-buttons button {
   width: 45%;
 }
+
 .delete-guest-button {
   background: rgba(255,76,76,0.9);
   color: #fff;
@@ -267,5 +312,45 @@ body {
   max-width: 180px;
 }
 .delete-guest-button:hover {
+  background: rgba(212,53,53,0.9);
+}
+
+/* Additional Utility Classes */
+.hidden {
+  display: none !important;
+}
+
+/* Photo Item (for deleting) */
+.photo-item {
+  position: relative;
+  background: rgba(247,250,255,0.9);
+  padding: 5px;
+  border-radius: 8px;
+  border: 1px solid #cde0f5;
+  text-align: center;
+}
+
+.photo-item img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #307fe2;
+}
+
+.delete-btn {
+  background: rgba(255,76,76,0.9);
+  color: #fff;
+  padding: 5px;
+  font-size: 12px;
+  margin-top: 5px;
+  max-width: 100px;
+  border: 1px solid #000; /* black outline */
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.delete-btn:hover {
   background: rgba(212,53,53,0.9);
 }
