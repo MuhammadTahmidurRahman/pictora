@@ -161,13 +161,13 @@ button:hover {
   opacity: 1;
 }
 
-/* Arrange button (was "Arrange Photo"): remove 'photo' reference and update icon */
+/* Arrange button: Remove camera icon and add human + plus icons */
 .arrange-photo-button {
   font-size: 0; /* hide original text if any */
 }
 
 .arrange-photo-button::before {
-  content: "'🔄'"; /* Changed from "📷↺" to "🔄" */
+  content: "⟳"; /* Human and plus icon */
   font-size: 18px;
   display: block;
   margin-bottom: 3px;
@@ -178,13 +178,13 @@ button:hover {
   content: "Arrange"; /* Hidden by opacity */
 }
 
-/* Add button (was "Add Member"): remove 'member' reference */
+/* Add button: Ensure it has the correct icon */
 .add-member-button {
   font-size: 0; /* hide original text if any */
 }
 
 .add-member-button::before {
-  content: "+1"; /* Assuming same icon as arrange-photo-button */
+  content: "+1"; /* Plus icon */
   font-size: 18px;
   display: block;
   margin-bottom: 3px;
@@ -195,13 +195,13 @@ button:hover {
   content: "Add"; /* Hidden by opacity */
 }
 
-/* View Sorted Photos Button */
+/* View Sorted Photos Button: Add sorted icon and remove text */
 .view-sorted-button {
   font-size: 0; /* hide original text if any */
 }
 
 .view-sorted-button::before {
-  content: "👁🗂";
+  content: "🧩"; /* Sorted icon */
   font-size: 18px;
   display: block;
   margin-bottom: 3px;
@@ -209,7 +209,8 @@ button:hover {
 }
 
 .view-sorted-button::after {
-  content: "Sorted"; /* Hidden by opacity */
+  content: ""; /* Remove text */
+  opacity: 0; /* Ensure text is not visible */
 }
 
 /* Upload Photos Button below the five buttons */
@@ -238,7 +239,7 @@ button:hover {
 
 /* Upload Photos Button Icon/Text */
 #uploadPhotoButton::before {
-  content: "📤"; /* Changed from "⬆📷" to "📤" */
+  content: "📤"; /* Single upload icon */
   font-size: 18px;
   display: block;
   margin-bottom: 3px;
