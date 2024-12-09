@@ -82,11 +82,14 @@ body, html {
 
 /* Button Styles */
 .button {
-  width: 160px; /* Compact width */
-  padding: 12px 0; /* Balanced padding */
-  font-size: 16px;
-  font-weight: 600;
-  color: #fff;
+  position: absolute; /* Absolute positioning to anchor at the bottom */
+  bottom: 25%; /* Positioned in the lower 25% portion of the screen */
+  left: 50%; /* Center horizontally */
+  transform: translateX(-50%); /* Center alignment fix */
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Space between buttons */
+  align-items: center;
   background: linear-gradient(to right, #f0f0f0, #000000); /* Whitish to black gradient */
   border: 1px solid #000;
   border-radius: 8px;
