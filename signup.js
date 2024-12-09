@@ -1,28 +1,8 @@
-// signup.js
-
-// Import Firebase modules
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
-import { 
-  getAuth, 
-  createUserWithEmailAndPassword, 
-  signInWithPopup, 
-  fetchSignInMethodsForEmail, 
-  GoogleAuthProvider, 
-  onAuthStateChanged,
-  sendEmailVerification,
-  signOut
-} from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
-import { 
-  getStorage, 
-  ref as storageRef, 
-  uploadBytes, 
-  getDownloadURL 
-} from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js';
-import { 
-  getDatabase, 
-  ref as dbRef, 
-  set 
-} from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
+// Ensure no duplicate imports and only import necessary functions once
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithPopup, fetchSignInMethodsForEmail, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { getDatabase, ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -31,319 +11,149 @@ const firebaseConfig = {
   projectId: "pictora-7f0ad",
   storageBucket: "pictora-7f0ad.appspot.com",
   messagingSenderId: "155732133141",
-  databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app",
+  databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app/",
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const storage = getStorage(app);
-const database = getDatabase(app);
+const auth = getAuth();
+const storage = getStorage();
+const database = getDatabase();
 
-// Authentication State Listener
-onAuthStateChanged(auth, async (user) => {
+// Check auth state and handle redirection
+onAuthStateChanged(auth, (user) => {
   if (user) {
-    if (user.emailVerified) {
-      // User is authenticated and email is verified
-      window.location.href = "join_event.html";
-    } else {
-      // User is authenticated but email is not verified
-      alert("Please verify your email before proceeding. A verification email has been sent to your email address.");
-      try {
-        await sendEmailVerification(user);
-        alert("Verification email resent. Please check your inbox.");
-      } catch (error) {
-        console.error("Error sending verification email:", error);
-        alert("Failed to send verification email. Please try again.");
-      }
-      // Sign out the user to prevent access without verification
-      await signOut(auth);
-    }
+    console.log("User is logged in, redirecting to join event...");
+    window.location.href = 'join_event.html';
   }
 });
 
-/**
- * Toggles the visibility of a password field.
- * @param {string} fieldId - The ID of the password input field.
- */
+// Function to toggle password visibility
 window.togglePassword = function (fieldId) {
   const field = document.getElementById(fieldId);
-  if (field) {
-    field.type = field.type === "password" ? "text" : "password";
-  } else {
-    console.error(`Password field with id '${fieldId}' not found.`);
-  }
+  field.type = field.type === "password" ? "text" : "password";
 };
 
-/**
- * Triggers the hidden file input to open the image picker.
- */
+// Function to show the file picker
 window.showImagePicker = function () {
-  const imageInput = document.getElementById("image");
-  if (imageInput) {
-    imageInput.click();
-  } else {
-    console.error("Image input element with id 'image' not found.");
-  }
+  document.getElementById("image").click();
 };
 
-/**
- * Displays the selected image status and preview.
- * @param {HTMLElement} input - The file input element.
- */
+// Function to display selected image message
 window.displayImage = function (input) {
   const uploadText = document.getElementById("upload-text");
-  const imagePreview = document.getElementById("image-preview");
-  if (uploadText && imagePreview) {
-    if (input.files && input.files[0]) {
-      uploadText.textContent = "Photo selected";
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        imagePreview.src = e.target.result;
-        imagePreview.style.display = "block";
-      };
-      reader.readAsDataURL(input.files[0]);
-    } else {
-      uploadText.textContent = "Upload your photo here";
-      imagePreview.style.display = "none";
-    }
-  } else {
-    console.error("Upload text or image preview element not found.");
-  }
+  uploadText.textContent = input.files && input.files[0] ? "Photo selected" : "Upload your photo here";
 };
 
-/**
- * Navigates back to the previous page.
- */
-window.goBack = function () {
-  window.history.back();
-};
-
-/**
- * Shows the loading overlay.
- */
-function showLoading() {
-  const overlay = document.getElementById("loading-overlay");
-  if (overlay) {
-    overlay.style.display = "block";
-  } else {
-    console.error("Loading overlay element not found.");
-  }
-}
-
-/**
- * Hides the loading overlay.
- */
-function hideLoading() {
-  const overlay = document.getElementById("loading-overlay");
-  if (overlay) {
-    overlay.style.display = "none";
-  } else {
-    console.error("Loading overlay element not found.");
-  }
-}
-
-/**
- * Registers a new user with email and password, uploads their profile image, and sends a verification email.
- */
+// Function to register a user and upload the profile image
 window.registerUser = async function () {
   const name = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
   const confirmPassword = document.getElementById("confirm-password").value.trim();
-  const imageInput = document.getElementById("image");
-  const imageFile = imageInput ? imageInput.files[0] : null;
+  const imageFile = document.getElementById("image").files[0];
 
-  // Debugging: Check if imageFile is obtained correctly
-  console.log("Image File:", imageFile);
-
-  // Validation checks
-  if (!name || !email || !password || !confirmPassword || !imageFile) {
-    alert("Please fill up all the fields and upload an image.");
+  if (!name || !email || !password || !confirmPassword) {
+    alert("Please fill up all the information boxes.");
     return;
   }
 
-  // Validate file type
-  const allowedExtensions = ["jpg", "jpeg", "png", "gif"];
-  const fileExtension = imageFile.name.split('.').pop().toLowerCase();
-  if (!allowedExtensions.includes(fileExtension)) {
-    alert("Invalid file type. Please upload an image (jpg, jpeg, png, gif).");
+  if (!emailRegex.test(email)) {
+    alert("Wrong email. Please type again.");
     return;
   }
-
-  // Validate file size (e.g., max 2MB)
-  const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
-  if (imageFile.size > maxSizeInBytes) {
-    alert("Image size exceeds 2MB. Please upload a smaller image.");
-    return;
-  }
-
+  
   if (password.length < 8) {
-    alert("Password must be at least 8 characters long.");
+    alert("The password must be 8 characters long.");
     return;
   }
-
   if (password !== confirmPassword) {
     alert("Passwords do not match.");
     return;
   }
-
-  try {
-    showLoading(); // Show loading overlay
-
-    // Check if the email is already registered
-    const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-    if (signInMethods.length > 0) {
-      alert("This email is already registered. Please log in.");
-      hideLoading(); // Hide loading overlay
-      return;
-    }
-
-    // Create user with email and password
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-
-    // Ensure the user object exists
-    if (!user) {
-      alert("Failed to create user. Please try again.");
-      hideLoading(); // Hide loading overlay
-      return;
-    }
-
-    // Upload image to Firebase Storage
-    const storagePath = `uploads/${user.uid}/profile.${fileExtension}`;
-    const imageStorageRef = storageRef(storage, storagePath);
-
-    // Debugging: Log storage path
-    console.log("Uploading image to:", storagePath);
-
-    await uploadBytes(imageStorageRef, imageFile);
-    const imageUrl = await getDownloadURL(imageStorageRef);
-
-    // Debugging: Log image URL
-    console.log("Image URL:", imageUrl);
-
-    // Save user data to Firebase Realtime Database
-    await set(dbRef(database, `users/${user.uid}`), {
-      email,
-      name,
-      photo: imageUrl,
-    });
-
-    // Debugging: Confirm data write
-    console.log("User data written to Realtime Database.");
-
-    // Send email verification
-    await sendEmailVerification(user);
-    alert("Registration successful! A verification email has been sent to your email address. Please verify to proceed.");
-
-    // Sign out the user to prevent access without verification
-    await signOut(auth);
-
-    // Redirect to login page after signing out
-    window.location.href = "login.html";
-  } catch (error) {
-    console.error("Registration error:", error);
-    alert(`Failed to register. ${error.message}`);
-  } finally {
-    hideLoading(); // Hide loading overlay
-  }
-};
-
-/**
- * Signs in the user using Google Sign-In, uploads their profile image if new, and redirects accordingly.
- */
-window.signInWithGoogle = async function () {
-  const provider = new GoogleAuthProvider();
-  const imageInput = document.getElementById("image");
-  const imageFile = imageInput ? imageInput.files[0] : null;
-
   if (!imageFile) {
     alert("Please upload a profile image.");
     return;
   }
 
-  // Validate file type
-  const allowedExtensions = ["jpg", "jpeg", "png", "gif"];
-  const fileExtension = imageFile.name.split('.').pop().toLowerCase();
-  if (!allowedExtensions.includes(fileExtension)) {
-    alert("Invalid file type. Please upload an image (jpg, jpeg, png, gif).");
-    return;
-  }
+  try {
+    const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+    if (signInMethods.length > 0) {
+      alert("This email is already registered. Please log in instead.");
+      return;
+    }
 
-  // Validate file size (e.g., max 2MB)
-  const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
-  if (imageFile.size > maxSizeInBytes) {
-    alert("Image size exceeds 2MB. Please upload a smaller image.");
+    // Create user and upload photo
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    console.log("Uploading image...");
+    const storageRef = ref(storage, `uploads/${user.uid}`);
+    await uploadBytes(storageRef, imageFile);
+    console.log("Image uploaded successfully.");
+    const imageUrl = await getDownloadURL(storageRef);
+    console.log("Image URL:", imageUrl);
+
+    // Store user data in Realtime Database
+    await set(dbRef(database, `users/${user.uid}`), {
+      email: email,
+      name: name,
+      photo: imageUrl,
+    });
+
+    alert("User registered successfully with image uploaded!");
+    window.location.href = "join_event.html";
+  } catch (error) {
+    console.error("Error creating user:", error);
+    alert("Failed to register user. Please try again.");
+  }
+};
+
+// Google Sign-In function with image upload validation
+// Google Sign-In function with account selection and image upload validation
+window.signInWithGoogle = async function () {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({
+    prompt: "select_account", // Ensures the user is prompted to select an account
+  });
+
+  const imageFile = document.getElementById("image").files[0];
+
+  if (!imageFile) {
+    alert("Please upload an image before signing up with Google.");
     return;
   }
 
   try {
-    showLoading(); // Show loading overlay
-
-    // Sign in with Google
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Debugging: Log authenticated user
-    console.log("Authenticated User:", user);
-
-    if (!user) {
-      alert("Failed to sign in with Google. Please try again.");
-      hideLoading(); // Hide loading overlay
-      return;
-    }
-
-    // Check if user exists in the database
-    const userRef = dbRef(database, `users/${user.uid}`);
-    const userSnapshot = await get(userRef);
+    // Check if the user is already registered in Realtime Database
+    const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
     if (userSnapshot.exists()) {
-      alert("Welcome back!");
-      window.location.href = `/eventroom.html?eventCode=${roomCode}`;
-      hideLoading(); // Hide loading overlay
+      alert("You have already signed up. Redirecting you to the join event page.");
+      window.location.href = "join_event.html";
       return;
     }
 
-    // Upload image to Firebase Storage
-    const storagePath = `uploads/google/${Date.now()}.${fileExtension}`;
-    const imageStorageRef = storageRef(storage, storagePath);
+    // Upload profile image to Firebase Storage
+    const storageRef = ref(storage, `uploads/${user.uid}`);
+    await uploadBytes(storageRef, imageFile);
+    const imageUrl = await getDownloadURL(storageRef);
 
-    // Debugging: Log storage path
-    console.log("Uploading Google image to:", storagePath);
-
-    await uploadBytes(imageStorageRef, imageFile);
-    const imageUrl = await getDownloadURL(imageStorageRef);
-
-    // Debugging: Log image URL
-    console.log("Google Image URL:", imageUrl);
-
-    // Save user data to Firebase Realtime Database
-    await set(userRef, {
+    // Store user data in Realtime Database
+    await set(dbRef(database, `users/${user.uid}`), {
       email: user.email,
-      name: user.displayName || "No Name",
+      name: user.displayName,
       photo: imageUrl,
     });
 
-    // Debugging: Confirm data write
-    console.log("Google user data written to Realtime Database.");
-
-    alert("Google Sign-In successful!");
-    window.location.href = `/eventroom.html?eventCode=${roomCode}`;
+    alert("Google Sign-In successful and image uploaded!");
+    window.location.href = "join_event.html";
   } catch (error) {
-    console.error("Google Sign-In error:", error);
-    alert(`Failed to sign in with Google. ${error.message}`);
-  } finally {
-    hideLoading(); // Hide loading overlay
+    console.error("Error with Google Sign-In:", error);
+    alert("Google Sign-In failed. Please try again.");
   }
 };
 
-// Listen for "Go to EventRoom" button click
-document.addEventListener("DOMContentLoaded", () => {
-  const joinButton = document.getElementById("joinEventBtn");
-  if (joinButton) {
-    joinButton.addEventListener("click", joinRoom);
-  } else {
-    console.error("Join Event button not found in the DOM.");
-  }
-});
