@@ -7,6 +7,7 @@ import { getStorage, ref as storageRef, getDownloadURL } from 'https://www.gstat
 
 // Firebase configuration
 const firebaseConfig = {
+  apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
   authDomain: "pictora-7f0ad.firebaseapp.com",
   projectId: "pictora-7f0ad",
   storageBucket: "pictora-7f0ad.appspot.com",
