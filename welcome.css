@@ -16,7 +16,6 @@ body, html {
   position: relative;
   width: 100%;
   height: 100vh;
-  /* Remove flex properties */
   background-color: #000;
 }
 
@@ -44,7 +43,8 @@ body, html {
 }
 
 .button {
-  width: 100%;
+  width: 50%; /* Make buttons 50% of the button-section width */
+  align-self: center; /* Center the buttons within the button-section */
   padding: 15px;
   font-size: 16px;
   color: white;
@@ -57,4 +57,52 @@ body, html {
 
 .button:hover {
   background: linear-gradient(to right, #333, #666); /* Darker gradient on hover */
+}
+
+/* Responsive Design */
+
+/* Tablets and small laptops */
+@media (max-width: 1024px) {
+  .button-section {
+    width: 60%;
+    bottom: 25%;
+  }
+
+  .button {
+    width: 60%;
+    padding: 14px;
+    font-size: 15px;
+  }
+}
+
+/* Mobile Devices */
+@media (max-width: 768px) {
+  .button-section {
+    width: 70%;
+    bottom: 20%;
+  }
+
+  .button {
+    width: 70%;
+    padding: 13px;
+    font-size: 14px;
+  }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 480px) {
+  body, html {
+    overflow: auto; /* Allow scrolling if content overflows */
+  }
+
+  .button-section {
+    width: 80%;
+    bottom: 15%;
+  }
+
+  .button {
+    width: 80%;
+    padding: 12px;
+    font-size: 13px;
+  }
 }
