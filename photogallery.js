@@ -108,3 +108,4 @@ onAuthStateChanged(auth2, (user) => {
     window.location.href = "login.html";
   }
 });
+//
