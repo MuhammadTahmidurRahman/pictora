@@ -2,34 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Join Room</title>
-  <link rel="stylesheet" href="arrnagedphoto.css">
-  <!-- Optionally include Font Awesome for profile icon -->
-  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrQkTyYkGlU+BPFo8Jzho96jvPe7ZtqJIKJwOtQp3Fm62bPNgrPLl5iAV4Py1Zppfr9bqG6Z0dN+6Yupmg==" crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join Event</title>
+  <link rel="stylesheet" href="join_event.css">
+  <script type="module" src="join_event.js"></script>
 </head>
 <body>
-  <div id="eventRoomContainer">
-    <button id="backButton">Back</button>
-    
-    <h1 id="roomName">Room Name</h1>
-    <p id="roomCode">Room Code: ABC123</p>
-    
-    <!-- Profile Icon and Join Button Container -->
-    <div class="action-buttons">
-      <button class="profile-button" onclick="window.location.href='profile.html'" title="Profile">
-        <!-- If using Font Awesome, uncomment the line below and comment out the ::after in CSS
-        <i class="fas fa-user"></i> 
-        -->
-      </button>
-      <button id="joinEventBtn">Join Room</button>
-    </div>
-    
-    <!-- Additional Content -->
-    <!-- ... your existing content ... -->
+  <div class="container">
+    <h1>Join Room</h1>
+    <input type="text" id="eventCodeInput" placeholder="Enter event code to join">
+    <button id="joinEventBtn">Join Room</button>
   </div>
-
-  <!-- Optional Font Awesome JS for icons -->
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js" integrity="sha512-Fo3rlrQkTyYkGlU+BPFo8Jzho96jvPe7ZtqJIKJwOtQp3Fm62bPNgrPLl5iAV4Py1Zppfr9bqG6Z0dN+6Yupmg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+  
+  <div class="navbar">
+    <button id="profileBtn" onclick="window.location.href='profile.html'">Profile</button>
+  </div>
 </body>
 </html>
