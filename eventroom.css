@@ -149,6 +149,7 @@ button:hover {
 #hostActions .add-member-button::after,
 #hostActions .view-sorted-button::after,
 #uploadPhotoButton::after {
+  content="📁"
   opacity: 0;
   transition: opacity 0.3s;
 }
@@ -158,6 +159,7 @@ button:hover {
 #hostActions .add-member-button:hover::after,
 #hostActions .view-sorted-button:hover::after,
 #uploadPhotoButton:hover::after {
+  content="See Photos"
   opacity: 1;
 }
 
