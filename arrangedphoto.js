@@ -75,7 +75,7 @@ function sendGeneralEmailToParticipants(normalParticipantEmails) {
   }
 
   const subject = `Your Photos from ${globalRoomName} (${globalEventCode})`;
-  const body = `Hello everyone,\n\nYour Photos has been sorted,Hurrah!!! ${globalRoomName} (${globalEventCode}).\n\nBest regards,\nYour Event Team,\nDeveloped By-,\nTahmid,Disha,Anika from NSU`;
+  const body = `Hello everyone,\n\nYour Photos has been sorted,Hurrah!!!,check our web pictora.netlify.app or our app pictora to get the phots ${globalRoomName} (${globalEventCode}).\n\nBest regards,\nYour Event Team,\nDeveloped By-,\nTahmid,Disha,Anika from NSU`;
   const mailtoLink = `mailto:${encodeURIComponent(normalParticipantEmails.join(','))}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   window.location.href = mailtoLink;
 }
