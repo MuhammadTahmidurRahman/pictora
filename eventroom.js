@@ -24,6 +24,8 @@ const storage = getStorage();
 document.getElementById("backButton").addEventListener("click", () => {
   window.location.href = "join_event.html";
 });
+
+// Close Dialog button functionality
 document.getElementById("closeDialogButton").addEventListener("click", () => {
   toggleDialog(false);  // Close the dialog
 });
@@ -132,7 +134,6 @@ async function loadEventRoom(eventCode) {
       const participants = roomData.participants || {};
       const guests = Object.entries(participants).filter(([key]) => key !== hostId);
 
-      // ADDED CODE START
       // Ensure each participant has a folderPath and upload their profile photo to that path if not already done
       for (const [participantId, participantData] of Object.entries(participants)) {
         if (!participantData.folderPath && participantData.photoUrl) {
@@ -146,7 +147,6 @@ async function loadEventRoom(eventCode) {
           await uploadBytes(participantImageRef, blob);
         }
       }
-      // ADDED CODE END
 
       loadGuests(guests, user.uid, hostId, eventCode);
 

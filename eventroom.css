@@ -24,7 +24,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* Button Styling - Updated to Match arrangedphoto.css */
+/* Button Styling */
 button {
   cursor: pointer;
   font-size: 14px;
@@ -161,7 +161,7 @@ button:hover {
   opacity: 1;
 }
 
-/* Arrange button: Remove camera icon and add human + plus icons */
+/* Arrange button: Add human + plus icons and "Arrange" text on hover */
 .arrange-photo-button {
   font-size: 0; /* hide original text if any */
 }
@@ -178,7 +178,7 @@ button:hover {
   content: "Arrange"; /* Hidden by opacity */
 }
 
-/* Add button: Ensure it has the correct icon */
+/* Add button: Plus icon and "Add" text on hover */
 .add-member-button {
   font-size: 0; /* hide original text if any */
 }
@@ -195,13 +195,13 @@ button:hover {
   content: "Add"; /* Hidden by opacity */
 }
 
-/* View Sorted Photos Button: Add sorted icon and remove text */
+/* View Sorted Photos Button: Folder icon and "Sorted" text on hover */
 .view-sorted-button {
   font-size: 0; /* hide original text if any */
 }
 
 .view-sorted-button::before {
-  content: "⇆"; /* Sorted icon */
+  content: "⇆"; /* Folder icon */
   font-size: 18px;
   display: block;
   margin-bottom: 3px;
@@ -209,8 +209,7 @@ button:hover {
 }
 
 .view-sorted-button::after {
-  content: ""; /* Remove text */
-  opacity: 0; /* Ensure text is not visible */
+  content: "Sorted"; /* Hidden by opacity */
 }
 
 /* Upload Photos Button below the five buttons */
