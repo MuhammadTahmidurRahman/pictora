@@ -18,68 +18,96 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const storage = getStorage();
 
+async function downloadAllPhotosAsZip(folderName) {
+  const JSZip = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
+  const { saveAs } = await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js');
+  const zip = new JSZip();
+
+  try {
+    const folderRef = storageRef(storage, folderName);
+    const listResult = await listAll(folderRef);
+
+    if (listResult.items.length === 0) {
+      alert("No photos available.");
+      return;
+    }
+
+    for (const itemRef of listResult.items) {
+      const photoUrl = await getDownloadURL(itemRef);
+      const response = await fetch(photoUrl);
+      const blob = await response.blob();
+      const fileName = itemRef.name;
+      zip.file(fileName, blob);
+    }
+
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    saveAs(zipBlob, "All_Photos.zip");
+    alert("Photos downloaded successfully.");
+  } catch (error) {
+    console.error("Error downloading photos:", error);
+    alert("Failed to download photos.");
+  }
+}
+
 // Fetch images and populate the gallery
 async function fetchImages(folderName) {
   try {
-    console.log("Fetching images from folder:", folderName); // Debug folder path
-
-    // Reference to the folder in Firebase Storage
     const folderRef = storageRef(storage, folderName);
-
-    // List all items in the folder
     const result = await listAll(folderRef);
-    console.log("Storage items:", result.items); // Debug storage items
 
-    // If no images are found, display a message
     if (result.items.length === 0) {
       document.getElementById("emptyMessage").textContent = "No photos uploaded.";
       return;
     }
 
-    // Fetch URLs for all images
     const photoGrid = document.getElementById("photoGrid");
     const urls = await Promise.all(result.items.map((item) => getDownloadURL(item)));
-    console.log("Fetched URLs:", urls); // Debug fetched URLs
 
-    // Populate the gallery with images
     document.getElementById("emptyMessage").style.display = "none";
     urls.forEach((url) => {
       const img = document.createElement("img");
       img.src = url;
       photoGrid.appendChild(img);
     });
+
+    // Add a download all button below the gallery
+    let downloadAllBtn = document.getElementById("downloadAllBtn");
+    if (!downloadAllBtn) {
+      downloadAllBtn = document.createElement("button");
+      downloadAllBtn.id = "downloadAllBtn";
+      downloadAllBtn.textContent = "Download All Photos";
+      downloadAllBtn.addEventListener("click", () => {
+        downloadAllPhotosAsZip(folderName);
+      });
+      document.getElementById("photoGalleryContainer").appendChild(downloadAllBtn);
+    }
+
   } catch (error) {
-    console.error("Error loading photos:", error); // Debug any errors
+    console.error("Error loading photos:", error);
     alert("Error loading photos. Please try again.");
   }
 }
 
 // Back button functionality
 document.getElementById("backButton").addEventListener("click", () => {
-  window.history.back(); // Navigate back to the previous page
+  window.history.back(); 
 });
 
 // Ensure user is authenticated before loading photos
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    console.log("User authenticated:", user.uid); // Debug authenticated user ID
-
-    // Get query parameters
     const urlParams = new URLSearchParams(window.location.search);
     const folderName = urlParams.get("folderName");
 
-    // Validate folder path
     if (!folderName) {
       alert("Missing folder path. Unable to load photos.");
       window.history.back();
       return;
     }
 
-    // Fetch and display images
     fetchImages(folderName);
   } else {
-    console.log("User is not authenticated."); // Debug unauthenticated state
     alert("You must be signed in to view photos.");
-    window.location.href = "login.html"; // Redirect to login page
+    window.location.href = "login.html";
   }
 });

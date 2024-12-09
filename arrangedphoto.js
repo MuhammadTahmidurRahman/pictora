@@ -15,7 +15,6 @@ import {
   deleteObject 
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-// Firebase Initialization
 const firebaseConfig = {
   apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
   authDomain: "pictora-7f0ad.firebaseapp.com",
@@ -31,17 +30,20 @@ const auth = getAuth();
 const database = getDatabase();
 const storage = getStorage();
 
+// Global variables to store event code and room name for email bodies
+let globalEventCode = "";
+let globalRoomName = "";
+
 // Back button functionality
 document.getElementById("backButton").addEventListener("click", () => {
   window.location.href = "eventroom.html";
 });
 
-
 /**
  * Existing Functionality
  */
 
-// Function to download guest photos as a ZIP file
+// Function to download participant/manual participant photos as a ZIP file (if needed)
 async function downloadGuestPhotosAsZip(folderPath, guestName) {
   const JSZip = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
   const { saveAs } = await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js');
@@ -52,8 +54,8 @@ async function downloadGuestPhotosAsZip(folderPath, guestName) {
     const listResult = await listAll(folderRef);
 
     if (listResult.items.length === 0) {
-      alert("No photos available for this guest.");
-      return;
+      alert("No photos available.");
+      return null;
     }
 
     for (const itemRef of listResult.items) {
@@ -65,56 +67,100 @@ async function downloadGuestPhotosAsZip(folderPath, guestName) {
     }
 
     const zipBlob = await zip.generateAsync({ type: "blob" });
-    saveAs(zipBlob, `${guestName}_Photos.zip`);
-    alert("Photos downloaded successfully.");
+    const zipFileName = `${guestName.replace(/\s+/g, '_')}_Photos.zip`;
+    saveAs(zipBlob, zipFileName);
+    return zipFileName;
   } catch (error) {
-    console.error("Error downloading photos:", error);
-    alert("Failed to download photos.");
+    console.error("Error creating ZIP:", error);
+    alert("Failed to create ZIP.");
+    return null;
   }
 }
 
-// Function to load guests into the DOM
+// Function to send generalized email to all normal participants
+function sendGeneralEmailToParticipants(normalParticipantEmails) {
+  if (normalParticipantEmails.length === 0) {
+    alert("No normal participants to email.");
+    return;
+  }
+
+  // Using the provided format
+  const subject = `Your Photos from ${globalRoomName} (${globalEventCode})`;
+  const body = `Hello everyone,\n\nHere are your photos from the ${globalRoomName} (${globalEventCode}).\n\nBest regards,\nYour Event Team`;
+
+  const mailtoLink = `mailto:${encodeURIComponent(normalParticipantEmails.join(','))}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailtoLink;
+}
+
+// Function to handle emailing a manual guest with their ZIP
+async function sendEmailToManualGuest(guestData) {
+  // Create ZIP from their "/photos" folder
+  const folderPath = guestData.folderPath + "/photos";
+  const zipName = await downloadGuestPhotosAsZip(folderPath, guestData.name || "ManualGuest");
+  if (!zipName) return; // If ZIP creation failed, stop
+
+  // Since we can't attach automatically via mailto, we just open mailto with subject/body
+  const subject = `Your Photos from ${globalRoomName} (${globalEventCode})`;
+  const name = guestData.name || "Guest";
+  const body = `Hello ${name},\n\nWe are pleased to share with you the photos from the ${globalRoomName} (${globalEventCode}). Please find your photos in the downloaded ZIP file.\n\nBest regards,\nYour Event Team`;
+
+  const mailtoLink = `mailto:${encodeURIComponent(guestData.email || "")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailtoLink;
+}
+
+// Function to load guests (normal participants)
 async function loadGuests(guests, containerId) {
   const guestListContainer = document.getElementById(containerId);
   guestListContainer.innerHTML = ""; // Clear previous list
 
+  // We'll collect normal participant emails for the general email
+  const normalParticipantEmails = [];
+
   guests.forEach(([guestId, guestData]) => {
     const guestItem = document.createElement("li");
+    // Remove download button, only show folder-icon
+    // No email icon for normal participants as requested
     guestItem.innerHTML = 
       `<img src="${guestData.photoUrl || "fallback.png"}" alt="Guest Photo" class="guest-photo" />
       <span>${guestData.name || "Unnamed Guest"}</span>
       <button class="folder-icon" data-folder-path="${guestData.folderPath || ""}">
         📁 View Photos
-      </button>
-      <button class="download-button" data-folder-path="${guestData.folderPath || ""}">
-        📦 Download Photos
       </button>`;
 
     guestListContainer.appendChild(guestItem);
 
-    // Modified event listener to redirect to photogallery
+    // Collect email for normal participants if available
+    if (guestData.email && !guestData.isManual) {
+      normalParticipantEmails.push(guestData.email);
+    }
+
     const folderButton = guestItem.querySelector(".folder-icon");
     folderButton.addEventListener("click", () => {
       if (guestData.folderPath) {
-        // Redirect to photogallery with "/photos" appended
         window.location.href = "photogallery.html?folderName=" + encodeURIComponent(guestData.folderPath + "/photos");
       } else {
         alert("No photos available for this guest.");
       }
     });
-
-    const downloadButton = guestItem.querySelector(".download-button");
-    downloadButton.addEventListener("click", () => {
-      if (guestData.folderPath) {
-        downloadGuestPhotosAsZip(guestData.folderPath, guestData.name || "Unnamed Guest");
-      } else {
-        alert("No photos available for this guest.");
-      }
-    });
   });
+
+  // Add a single button at top to send a general email to all normal participants
+  if (normalParticipantEmails.length > 0) {
+    const parentContainer = document.getElementById(containerId).parentElement; 
+    let emailAllButton = document.getElementById("emailAllParticipantsBtn");
+    if (!emailAllButton) {
+      emailAllButton = document.createElement("button");
+      emailAllButton.id = "emailAllParticipantsBtn";
+      emailAllButton.textContent = "Send General Email to All Participants";
+      emailAllButton.addEventListener("click", () => {
+        sendGeneralEmailToParticipants(normalParticipantEmails);
+      });
+      parentContainer.insertBefore(emailAllButton, parentContainer.firstChild);
+    }
+  }
 }
 
-// Function to load manual guests into the DOM
+// Function to load manual guests
 async function loadManualGuests(manualGuests, containerId) {
   const manualGuestListContainer = document.getElementById(containerId);
   manualGuestListContainer.innerHTML = ""; // Clear previous list
@@ -126,41 +172,40 @@ async function loadManualGuests(manualGuests, containerId) {
 
   manualGuests.forEach(([guestId, guestData]) => {
     const guestItem = document.createElement("li");
+    // Remove download button and replace with email icon for manual participants
     guestItem.innerHTML = 
       `<img src="${guestData.photoUrl || "fallback.png"}" alt="Manual Guest Photo" class="guest-photo" />
       <span>${guestData.name || "Unnamed Manual Guest"}</span>
       <button class="folder-icon" data-folder-path="${guestData.folderPath || ""}">
         📁 View Photos
       </button>
-      <button class="download-button" data-folder-path="${guestData.folderPath || ""}">
-        📦 Download Photos
+      <button class="email-button" title="Send Email">
+        ✉️
       </button>`;
 
     manualGuestListContainer.appendChild(guestItem);
 
-    // Modified event listener to redirect to photogallery
     const folderButton = guestItem.querySelector(".folder-icon");
     folderButton.addEventListener("click", () => {
       if (guestData.folderPath) {
-        // Redirect to photogallery with "/photos" appended
         window.location.href = "photogallery.html?folderName=" + encodeURIComponent(guestData.folderPath + "/photos");
       } else {
         alert("No photos available for this manual guest.");
       }
     });
 
-    const downloadButton = guestItem.querySelector(".download-button");
-    downloadButton.addEventListener("click", () => {
-      if (guestData.folderPath) {
-        downloadGuestPhotosAsZip(guestData.folderPath, guestData.name || "Unnamed Manual Guest");
+    const emailButton = guestItem.querySelector(".email-button");
+    emailButton.addEventListener("click", () => {
+      if (guestData.folderPath && guestData.email) {
+        sendEmailToManualGuest(guestData);
       } else {
-        alert("No photos available for this manual guest.");
+        alert("No email or no photos available for this manual guest.");
       }
     });
   });
 }
 
-// Function to fetch and display photos in a dialog
+// Existing fetchAndDisplayPhotos and toggleDialog remain unchanged
 async function fetchAndDisplayPhotos(folderPath, containerId) {
   const photoContainer = document.getElementById(containerId);
   photoContainer.innerHTML = ""; // Clear any previous content
@@ -174,21 +219,20 @@ async function fetchAndDisplayPhotos(folderPath, containerId) {
       return;
     }
 
-    listResult.items.forEach(async (itemRef) => {
+    for (const itemRef of listResult.items) {
       const photoUrl = await getDownloadURL(itemRef);
       const img = document.createElement("img");
       img.src = photoUrl;
       img.alt = "Photo";
       img.classList.add("photo-thumbnail");
       photoContainer.appendChild(img);
-    });
+    }
   } catch (error) {
     console.error("Error fetching photos:", error);
     photoContainer.textContent = "Failed to load photos.";
   }
 }
 
-// Function to toggle the photo dialog visibility
 function toggleDialog(show) {
   let dialog = document.getElementById("photoDialog");
   if (!dialog) {
@@ -204,10 +248,10 @@ function toggleDialog(show) {
   dialog.style.display = show ? "flex" : "none";
 }
 
-// Function to view host photo
+// Host functions remain as is
 async function viewHostPhoto(hostData) {
   const hostMessage = document.getElementById("hostMessage");
-  const folderPath = hostData.photoFolderPath; // Now set from roomData
+  const folderPath = hostData.photoFolderPath;
 
   if (folderPath) {
     try {
@@ -219,13 +263,12 @@ async function viewHostPhoto(hostData) {
         return;
       }
 
-      // Display first photo from the folder
       const photoUrl = await getDownloadURL(listResult.items[0]);
       const img = document.createElement("img");
       img.src = photoUrl;
       img.alt = "Host Photo";
       img.classList.add("photo-thumbnail");
-      hostMessage.innerHTML = ""; // Clear any previous message
+      hostMessage.innerHTML = "";
       hostMessage.appendChild(img);
     } catch (error) {
       console.error("Error fetching host photo:", error);
@@ -236,10 +279,9 @@ async function viewHostPhoto(hostData) {
   }
 }
 
-// Function to download host photos as a ZIP file
 async function downloadHostPhoto(hostData) {
   const hostMessage = document.getElementById("hostMessage");
-  const folderPath = hostData.photoFolderPath; // Now set from roomData
+  const folderPath = hostData.photoFolderPath;
 
   if (folderPath) {
     try {
@@ -255,7 +297,6 @@ async function downloadHostPhoto(hostData) {
       const { saveAs } = await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js');
       const zip = new JSZip();
 
-      // Loop through all photos in the folder and add them to the zip file
       for (const itemRef of listResult.items) {
         const photoUrl = await getDownloadURL(itemRef);
         const response = await fetch(photoUrl);
@@ -276,50 +317,52 @@ async function downloadHostPhoto(hostData) {
   }
 }
 
-// Function to load event room details and participants
+// Loading event room
 async function loadEventRoom(eventCode) {
   try {
     const roomRef = dbRef(database, `rooms/${eventCode}`);
     const snapshot = await get(roomRef);
     if (snapshot.exists()) {
       const roomData = snapshot.val();
+      globalEventCode = eventCode;
+      globalRoomName = roomData.roomName || "Event Room";
 
-      // Display room name and code
-      document.getElementById("roomName").textContent = roomData.roomName || "Event Room";
+      document.getElementById("roomName").textContent = globalRoomName;
       document.getElementById("roomCode").textContent = `Code: ${eventCode}`;
 
-      const user = auth.currentUser;
-
-      // Load host information
       const hostId = roomData.hostId;
       const hostData = roomData.participants[hostId];
       if (hostData) {
         document.getElementById("hostName").textContent = hostData.name || "Host";
         document.getElementById("hostPhoto").src = hostData.photoUrl || "fallback.png";
-
-        // Assign the host's folder path
         hostData.photoFolderPath = roomData.hostUploadedPhotoFolderPath;
 
-        // Modified host photo button event to redirect to photogallery
         document.getElementById("viewHostPhotoBtn").addEventListener("click", () => {
           if (hostData.photoFolderPath) {
-            // Redirect to photogallery with "/photos" appended
             window.location.href = "photogallery.html?folderName=" + encodeURIComponent(hostData.photoFolderPath + "/photos");
           } else {
             alert("No photo folder available for the host.");
           }
         });
 
+        // Keep download button for host
         document.getElementById("downloadHostPhotoBtn").addEventListener("click", () => downloadHostPhoto(hostData));
       }
 
-      // Load participants and manual participants
+      // Load normal participants and manual participants
       const participants = roomData.participants || {};
-      const guests = Object.entries(participants).filter(([key]) => key !== hostId);
+      const guests = Object.entries(participants)
+        .filter(([key]) => key !== hostId)
+        .map(([id, data]) => {
+          return [id, { ...data, isManual: false }];
+        });
       loadGuests(guests, "guestList");
 
       const manualGuests = roomData.manualParticipants || {};
-      loadManualGuests(Object.entries(manualGuests), "manualGuestList");
+      const manualList = Object.entries(manualGuests).map(([id, data]) => {
+        return [id, { ...data, isManual: true }];
+      });
+      loadManualGuests(manualList, "manualGuestList");
     } else {
       alert("Room does not exist.");
     }
@@ -328,13 +371,9 @@ async function loadEventRoom(eventCode) {
   }
 }
 
-/**
- * New Backend Connection Functionality
- */
-
-// Function to load photos for arranging the room
+// Load and arrange photos
 async function loadPhotos(eventCode) {
-  const folderPath = `rooms/${eventCode}/host`;  // Path for the room photos
+  const folderPath = `rooms/${eventCode}/host`; 
   const folderRef = storageRef(storage, folderPath);
   const photoContainer = document.getElementById("photoContainer");
 
@@ -342,13 +381,12 @@ async function loadPhotos(eventCode) {
     const listResult = await listAll(folderRef);
     photoContainer.innerHTML = "";
 
-    const photoItems = []; // Store photo items for reordering
-    const allPaths = [];  // Array to hold all photo paths
+    const photoItems = []; 
+    const allPaths = [];  
 
     for (const itemRef of listResult.items) {
       const photoUrl = await getDownloadURL(itemRef);
 
-      // Create photo thumbnail
       const photoItem = document.createElement("div");
       photoItem.classList.add("photo-item");
       photoItem.dataset.path = itemRef.fullPath;
@@ -357,19 +395,17 @@ async function loadPhotos(eventCode) {
         `<img src="${photoUrl}" alt="Photo" />
         <button class="delete-btn">Delete</button>`;
 
-      // Add delete functionality
       photoItem.querySelector(".delete-btn").addEventListener("click", async () => {
         if (confirm("Are you sure you want to delete this photo?")) {
           await deletePhoto(itemRef.fullPath);
-          loadPhotos(eventCode); // Reload photos after deletion
+          loadPhotos(eventCode); 
         }
       });
 
       photoItems.push(photoItem);
-      allPaths.push(itemRef.fullPath); // Add photo path to the array
+      allPaths.push(itemRef.fullPath);
     }
 
-    // Append photos to container
     photoItems.forEach((item) => {
       photoContainer.appendChild(item);
     });
@@ -380,10 +416,8 @@ async function loadPhotos(eventCode) {
   }
 }
 
-// Function to delete a photo from Firebase Storage
 async function deletePhoto(photoPath) {
   const photoRef = storageRef(storage, photoPath);
-
   try {
     await deleteObject(photoRef);
     alert("Photo deleted successfully.");
@@ -393,12 +427,10 @@ async function deletePhoto(photoPath) {
   }
 }
 
-// Update sortPhotoRequest field and increment it when host visits the page
 async function updateSortPhotoRequest(eventCode) {
   const hostRef = dbRef(database, `rooms/${eventCode}/host`);
 
   try {
-    // Get the current sortPhotoRequest value
     const snapshot = await get(hostRef);
     let currentSortValue = 0.0;
 
@@ -407,12 +439,10 @@ async function updateSortPhotoRequest(eventCode) {
       currentSortValue = hostData.sortPhotoRequest !== undefined ? hostData.sortPhotoRequest : 0.0;
     }
 
-    // Increment the value by 1
     const newSortValue = currentSortValue + 1.0;
 
-    // Update the sortPhotoRequest field in the database while preserving existing data
     await set(hostRef, {
-      ...snapshot.val(),  // Preserve existing host data
+      ...snapshot.val(),
       sortPhotoRequest: newSortValue,
     });
 
@@ -423,23 +453,15 @@ async function updateSortPhotoRequest(eventCode) {
   }
 }
 
-/**
- * Authentication and Initialization
- */
-
+// Authentication and Initialization
 onAuthStateChanged(auth, (user) => {
   if (user) {
     const urlParams = new URLSearchParams(window.location.search);
     const eventCode = urlParams.get("eventCode");
 
     if (eventCode) {
-      // Load Event Room Details
       loadEventRoom(eventCode);
-
-      // Load and arrange photos for the room
       loadPhotos(eventCode);
-
-      // Update sortPhotoRequest each time the host visits the page
       updateSortPhotoRequest(eventCode);
     } else {
       alert("Event Code is missing!");
