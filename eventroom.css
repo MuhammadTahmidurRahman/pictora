@@ -47,6 +47,7 @@ button:hover {
 
 /* Move back button to the right side */
 #backButton {
+  content:"Back"
   float: right;
   margin-bottom: 10px;
   /* Inherit global button styles */
@@ -340,12 +341,16 @@ h3 {
 
 /* Delete Guest Button */
 .delete-guest-button {
+  content: "🗑️";
   background: rgba(255,76,76,0.9);
   color: #fff;
   border: 1px solid #000;
-  font-size: 14px;
   max-width: 180px;
   border-radius: 5px;
+  font-size: 18px;
+  display: block;
+  margin-bottom: 3px;
+  line-height: 1;
   cursor: pointer;
   transition: background 0.3s;
 }
@@ -378,20 +383,23 @@ h3 {
 }
 
 .delete-btn {
+  content: "🗑️";
   background: rgba(255,76,76,0.9);
   color: #fff;
-  padding: 5px;
-  font-size: 12px;
-  margin-top: 5px;
-  max-width: 100px;
-  border: 1px solid #000; /* black outline */
+  border: 1px solid #000;
+  max-width: 180px;
   border-radius: 5px;
+  font-size: 18px;
+  display: block;
+  margin-bottom: 3px;
+  line-height: 1;
   cursor: pointer;
   transition: background 0.3s;
 }
 
 .delete-btn:hover {
   background: rgba(212,53,53,0.9);
+  content: "🗑️";
 }
 /* Folder Icon Button */
 .folder-icon {
