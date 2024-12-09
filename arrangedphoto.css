@@ -2,7 +2,7 @@
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   /* More bluish background */
-  background: linear-gradient(to right, rgb(123, 176, 229), #80b2e6);
+  background: linear-gradient(to right, #b3d1f0, #80b2e6);
   margin: 0;
   display: flex;
   justify-content: center;
