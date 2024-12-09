@@ -41,61 +41,25 @@ body {
   border-radius: 10px;
 }
 
-/* Buttons */
-button {
-  cursor: pointer;
-  font-size: 14px;
-  border: 1px solid #000; /* black outline */
-  border-radius: 5px;
-  padding: 8px 15px;
-  margin: 5px 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  white-space: nowrap;
-  background: rgba(48,127,226, 0.8);
-  color: #fff;
-  box-sizing: border-box;
-  max-width: 180px;
-}
-
-button:hover {
-  background: rgba(35,99,183,0.8);
-}
-
-/* Action buttons (like arrangedphoto.js) */
-.action-button {
-  background: linear-gradient(to right, #ffffff, #307fe2);
-  color: #000;
-  border: 1px solid #000;
-  width: 180px;
-  text-align: center;
-}
-
-.action-button:hover {
-  background: linear-gradient(to right, #e0eaff, #2363b7);
-}
-
 /* Host Photo and folder icon positioning */
 #hostPhoto {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  margin: 10px auto;
+  margin: 10px auto 5px auto; /* Slight margin at bottom for spacing */
   display: block;
   object-fit: cover;
   border: 2px solid #307fe2;
 }
 
-/* We'll assume #hostActions is a container for host controls */
 #hostActions {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* Host folder icon below host image */
   align-items: center;
   margin-top: 10px;
 }
 
+/* Host folder icon below host image */
 .folder-icon {
   background: none;
   border: 1px solid #000;
@@ -120,56 +84,65 @@ button:hover {
   background: #ccc;
 }
 
-/* Align the 4 main buttons (Upload Photos, Add Member, View Sorted Photos, Arrange Photo) in a row */
+/* Align the 4 main buttons in one row below the folder icon */
 #hostActionsRow {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
   justify-content: center;
+  gap: 20px;
   margin-top: 10px;
 }
 
-/* Add icons to these four buttons via CSS content or just prepend icons in text */
-
-/* Example:
-   Upload Photos: "↑"
-   Add Member: "+"
-   View Sorted Photos: "🗂"
-   Arrange Photo: "↺"
-   
-   We'll modify them in CSS by using ::before pseudo-elements.
-   We assume the buttons have IDs or classes to target them individually.
+/* Four main buttons styling:
+   Place icons above text by using flex-direction: column
+   and fancy icons with ::before
+   Buttons: Upload Photos, Add Member, View Sorted Photos, Arrange Photo
 */
-
-#uploadPhotoButton::before {
-  content: "↑ ";
+#hostActionsRow button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  padding: 5px; 
+  margin: 0; 
+  border: 1px solid #000; 
+  border-radius: 8px;
+  background: rgba(48,127,226, 0.8);
+  color: #fff;
+  box-sizing: border-box;
+  text-align: center;
+  cursor: pointer;
   font-size: 12px;
+}
+
+#hostActionsRow button:hover {
+  background: rgba(35,99,183,0.8);
+}
+
+/* Fancy icons for each button via ::before */
+.arrange-photo-button::before {
+  content: "📷↺";
+  font-size: 18px;
+  margin-bottom: 3px;
 }
 
 .add-member-button::before {
-  content: "+ ";
-  font-size: 12px;
-}
-
-.action-button::before {
-  /* For the sorted photos button we gave it .action-button
-     We need a specific class for "View Sorted Photos" button if it differs from others.
-     If not, all action-buttons get the same icon - we must assume only "View Sorted Photos" uses .action-button alone.
-     Let's assume "View Sorted Photos" is unique action-button here and rely on order or a unique ID if available.
-     If unique ID is not given, we rely on that the action-button for sorted photos is appended last. 
-     Let's just do a direct approach: add a class "view-sorted-button" to it in code if possible.
-     Since logic cannot be changed, we rely on order. Let's suppose we can do view-sorted-button class.
-  */
+  content: "👤➕";
+  font-size: 18px;
+  margin-bottom: 3px;
 }
 
 .view-sorted-button::before {
-  content: "🗂 ";
-  font-size: 12px;
+  content: "👁🗂";
+  font-size: 18px;
+  margin-bottom: 3px;
 }
 
-.arrange-photo-button::before {
-  content: "↺ ";
-  font-size: 12px;
+#uploadPhotoButton::before {
+  content: "⬆📷";
+  font-size: 18px;
+  margin-bottom: 3px;
 }
 
 /* Guest Lists */
@@ -203,17 +176,17 @@ button:hover {
   position: fixed;
   top: 0;
   right: 0;
-  width: 100%; /* Make it slide over the whole page */
+  width: 100%; /* full page width */
   height: 100%;
   background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   transition: transform 0.3s ease-in-out;
-  transform: translateX(100%); /* initially off-screen to the right */
+  transform: translateX(100%); /* Initially off-screen to the right */
 }
 
 .dialog:not(.hidden) {
-  transform: translateX(0);
+  transform: translateX(0); /* Slide in from right */
 }
 
 .dialog-content {
