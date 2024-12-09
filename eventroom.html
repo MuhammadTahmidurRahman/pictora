@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Event Room</title>
-<link rel="stylesheet" href="eventroom.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Event Room</title>
+  <link rel="stylesheet" href="eventroom.css">
 </head>
 <body>
   <div id="eventRoomContainer">
+    <!-- Back Button -->
     <button id="backButton">Back</button>
+    
     <h1 id="roomName">Loading Room...</h1>
     <p id="roomCode"></p>
     
@@ -17,7 +19,14 @@
       <h3>Host:</h3>
       <p id="hostName"></p>
       <img id="hostPhoto" src="" alt="Host Photo" />
-      <div id="hostActions"></div> <!-- Host actions go here -->
+      
+      <!-- Host Actions -->
+      <div id="hostActions">
+        <button class="action-button folder-icon">Folder</button>
+        <button class="action-button arrange-photo-button">Arrange Photo</button>
+        <button class="action-button add-member-button">Add Member</button>
+        <button class="action-button view-sorted-button">View Sorted</button>
+      </div>
     </div>
     
     <!-- Upload Photo Button -->
@@ -46,6 +55,7 @@
       </div>
     </div>
   </div>
-<script type="module" src="eventroom.js"></script>
+  
+  <script type="module" src="eventroom.js"></script>
 </body>
 </html>
