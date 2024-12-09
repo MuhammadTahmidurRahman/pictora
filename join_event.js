@@ -144,10 +144,6 @@ function listenForUserProfileChanges() {
     });
   });
 }
-document.querySelector('.profile-button').addEventListener('click', () => {
-  document.querySelector('.profile-panel').classList.toggle('show');
-});
-
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
