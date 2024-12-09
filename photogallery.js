@@ -1,6 +1,4 @@
-// photogallery.js
-
-// Import necessary Firebase modules
+//Import necessary Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref as storageRef, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
@@ -24,7 +22,7 @@ let currentFolderName = "";
 async function downloadAllPhotosAsZip(folderName) {
   const JSZipModule = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
   const JSZip = JSZipModule.default;
-  await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js');
+  await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/FileSaver.min.js');
   const saveAs = window.saveAs;
 
   const folderRef = storageRef(storage2, folderName);

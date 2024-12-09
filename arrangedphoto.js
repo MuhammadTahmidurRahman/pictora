@@ -1,4 +1,4 @@
-// arrangedphoto.js
+/ arrangedphoto.js
 
 // Import necessary Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -39,11 +39,10 @@ document.getElementById("backButton").addEventListener("click", () => {
   window.location.href = "eventroom.html";
 });
 
-// Download photos as ZIP (uses saveAs)
 async function downloadPhotosAsZip(folderPath, fileNamePrefix) {
   const JSZipModule = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
   const JSZip = JSZipModule.default;
-  await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js');
+  await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/FileSaver.min.js');
   const saveAs = window.saveAs;
 
   const folderRef = storageRef(storage, folderPath);
