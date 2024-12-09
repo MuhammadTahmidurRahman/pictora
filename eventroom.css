@@ -1,7 +1,6 @@
 /* General Styling */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  /* More bluish background similar to arrangedphoto.css */
   background: linear-gradient(to right, #b3d1f0, #80b2e6);
   margin: 0;
   display: flex;
@@ -12,8 +11,7 @@ body {
 
 #eventRoomContainer {
   width: 90%;
-  max-width: 600px;
-  /* Glass effect: semi-transparent background with blur */
+  max-width: 800px; /* Increased max-width to accommodate all 5 buttons in one row */
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -25,7 +23,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* Move back button to the right side (as in arrangedphoto.css) */
+/* Move back button to the right side */
 #backButton {
   float: right;
   margin-bottom: 10px;
@@ -60,13 +58,8 @@ body {
   border: 2px solid #307fe2;
 }
 
-/* All 5 buttons in one horizontal row,
-   including the folder icon button.
-   We'll have a container (#hostActionsRow) for all 5 buttons.
-*/
+/* All 5 buttons in a single row (including the folder icon) */
 #hostActions {
-  /* We no longer stack folder icon below host image separately.
-     We'll just rely on #hostActionsRow for all buttons. */
   margin-top: 10px;
   display: flex;
   justify-content: center;
@@ -80,10 +73,10 @@ body {
   margin-top: 10px;
 }
 
-/* Common styles for all 5 buttons */
-#hostActionsRow button {
+/* Common styles for the 5 buttons: folder icon, arrange photo, add member, view sorted photos, upload photos */
+#hostActionsRow button, .folder-icon {
   display: flex;
-  flex-direction: column; /* icon above, text below */
+  flex-direction: column; /* icon above text */
   align-items: center;
   justify-content: center;
   width: 70px;
@@ -100,14 +93,11 @@ body {
   font-size: 12px;
 }
 
-#hostActionsRow button:hover {
+#hostActionsRow button:hover, .folder-icon:hover {
   background: rgba(35,99,183,0.8);
 }
 
-/* Fancy icons for four main buttons:
-   Arrange Photo, Add Member, View Sorted Photos, Upload Photos 
-   Using ::before for icons
-*/
+/* Fancy icons for main buttons */
 .arrange-photo-button::before {
   content: "📷↺";
   font-size: 18px;
@@ -132,31 +122,26 @@ body {
   margin-bottom: 3px;
 }
 
-/* Host folder icon button:
-   Originally code sets textContent = "📁"
-   We'll hide that text and add a fancy icon & label via pseudo-elements.
-*/
+/* Folder icon button: Show icon above, text below */
 .folder-icon {
   position: relative;
-  color: transparent; /* hide original "📁" text */
+  font-size: 12px; 
 }
 
-/* Add a fancy folder icon above */
 .folder-icon::before {
   content: "📂";
   font-size: 18px;
-  margin-bottom: 3px;
   display: block;
+  margin-bottom: 3px;
 }
 
-/* Add a label below the icon */
 .folder-icon::after {
   content: "Folder";
   font-size: 12px;
   color: #fff;
 }
 
-/* Guest Lists similar to arrangedphoto.css */
+/* Guest Lists */
 #guestList li,
 #manualGuestList li {
   display: flex;
@@ -178,7 +163,7 @@ body {
   margin-right: 10px;
 }
 
-/* Dialog Styles - slide from right (cover whole page) */
+/* Dialog Styles - slide from right over whole page */
 .dialog {
   position: fixed;
   top: 0;
@@ -189,11 +174,11 @@ body {
   display: flex;
   align-items: center;
   transition: transform 0.3s ease-in-out;
-  transform: translateX(100%); /* Initially off-screen to the right */
+  transform: translateX(100%); /* off-screen to right initially */
 }
 
 .dialog:not(.hidden) {
-  transform: translateX(0); /* slide in from right */
+  transform: translateX(0); /* slide in */
 }
 
 .dialog-content {
