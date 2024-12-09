@@ -41,7 +41,7 @@ body {
   border-radius: 10px;
 }
 
-/* Button Styles */
+/* Buttons */
 button {
   cursor: pointer;
   font-size: 14px;
@@ -49,20 +49,22 @@ button {
   border-radius: 5px;
   padding: 8px 15px;
   margin: 5px 0;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   white-space: nowrap;
-  background: rgba(48,127,226, 0.8); /* semi-transparent blue */
+  background: rgba(48,127,226, 0.8);
   color: #fff;
   box-sizing: border-box;
-  max-width: 180px; /* keep a consistent width */
+  max-width: 180px;
 }
 
 button:hover {
   background: rgba(35,99,183,0.8);
 }
 
-/* Action buttons for host and email (reusing same .action-button style) */
+/* Action buttons (like arrangedphoto.js) */
 .action-button {
   background: linear-gradient(to right, #ffffff, #307fe2);
   color: #000;
@@ -75,7 +77,7 @@ button:hover {
   background: linear-gradient(to right, #e0eaff, #2363b7);
 }
 
-/* Host Photo Styling */
+/* Host Photo and folder icon positioning */
 #hostPhoto {
   width: 100px;
   height: 100px;
@@ -84,6 +86,90 @@ button:hover {
   display: block;
   object-fit: cover;
   border: 2px solid #307fe2;
+}
+
+/* We'll assume #hostActions is a container for host controls */
+#hostActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.folder-icon {
+  background: none;
+  border: 1px solid #000;
+  border-radius: 5px;
+  color: #fff;
+  padding: 5px 8px;
+  font-size: 14px;
+  cursor: pointer;
+  background: rgba(48,127,226, 0.8);
+  margin-bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.folder-icon:hover {
+  background: rgba(35,99,183,0.8);
+}
+
+.folder-icon:disabled {
+  cursor: not-allowed;
+  background: #ccc;
+}
+
+/* Align the 4 main buttons (Upload Photos, Add Member, View Sorted Photos, Arrange Photo) in a row */
+#hostActionsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+/* Add icons to these four buttons via CSS content or just prepend icons in text */
+
+/* Example:
+   Upload Photos: "↑"
+   Add Member: "+"
+   View Sorted Photos: "🗂"
+   Arrange Photo: "↺"
+   
+   We'll modify them in CSS by using ::before pseudo-elements.
+   We assume the buttons have IDs or classes to target them individually.
+*/
+
+#uploadPhotoButton::before {
+  content: "↑ ";
+  font-size: 12px;
+}
+
+.add-member-button::before {
+  content: "+ ";
+  font-size: 12px;
+}
+
+.action-button::before {
+  /* For the sorted photos button we gave it .action-button
+     We need a specific class for "View Sorted Photos" button if it differs from others.
+     If not, all action-buttons get the same icon - we must assume only "View Sorted Photos" uses .action-button alone.
+     Let's assume "View Sorted Photos" is unique action-button here and rely on order or a unique ID if available.
+     If unique ID is not given, we rely on that the action-button for sorted photos is appended last. 
+     Let's just do a direct approach: add a class "view-sorted-button" to it in code if possible.
+     Since logic cannot be changed, we rely on order. Let's suppose we can do view-sorted-button class.
+  */
+}
+
+.view-sorted-button::before {
+  content: "🗂 ";
+  font-size: 12px;
+}
+
+.arrange-photo-button::before {
+  content: "↺ ";
+  font-size: 12px;
 }
 
 /* Guest Lists */
@@ -100,10 +186,9 @@ button:hover {
   background: rgba(247,250,255,0.9);
   border: 1px solid #cde0f5;
   border-radius: 8px;
-  justify-content: space-between; /* buttons on right side */
+  justify-content: space-between; 
 }
 
-/* Guest Photo Styles */
 .guest-photo {
   width: 50px;
   height: 50px;
@@ -113,43 +198,22 @@ button:hover {
   margin-right: 10px;
 }
 
-/* Folder Icon Styles */
-.folder-icon {
-  background: none;
-  border: 1px solid #000;
-  border-radius: 5px;
-  color: #000;
-  padding: 5px 8px;
-  font-size: 14px;
-  cursor: pointer;
-  background: rgba(48,127,226, 0.8);
-  color: #fff;
-}
-
-.folder-icon:hover {
-  background: rgba(35,99,183,0.8);
-}
-
-.folder-icon:disabled {
-  cursor: not-allowed;
-  background: #ccc;
-}
-
-/* Dialog Styles */
+/* Dialog Styles - slide from right */
 .dialog {
   position: fixed;
   top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  right: 0;
+  width: 100%; /* Make it slide over the whole page */
+  height: 100%;
   background: rgba(0, 0, 0, 0.6);
   display: flex;
-  justify-content: center;
   align-items: center;
+  transition: transform 0.3s ease-in-out;
+  transform: translateX(100%); /* initially off-screen to the right */
 }
 
-.dialog.hidden {
-  display: none;
+.dialog:not(.hidden) {
+  transform: translateX(0);
 }
 
 .dialog-content {
@@ -158,6 +222,7 @@ button:hover {
   border-radius: 8px;
   width: 90%;
   max-width: 400px;
+  margin: 0 auto;
   text-align: center;
 }
 
@@ -178,18 +243,6 @@ button:hover {
 
 .dialog-buttons button {
   width: 45%;
-}
-
-/* Additional Buttons */
-.add-member-button {
-  background: linear-gradient(to right, #ffffff, #307fe2);
-  color: #000;
-  border: 1px solid #000;
-  width: 180px;
-}
-
-.add-member-button:hover {
-  background: linear-gradient(to right, #e0eaff, #2363b7);
 }
 
 .delete-guest-button {
