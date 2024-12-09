@@ -80,16 +80,16 @@ async function loadGuests(guests, containerId) {
 
   guests.forEach(([guestId, guestData]) => {
     const guestItem = document.createElement("li");
-    guestItem.innerHTML = `
-      <img src="${guestData.photoUrl || "fallback.png"}" alt="Guest Photo" class="guest-photo" />
+    guestItem.innerHTML = 
+      `<img src="${guestData.photoUrl || "fallback.png"}" alt="Guest Photo" class="guest-photo" />
       <span>${guestData.name || "Unnamed Guest"}</span>
       <button class="folder-icon" data-folder-path="${guestData.folderPath || ""}">
         📁 View Photos
       </button>
       <button class="download-button" data-folder-path="${guestData.folderPath || ""}">
         📦 Download Photos
-      </button>
-    `;
+      </button>`;
+
     guestListContainer.appendChild(guestItem);
 
     // Add event listener to view photos
@@ -116,7 +116,6 @@ async function loadGuests(guests, containerId) {
 }
 
 // Function to load manual guests into the DOM
-// Function to load manual guests into the DOM
 async function loadManualGuests(manualGuests, containerId) {
   const manualGuestListContainer = document.getElementById(containerId);
   manualGuestListContainer.innerHTML = ""; // Clear previous list
@@ -128,16 +127,16 @@ async function loadManualGuests(manualGuests, containerId) {
 
   manualGuests.forEach(([guestId, guestData]) => {
     const guestItem = document.createElement("li");
-    guestItem.innerHTML = `
-      <img src="${guestData.photoUrl || "fallback.png"}" alt="Manual Guest Photo" class="guest-photo" />
+    guestItem.innerHTML = 
+      `<img src="${guestData.photoUrl || "fallback.png"}" alt="Manual Guest Photo" class="guest-photo" />
       <span>${guestData.name || "Unnamed Manual Guest"}</span>
       <button class="folder-icon" data-folder-path="${guestData.folderPath || ""}">
         📁 View Photos
       </button>
       <button class="download-button" data-folder-path="${guestData.folderPath || ""}">
         📦 Download Photos
-      </button>
-    `;
+      </button>`;
+
     manualGuestListContainer.appendChild(guestItem);
 
     // Add event listener to view photos
@@ -193,14 +192,24 @@ async function fetchAndDisplayPhotos(folderPath, containerId) {
 
 // Function to toggle the photo dialog visibility
 function toggleDialog(show) {
-  const dialog = document.getElementById("photoDialog");
+  let dialog = document.getElementById("photoDialog");
+  if (!dialog) {
+    dialog = document.createElement("div");
+    dialog.id = "photoDialog";
+    dialog.style.display = "none";
+    document.body.appendChild(dialog);
+
+    const content = document.createElement("div");
+    content.id = "photoDialogContent";
+    dialog.appendChild(content);
+  }
   dialog.style.display = show ? "flex" : "none";
 }
 
 // Function to view host photo
 async function viewHostPhoto(hostData) {
   const hostMessage = document.getElementById("hostMessage");
-  const folderPath = hostData.photoFolderPath; // Assuming photoFolderPath is the folder path of the host's photos in Firebase Storage
+  const folderPath = hostData.photoFolderPath; // Now set from roomData
 
   if (folderPath) {
     try {
@@ -232,7 +241,7 @@ async function viewHostPhoto(hostData) {
 // Function to download host photos as a ZIP file
 async function downloadHostPhoto(hostData) {
   const hostMessage = document.getElementById("hostMessage");
-  const folderPath = hostData.photoFolderPath; // Assuming photoFolderPath is the folder path of the host's photos in Firebase Storage
+  const folderPath = hostData.photoFolderPath; // Now set from roomData
 
   if (folderPath) {
     try {
@@ -290,6 +299,9 @@ async function loadEventRoom(eventCode) {
         document.getElementById("hostName").textContent = hostData.name || "Host";
         document.getElementById("hostPhoto").src = hostData.photoUrl || "fallback.png";
 
+        // Assign the host's folder path
+        hostData.photoFolderPath = roomData.hostUploadedPhotoFolderPath;
+
         // Add event listeners for the host photo buttons
         document.getElementById("viewHostPhotoBtn").addEventListener("click", () => viewHostPhoto(hostData));
         document.getElementById("downloadHostPhotoBtn").addEventListener("click", () => downloadHostPhoto(hostData));
@@ -335,10 +347,9 @@ async function loadPhotos(eventCode) {
       photoItem.classList.add("photo-item");
       photoItem.dataset.path = itemRef.fullPath;
 
-      photoItem.innerHTML = `  
-        <img src="${photoUrl}" alt="Photo" />
-        <button class="delete-btn">Delete</button>
-      `;
+      photoItem.innerHTML =   
+        `<img src="${photoUrl}" alt="Photo" />
+        <button class="delete-btn">Delete</button>`;
 
       // Add delete functionality
       photoItem.querySelector(".delete-btn").addEventListener("click", async () => {
@@ -410,7 +421,6 @@ async function updateSortPhotoRequest(eventCode) {
  * Authentication and Initialization
  */
 
-// Check Authentication and Initialize Page
 onAuthStateChanged(auth, (user) => {
   if (user) {
     const urlParams = new URLSearchParams(window.location.search);
