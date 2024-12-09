@@ -1,99 +1,167 @@
-/* General Reset */
-* {
+/* General Styling */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* More bluish background */
+  background: linear-gradient(to right, #b3d1f0, #80b2e6);
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+#eventRoomContainer {
+  width: 90%;
+  max-width: 700px; /* Increased max-width for larger container */
+  /* Glass effect: semi-transparent background with blur */
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 30px; /* Increased padding */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 16px; /* More rounded corners */
+  overflow-y: auto;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Move back button to the right side */
+#backButton {
+  float: right;
+  margin-bottom: 10px;
+}
+
+/* Scrollable List Styling */
+.scrollable-list {
+  max-height: 150px;
+  overflow-y: auto;
   margin: 0;
   padding: 0;
+  list-style-type: none;
+}
+
+.scrollable-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollable-list::-webkit-scrollbar-thumb {
+  background: #a2cbe8;
+  border-radius: 10px;
+}
+
+/* Headings and Text */
+#roomName {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+#roomCode {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+}
+
+h3 {
+  color: #333;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+/* Buttons */
+button {
+  cursor: pointer;
+  font-size: 14px;
+  border: 1px solid #000; /* black outline */
+  border-radius: 5px;
+  padding: 8px 15px;
+  margin: 5px 0;
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap; 
+  background: rgba(48,127,226, 0.8);
+  color: #fff;
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Inter', Arial, sans-serif;
-  background: url('hpbg1.png') no-repeat center center fixed;
-  background-size: cover;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100vh;
-  margin: 0;
-}
-
-.container {
-  background: rgba(255, 255, 255, 0.7); /* Semi-transparent white background */
-  padding: 32px;
-  width: 100%;
-  max-width: 450px;
-  border-radius: 16px;
-  text-align: center;
-  margin: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-  font-size: 24px;
-  font-weight: 600;
-  color: #2d3a45;
-  margin-bottom: 16px;
-}
-
-button {
-  width: 100%;
-  padding: 12px 0;
-  background: #4c8bf5;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  margin-top: 16px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
 button:hover {
-  background: #356ac3;
+  background: rgba(35,99,183,0.8);
 }
 
-input {
-  width: 100%;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  border-radius: 8px;
-  border: 1px solid #d1d9e6;
-  background-color: #f7f9fc;
-  color: #4a5568;
-  font-size: 14px;
+/* Action buttons for host and email */
+.action-button {
+  background: linear-gradient(to right, #ffffff, #307fe2);
+  color: #000;
+  border: 1px solid #000;
+  width: 180px; /* fixed width for uniform size */
+  text-align: center;
 }
 
-input::placeholder {
-  color: #a0aec0;
-}
-
-input:focus {
-  outline: none;
-  border: 1px solid #4c8bf5;
-  box-shadow: 0 0 0 3px rgba(76, 139, 245, 0.2);
-}
-
-.navbar {
+/* Action Buttons Container */
+.action-buttons {
   display: flex;
-  justify-content: space-around;
-  background: rgba(255, 255, 255, 0.7);
-  padding: 16px 0;
-  border-top: 1px solid #d1d9e6;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
 }
 
-.navbar button {
-  width: 45%;
-  padding: 12px 0;
-  background: #4c8bf5;
-  color: white;
-  border: none;
-  border-radius: 50px;
-  font-size: 14px;
-  font-weight: 600;
+/* Profile Button Styling */
+.profile-button {
+  width: 50px;
+  height: 50px;
+  background: rgba(48, 127, 226, 0.8); /* Matching button background */
+  border: 1px solid #000; /* Black outline as per existing button styles */
+  border-radius: 50%;
   cursor: pointer;
-  transition: background 0.3s ease;
+  position: relative;
+  transition: background 0.3s ease, transform 0.2s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.navbar button:hover {
-  background: #356ac3;
+.profile-button:hover {
+  background: rgba(35, 99, 183, 0.8); /* Hover color as per button styles */
+  transform: translateY(-2px);
 }
+
+.profile-button::after {
+  content: '';
+  width: 22px;
+  height: 22px;
+  background: url('https://cdn-icons-png.flaticon.com/512/147/147144.png') no-repeat center center / contain;
+}
+
+/* If using Font Awesome, remove the ::after and style the <i> tag */
+.profile-button i {
+  color: #fff;
+  font-size: 20px;
+}
+
+/* Join Room Button Adjustments */
+#joinEventBtn {
+  flex: 1;
+  margin-left: 15px; /* Space between profile button and join button */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .profile-button {
+    margin-bottom: 15px;
+    width: 45px;
+    height: 45px;
+  }
+
+  #joinEventBtn {
+    margin-left: 0;
+  }
+}
+
+/* Scrollbar styling, Host Photo, Photo Grid, Guest Lists, Dialog Styles, etc. */
+/* ... rest of your existing CSS ... */
