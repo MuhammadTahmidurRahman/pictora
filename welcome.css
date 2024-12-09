@@ -16,10 +16,7 @@ body, html {
   position: relative;
   width: 100%;
   height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* Center vertically */
-  align-items: center;
+  /* Remove flex properties */
   background-color: #000;
 }
 
@@ -35,13 +32,15 @@ body, html {
 }
 
 .button-section {
-  position: relative;
+  position: absolute;
+  bottom: 30%; /* Position buttons 30% from the bottom */
+  left: 50%;
+  transform: translateX(-50%); /* Center horizontally */
   z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 20px;
   width: 50%; /* Adjust to make buttons narrower */
-  margin-top: -50px; /* Move buttons upwards */
 }
 
 .button {
