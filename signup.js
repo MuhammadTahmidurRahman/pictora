@@ -82,15 +82,27 @@ window.showImagePicker = function () {
 };
 
 /**
- * Displays the selected image status.
+ * Displays the selected image status and preview.
  * @param {HTMLElement} input - The file input element.
  */
 window.displayImage = function (input) {
   const uploadText = document.getElementById("upload-text");
-  if (uploadText) {
-    uploadText.textContent = input.files && input.files[0] ? "Photo selected" : "Upload your photo here";
+  const imagePreview = document.getElementById("image-preview");
+  if (uploadText && imagePreview) {
+    if (input.files && input.files[0]) {
+      uploadText.textContent = "Photo selected";
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        imagePreview.src = e.target.result;
+        imagePreview.style.display = "block";
+      };
+      reader.readAsDataURL(input.files[0]);
+    } else {
+      uploadText.textContent = "Upload your photo here";
+      imagePreview.style.display = "none";
+    }
   } else {
-    console.error("Upload text element with id 'upload-text' not found.");
+    console.error("Upload text or image preview element not found.");
   }
 };
 
@@ -100,6 +112,20 @@ window.displayImage = function (input) {
 window.goBack = function () {
   window.history.back();
 };
+
+/**
+ * Shows the loading overlay.
+ */
+function showLoading() {
+  document.getElementById("loading-overlay").style.display = "block";
+}
+
+/**
+ * Hides the loading overlay.
+ */
+function hideLoading() {
+  document.getElementById("loading-overlay").style.display = "none";
+}
 
 /**
  * Registers a new user with email and password, uploads their profile image, and sends a verification email.
@@ -121,6 +147,21 @@ window.registerUser = async function () {
     return;
   }
 
+  // Validate file type
+  const allowedExtensions = ["jpg", "jpeg", "png", "gif"];
+  const fileExtension = imageFile.name.split('.').pop().toLowerCase();
+  if (!allowedExtensions.includes(fileExtension)) {
+    alert("Invalid file type. Please upload an image (jpg, jpeg, png, gif).");
+    return;
+  }
+
+  // Validate file size (e.g., max 2MB)
+  const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+  if (imageFile.size > maxSizeInBytes) {
+    alert("Image size exceeds 2MB. Please upload a smaller image.");
+    return;
+  }
+
   if (password.length < 8) {
     alert("Password must be at least 8 characters long.");
     return;
@@ -132,10 +173,13 @@ window.registerUser = async function () {
   }
 
   try {
+    showLoading(); // Show loading overlay
+
     // Check if the email is already registered
     const signInMethods = await fetchSignInMethodsForEmail(auth, email);
     if (signInMethods.length > 0) {
       alert("This email is already registered. Please log in.");
+      hideLoading(); // Hide loading overlay
       return;
     }
 
@@ -146,11 +190,11 @@ window.registerUser = async function () {
     // Ensure the user object exists
     if (!user) {
       alert("Failed to create user. Please try again.");
+      hideLoading(); // Hide loading overlay
       return;
     }
 
     // Upload image to Firebase Storage
-    const fileExtension = imageFile.name.split('.').pop();
     const storagePath = `uploads/${user.uid}/profile.${fileExtension}`;
     const imageStorageRef = storageRef(storage, storagePath);
 
@@ -170,6 +214,9 @@ window.registerUser = async function () {
       photo: imageUrl,
     });
 
+    // Debugging: Confirm data write
+    console.log("User data written to Realtime Database.");
+
     // Send email verification
     await sendEmailVerification(user);
     alert("Registration successful! A verification email has been sent to your email address. Please verify to proceed.");
@@ -182,6 +229,8 @@ window.registerUser = async function () {
   } catch (error) {
     console.error("Registration error:", error);
     alert(`Failed to register. ${error.message}`);
+  } finally {
+    hideLoading(); // Hide loading overlay
   }
 };
 
@@ -198,7 +247,24 @@ window.signInWithGoogle = async function () {
     return;
   }
 
+  // Validate file type
+  const allowedExtensions = ["jpg", "jpeg", "png", "gif"];
+  const fileExtension = imageFile.name.split('.').pop().toLowerCase();
+  if (!allowedExtensions.includes(fileExtension)) {
+    alert("Invalid file type. Please upload an image (jpg, jpeg, png, gif).");
+    return;
+  }
+
+  // Validate file size (e.g., max 2MB)
+  const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+  if (imageFile.size > maxSizeInBytes) {
+    alert("Image size exceeds 2MB. Please upload a smaller image.");
+    return;
+  }
+
   try {
+    showLoading(); // Show loading overlay
+
     // Sign in with Google
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
@@ -208,6 +274,7 @@ window.signInWithGoogle = async function () {
 
     if (!user) {
       alert("Failed to sign in with Google. Please try again.");
+      hideLoading(); // Hide loading overlay
       return;
     }
 
@@ -216,11 +283,11 @@ window.signInWithGoogle = async function () {
     if (userSnapshot.exists()) {
       alert("Welcome back!");
       window.location.href = "join_event.html";
+      hideLoading(); // Hide loading overlay
       return;
     }
 
     // Upload image to Firebase Storage
-    const fileExtension = imageFile.name.split('.').pop();
     const storagePath = `uploads/google/${Date.now()}.${fileExtension}`;
     const imageStorageRef = storageRef(storage, storagePath);
 
@@ -240,10 +307,15 @@ window.signInWithGoogle = async function () {
       photo: imageUrl,
     });
 
+    // Debugging: Confirm data write
+    console.log("Google user data written to Realtime Database.");
+
     alert("Google Sign-In successful!");
     window.location.href = "join_event.html";
   } catch (error) {
     console.error("Google Sign-In error:", error);
     alert(`Failed to sign in with Google. ${error.message}`);
+  } finally {
+    hideLoading(); // Hide loading overlay
   }
 };
