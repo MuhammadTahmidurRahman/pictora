@@ -11,7 +11,7 @@ body {
 
 #eventRoomContainer {
   width: 90%;
-  max-width: 1000px; /* Increased to ensure all five fit in one line */
+  max-width: 800px; /* keep it 800px */
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -21,7 +21,6 @@ body {
   overflow-y: auto;
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  text-align: center; /* Center content horizontally */
 }
 
 /* Move back button to the right side */
@@ -59,27 +58,28 @@ body {
   border: 2px solid #307fe2;
 }
 
-/* We'll place all 5 buttons (folder, arrange, add member, view sorted, upload)
-   inside #hostActions in one horizontal row.
+/* We will have 4 main buttons (including folder) in one row.
+   Then below them, the upload photos button separately.
 */
+
+/* Container for the four main buttons (Folder, Arrange Photo, Add Member, View Sorted Photos) */
 #hostActions {
-  display: inline-flex; 
-  gap: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* space between buttons */
   margin-top: 10px;
-  flex-wrap: nowrap; /* No wrapping */
-  vertical-align: middle; /* Align with container */
 }
 
-/* Common styles for all buttons */
+/* Styles for all main buttons:
+   The folder icon button will just display "📁" from code (original design),
+   The other 3 will have pseudo-elements for icon and text.
+*/
+
+/* Common button styling */
 #hostActions .folder-icon,
 #hostActions .arrange-photo-button,
 #hostActions .add-member-button,
-#hostActions .view-sorted-button,
-#hostActions #uploadPhotoButton {
-  display: flex;
-  flex-direction: column; /* icon above text */
-  align-items: center;
-  justify-content: center;
+#hostActions .view-sorted-button {
   width: 70px;
   height: 70px;
   padding: 5px;
@@ -88,100 +88,129 @@ body {
   background: rgba(48,127,226, 0.8);
   color: #fff;
   box-sizing: border-box;
+  text-align: center;
   cursor: pointer;
-  /* Hide any original text (like "📁") by using small font-size and line-height=0 */
-  font-size: 0;
-  line-height: 0;
-  overflow: hidden; 
-  position: relative;
+  font-size: 14px; /* restore a readable font-size for folder icon */
+  line-height: 1.2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 #hostActions .folder-icon:hover,
 #hostActions .arrange-photo-button:hover,
 #hostActions .add-member-button:hover,
-#hostActions .view-sorted-button:hover,
-#hostActions #uploadPhotoButton:hover {
+#hostActions .view-sorted-button:hover {
   background: rgba(35,99,183,0.8);
 }
 
-/* Folder icon button: show one icon and text via pseudo-elements */
-.folder-icon::before {
-  content: "📂";
-  font-size: 18px;
-  display: block;
-  margin-bottom: 3px;
-  line-height:1;
-}
-
-.folder-icon::after {
-  content: "Folder";
-  font-size: 12px;
-  color: #fff;
-  line-height:1;
-}
+/* Folder icon button: Use original design - just "📁" from code
+   No pseudo-elements for folder icon. Just show code text "📁".
+   This means it will only show the single character provided by code.
+   The user asked for original past folder icon design.
+   So no pseudo-elements here.
+*/
 
 /* Arrange Photo Button */
+.arrange-photo-button {
+  font-size: 0; /* hide original text, if any */
+}
+
 .arrange-photo-button::before {
   content: "📷↺";
   font-size: 18px;
+  display: block;
   margin-bottom: 3px;
-  display:block;
-  line-height:1;
+  line-height: 1;
 }
 
 .arrange-photo-button::after {
   content: "Arrange";
   font-size: 12px;
   color: #fff;
-  line-height:1;
+  line-height: 1;
 }
 
 /* Add Member Button */
+.add-member-button {
+  font-size: 0; /* hide original text if any */
+}
+
 .add-member-button::before {
   content: "👤➕";
   font-size: 18px;
+  display: block;
   margin-bottom: 3px;
-  display:block;
-  line-height:1;
+  line-height: 1;
 }
 
 .add-member-button::after {
   content: "Member";
   font-size: 12px;
   color: #fff;
-  line-height:1;
+  line-height: 1;
 }
 
 /* View Sorted Photos Button */
+.view-sorted-button {
+  font-size: 0; /* hide original text if any */
+}
+
 .view-sorted-button::before {
   content: "👁🗂";
   font-size: 18px;
+  display: block;
   margin-bottom: 3px;
-  display:block;
-  line-height:1;
+  line-height: 1;
 }
 
 .view-sorted-button::after {
   content: "Sorted";
   font-size: 12px;
   color: #fff;
-  line-height:1;
+  line-height: 1;
 }
 
-/* Upload Photos Button */
+/* Upload Photos Button below the four buttons */
+#uploadPhotoButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  padding: 5px;
+  margin: 10px auto 0 auto; /* center it below the main row */
+  border: 1px solid #000;
+  border-radius: 8px;
+  background: rgba(48,127,226, 0.8);
+  color: #fff;
+  box-sizing: border-box;
+  text-align: center;
+  cursor: pointer;
+  font-size: 0; /* hide original text if any */
+  line-height: 0;
+}
+
+#uploadPhotoButton:hover {
+  background: rgba(35,99,183,0.8);
+}
+
+/* Upload Photos Button Icon/Text */
 #uploadPhotoButton::before {
   content: "⬆📷";
   font-size: 18px;
+  display: block;
   margin-bottom: 3px;
-  display:block;
-  line-height:1;
+  line-height: 1;
 }
 
 #uploadPhotoButton::after {
   content: "Upload";
   font-size: 12px;
   color: #fff;
-  line-height:1;
+  line-height: 1;
 }
 
 /* Guest Lists */
@@ -206,7 +235,7 @@ body {
   margin-right: 10px;
 }
 
-/* Dialog Styles - slide from right (cover whole page) */
+/* Dialog Styles - slide from right */
 .dialog {
   position: fixed;
   top: 0;
