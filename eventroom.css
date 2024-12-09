@@ -370,6 +370,36 @@ h3 {
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
+/* Add Guest Button Content */
+#addGuestButton::before {
+  content: "Add Guest";
+  font-size: 14px;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+#addGuestButton::after {
+  content: ""; /* Ensure no additional content */
+}
+
+#addGuestButton {
+  /* Optional: Add any specific styles if needed */
+}
+
+/* Close Dialog Button Content */
+#closeDialogButton::before {
+  content: "Cancel";
+  font-size: 14px;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+#closeDialogButton::after {
+  content: ""; /* Ensure no additional content */
+}
+
+#closeDialogButton {
+  /* Optional: Add any specific styles if needed */
+}
+
 /* Delete Guest Button */
 .delete-guest-button {
   /* Removed invalid 'content' property */
