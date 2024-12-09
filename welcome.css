@@ -86,6 +86,9 @@ body, html {
   padding: 10px 0;
   font-size: 16px;
   font-weight: 600;
+  position: absolute; /* Ensure positioning is relative to the parent container */
+  bottom: 30px; /* Adjust as needed for vertical spacing from the bottom */
+  left: 50%;
   color: #fff; 
   background: linear-gradient(to right, #f0f0f0, #000000); /* White-to-black gradient */
   border: 1px solid #000;
