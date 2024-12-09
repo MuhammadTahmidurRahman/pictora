@@ -190,14 +190,15 @@ async function fetchAndDisplayPhotos(folderPath, containerId) {
     document.body.appendChild(newContainer);
   }
   const container = document.getElementById(containerId);
-  container.innerHTML = "";
+  container.innerHTML = ""; // Clear container before loading
 
   try {
     const folderRef = storageRef(storage, folderPath);
     const listResult = await listAll(folderRef);
 
     if (listResult.items.length === 0) {
-      container.textContent = "No Photos Available.";
+      container.innerHTML = ""; // Ensure container is empty
+      container.textContent = "No Photos Available."; // Show message only if truly no items
       return;
     }
 
@@ -215,6 +216,7 @@ async function fetchAndDisplayPhotos(folderPath, containerId) {
     if (c) c.textContent = "Failed to load photos.";
   }
 }
+
 
 function toggleDialog(show) {
   let dialog = document.getElementById("photoDialog");
