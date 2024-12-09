@@ -17,6 +17,13 @@ body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border-radius: 12px;
   overflow-y: auto;
+  position: relative; /* To allow positioning of child elements if needed */
+}
+
+/* Move back button to the right side */
+#backButton {
+  float: right;
+  margin-bottom: 10px;
 }
 
 /* Scrollable List Styling */
@@ -67,23 +74,23 @@ button {
   margin: 5px 0;
   display: inline-block;
   text-align: center;
-  max-width: 150px;
+  white-space: nowrap; /* Prevent text wrapping */
   background: rgba(48,127,226, 0.8); /* semi-transparent blue for default buttons */
   color: #fff;
+  box-sizing: border-box;
 }
 
 button:hover {
   background: rgba(35,99,183,0.8);
 }
 
-/* Action buttons for host (white and blue combo) */
+/* Action buttons for host and email - consistent size */
 .action-button {
   background: linear-gradient(to right, #ffffff, #307fe2);
   color: #000;
-  padding: 8px 15px;
-  margin: 5px;
-  max-width: 150px;
-  border: 1px solid #000; /* ensure black outline here as well */
+  border: 1px solid #000; /* ensure black outline */
+  width: 160px; /* fixed width for uniform size */
+  text-align: center;
 }
 
 .action-button:hover {
@@ -128,10 +135,9 @@ button:hover {
   background: rgba(247,250,255,0.9);
   border: 1px solid #cde0f5;
   border-radius: 8px;
-  justify-content: space-between; /* buttons go to right side */
+  justify-content: space-between; /* buttons on right side */
 }
 
-/* Guest Photo */
 .guest-photo {
   width: 40px;
   height: 40px;
@@ -139,11 +145,6 @@ button:hover {
   object-fit: cover;
   border: 2px solid #307fe2;
   margin-right: 10px;
-}
-
-/* Positioning buttons to the right side */
-.folder-icon, .email-button {
-  margin-left: auto;
 }
 
 /* Dialog Styles */
