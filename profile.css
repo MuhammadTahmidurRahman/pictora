@@ -94,15 +94,16 @@ h1 {
 .button {
   width: 100%;
   padding: 14px 0; /* Increased padding for better touch targets */
-  border: none;
+  border: 1px solid #000;
   border-radius: 8px; /* More rounded for a modern look */
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  background: linear-gradient(to right, #307fe2, #6fa8dc);
+  background: linear-gradient(to right, #ffffff, #307fe2);
   color: #fff;
   transition: background 0.3s ease;
+  margin-top: 20px;
 }
 
 .button:hover {
@@ -114,5 +115,5 @@ h1 {
 }
 
 .delete-button:hover {
-  background: rgba(255, 0, 0, 0.8);
+  background: rgba(179, 1, 1, 0.8);
 }
