@@ -1,3 +1,5 @@
+// forgetpassword.js
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import {
   getAuth,
@@ -46,4 +48,9 @@ window.resetPassword = async function () {
   } else {
     alert("Please enter your email address");
   }
+};
+
+// Define the goBack function
+window.goBack = function() {
+    window.history.back();
 };
