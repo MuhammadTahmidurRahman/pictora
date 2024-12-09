@@ -226,4 +226,4 @@ logoutButton.addEventListener("click", () => {
       console.error("Error signing out:", error);
       alert(`Error signing out: ${error.message}`);
     });
-}
+});
