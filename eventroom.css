@@ -24,7 +24,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* Button Styling - Updated to Match arrnagedphoto.css */
+/* Button Styling - Updated to Match arrangedphoto.css */
 button {
   cursor: pointer;
   font-size: 14px;
@@ -45,13 +45,11 @@ button:hover {
   background: rgba(35,99,183,0.8);
 }
 
-/* Override Specific Buttons if Necessary */
-
 /* Move back button to the right side */
 #backButton {
   float: right;
   margin-bottom: 10px;
-  /* Remove existing background and color to inherit from global button styles */
+  /* Inherit global button styles */
   background: rgba(48,127,226, 0.8);
   color: #fff;
   border: 1px solid #000;
@@ -83,11 +81,14 @@ button:hover {
 }
 
 .scrollable-list li {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
   padding: 8px;
-  margin: 5px 0;
   background: rgba(247,250,255,0.9);
   border: 1px solid #cde0f5;
   border-radius: 8px;
+  justify-content: space-between; 
 }
 
 /* Host Photo */
@@ -142,10 +143,20 @@ button:hover {
   background: rgba(35,99,183,0.8);
 }
 
+/* Remove Text Below Icons in Buttons */
+#hostActions .folder-icon::after,
+#hostActions .arrange-photo-button::after,
+#hostActions .add-member-button::after,
+#hostActions .view-sorted-button::after,
+#uploadPhotoButton::after {
+  display: none;
+}
+
 /* Arrange button (was "Arrange Photo"): remove 'photo' reference */
 .arrange-photo-button {
   font-size: 0; /* hide original text if any */
 }
+
 .arrange-photo-button::before {
   content: "📷↺";
   font-size: 18px;
@@ -153,17 +164,16 @@ button:hover {
   margin-bottom: 3px;
   line-height: 1;
 }
+
 .arrange-photo-button::after {
-  content: "Arrange"; /* no mention of 'photo' */
-  font-size: 12px;
-  color: #fff;
-  line-height: 1;
+  content: "Arrange"; /* This will be hidden by the above rule */
 }
 
 /* Add button (was "Add Member"): remove 'member' reference */
 .add-member-button {
   font-size: 0; /* hide original text if any */
 }
+
 .add-member-button::before {
   content: "👤➕";
   font-size: 18px;
@@ -171,17 +181,16 @@ button:hover {
   margin-bottom: 3px;
   line-height: 1;
 }
+
 .add-member-button::after {
-  content: "Add"; /* no mention of 'member' */
-  font-size: 12px;
-  color: #fff;
-  line-height: 1;
+  content: "Add"; /* This will be hidden by the above rule */
 }
 
 /* View Sorted Photos Button */
 .view-sorted-button {
   font-size: 0; /* hide original text if any */
 }
+
 .view-sorted-button::before {
   content: "👁🗂";
   font-size: 18px;
@@ -189,16 +198,14 @@ button:hover {
   margin-bottom: 3px;
   line-height: 1;
 }
+
 .view-sorted-button::after {
-  content: "Sorted";
-  font-size: 12px;
-  color: #fff;
-  line-height: 1;
+  content: "Sorted"; /* This will be hidden by the above rule */
 }
 
 /* Upload Photos Button below the five buttons */
 #uploadPhotoButton {
-  /* Removed fixed width and height to inherit from the common styles above */
+  /* Inherits styles from common button styles */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -228,20 +235,32 @@ button:hover {
   margin-bottom: 3px;
   line-height: 1;
 }
+
 #uploadPhotoButton::after {
-  content: "Upload";
-  font-size: 12px;
-  color: #fff;
-  line-height: 1;
+  content: "Upload"; /* This will be hidden by the above rule */
 }
 
-/* Guests Section */
+/* Headings and Text */
 h3 {
   color: #333;
   margin-top: 20px;
   margin-bottom: 10px;
 }
 
+#roomName {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+#roomCode {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Guest Lists */
 #guestList li,
 #manualGuestList li {
   display: flex;
@@ -276,9 +295,11 @@ h3 {
   transition: transform 0.3s ease-in-out;
   transform: translateX(100%);
 }
+
 .dialog:not(.hidden) {
   transform: translateX(0);
 }
+
 .dialog-content {
   background: #fff;
   padding: 20px;
@@ -288,6 +309,7 @@ h3 {
   margin: 0 auto;
   text-align: center;
 }
+
 .dialog-content input {
   width: 90%;
   margin: 10px 0;
@@ -295,11 +317,13 @@ h3 {
   border: 1px solid #ddd;
   border-radius: 5px;
 }
+
 .dialog-buttons {
   display: flex;
   justify-content: space-between;
   gap: 10px;
 }
+
 .dialog-buttons button {
   width: 45%;
 }
@@ -311,6 +335,7 @@ h3 {
   font-size: 14px;
   max-width: 180px;
 }
+
 .delete-guest-button:hover {
   background: rgba(212,53,53,0.9);
 }
