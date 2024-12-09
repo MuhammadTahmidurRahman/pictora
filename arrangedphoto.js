@@ -43,7 +43,9 @@ document.getElementById("backButton").addEventListener("click", () => {
 async function downloadPhotosAsZip(folderPath, fileNamePrefix) {
   const JSZipModule = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
   const JSZip = JSZipModule.default;
-  const { saveAs } = await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.js');
+  // Use the UMD version of FileSaver that attaches saveAs to window
+  await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.umd.js');
+  const saveAs = window.saveAs;
 
   const folderRef = storageRef(storage, folderPath);
   const listResult = await listAll(folderRef);
