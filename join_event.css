@@ -96,3 +96,75 @@ input:focus {
 .navbar button:hover {
   background: #356ac3;
 }
+.profile-button {
+  position: fixed; /* Keep it fixed so it's always visible */
+  top: 20px;
+  right: 20px; /* Place it clearly visible on the page */
+  background: #4c8bf5;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  z-index: 9999; /* Ensure it stays on top of everything else */
+}
+
+.profile-button:hover {
+  background: #356ac3;
+}
+
+/* Profile Panel (Hidden by default, slides in when .show class is added) */
+.profile-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 300px; /* Adjust width as needed */
+  height: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+  transform: translateX(100%); /* Start off-screen to the right */
+  transition: transform 0.3s ease-in-out;
+  z-index: 9998;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Add this class to .profile-panel via JavaScript when the button is clicked */
+.profile-panel.show {
+  transform: translateX(0); /* Slide the panel onto the page */
+}
+
+/* Inside the profile panel, you can style content as you like */
+.profile-panel h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2d3a45;
+  margin-bottom: 16px;
+}
+
+.profile-panel p {
+  font-size: 14px;
+  color: #4a5568;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+/* Add a close button inside the panel if desired */
+.profile-panel .close-button {
+  background: #4c8bf5;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.profile-panel .close-button:hover {
+  background: #356ac
+}
