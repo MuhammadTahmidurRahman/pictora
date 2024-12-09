@@ -30,11 +30,9 @@ const auth = getAuth();
 const database = getDatabase();
 const storage = getStorage();
 
-// Global variables to store event code and room name for email bodies
 let globalEventCode = "";
 let globalRoomName = "";
 
-// Back button functionality
 document.getElementById("backButton").addEventListener("click", () => {
   window.location.href = "eventroom.html";
 });
@@ -43,63 +41,55 @@ document.getElementById("backButton").addEventListener("click", () => {
  * Existing Functionality
  */
 
-// Function to download participant/manual participant photos as a ZIP file (if needed)
-async function downloadGuestPhotosAsZip(folderPath, guestName) {
-  const JSZip = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
-  const { saveAs } = await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js');
-  const zip = new JSZip();
+// Download photos as ZIP (general helper)
+async function downloadPhotosAsZip(folderPath, fileNamePrefix) {
+  const JSZipModule = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
+  const JSZip = JSZipModule.default;
+  const fileSaverModule = await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js');
+  const saveAs = fileSaverModule.saveAs;
+  
+  const folderRef = storageRef(storage, folderPath);
+  const listResult = await listAll(folderRef);
 
-  try {
-    const folderRef = storageRef(storage, folderPath);
-    const listResult = await listAll(folderRef);
-
-    if (listResult.items.length === 0) {
-      alert("No photos available.");
-      return null;
-    }
-
-    for (const itemRef of listResult.items) {
-      const photoUrl = await getDownloadURL(itemRef);
-      const response = await fetch(photoUrl);
-      const blob = await response.blob();
-      const fileName = itemRef.name;
-      zip.file(fileName, blob);
-    }
-
-    const zipBlob = await zip.generateAsync({ type: "blob" });
-    const zipFileName = `${guestName.replace(/\s+/g, '_')}_Photos.zip`;
-    saveAs(zipBlob, zipFileName);
-    return zipFileName;
-  } catch (error) {
-    console.error("Error creating ZIP:", error);
-    alert("Failed to create ZIP.");
+  if (listResult.items.length === 0) {
+    alert("No photos available.");
     return null;
   }
+
+  const zip = new JSZip();
+  for (const itemRef of listResult.items) {
+    const photoUrl = await getDownloadURL(itemRef);
+    const response = await fetch(photoUrl);
+    const blob = await response.blob();
+    const fileName = itemRef.name;
+    zip.file(fileName, blob);
+  }
+
+  const zipBlob = await zip.generateAsync({ type: "blob" });
+  const zipFileName = `${fileNamePrefix.replace(/\s+/g, '_')}_Photos.zip`;
+  saveAs(zipBlob, zipFileName);
+  return zipFileName;
 }
 
-// Function to send generalized email to all normal participants
+// Normal participants: no download, but we have a general email button
 function sendGeneralEmailToParticipants(normalParticipantEmails) {
   if (normalParticipantEmails.length === 0) {
     alert("No normal participants to email.");
     return;
   }
 
-  // Using the provided format
   const subject = `Your Photos from ${globalRoomName} (${globalEventCode})`;
   const body = `Hello everyone,\n\nHere are your photos from the ${globalRoomName} (${globalEventCode}).\n\nBest regards,\nYour Event Team`;
-
   const mailtoLink = `mailto:${encodeURIComponent(normalParticipantEmails.join(','))}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   window.location.href = mailtoLink;
 }
 
-// Function to handle emailing a manual guest with their ZIP
+// Manual participants: replace download with email button
 async function sendEmailToManualGuest(guestData) {
-  // Create ZIP from their "/photos" folder
   const folderPath = guestData.folderPath + "/photos";
-  const zipName = await downloadGuestPhotosAsZip(folderPath, guestData.name || "ManualGuest");
-  if (!zipName) return; // If ZIP creation failed, stop
+  const zipName = await downloadPhotosAsZip(folderPath, guestData.name || "ManualGuest");
+  if (!zipName) return;
 
-  // Since we can't attach automatically via mailto, we just open mailto with subject/body
   const subject = `Your Photos from ${globalRoomName} (${globalEventCode})`;
   const name = guestData.name || "Guest";
   const body = `Hello ${name},\n\nWe are pleased to share with you the photos from the ${globalRoomName} (${globalEventCode}). Please find your photos in the downloaded ZIP file.\n\nBest regards,\nYour Event Team`;
@@ -108,18 +98,14 @@ async function sendEmailToManualGuest(guestData) {
   window.location.href = mailtoLink;
 }
 
-// Function to load guests (normal participants)
 async function loadGuests(guests, containerId) {
   const guestListContainer = document.getElementById(containerId);
-  guestListContainer.innerHTML = ""; // Clear previous list
+  guestListContainer.innerHTML = "";
 
-  // We'll collect normal participant emails for the general email
   const normalParticipantEmails = [];
 
   guests.forEach(([guestId, guestData]) => {
     const guestItem = document.createElement("li");
-    // Remove download button, only show folder-icon
-    // No email icon for normal participants as requested
     guestItem.innerHTML = 
       `<img src="${guestData.photoUrl || "fallback.png"}" alt="Guest Photo" class="guest-photo" />
       <span>${guestData.name || "Unnamed Guest"}</span>
@@ -129,7 +115,6 @@ async function loadGuests(guests, containerId) {
 
     guestListContainer.appendChild(guestItem);
 
-    // Collect email for normal participants if available
     if (guestData.email && !guestData.isManual) {
       normalParticipantEmails.push(guestData.email);
     }
@@ -144,7 +129,6 @@ async function loadGuests(guests, containerId) {
     });
   });
 
-  // Add a single button at top to send a general email to all normal participants
   if (normalParticipantEmails.length > 0) {
     const parentContainer = document.getElementById(containerId).parentElement; 
     let emailAllButton = document.getElementById("emailAllParticipantsBtn");
@@ -160,10 +144,9 @@ async function loadGuests(guests, containerId) {
   }
 }
 
-// Function to load manual guests
 async function loadManualGuests(manualGuests, containerId) {
   const manualGuestListContainer = document.getElementById(containerId);
-  manualGuestListContainer.innerHTML = ""; // Clear previous list
+  manualGuestListContainer.innerHTML = "";
 
   if (!manualGuests || manualGuests.length === 0) {
     manualGuestListContainer.innerHTML = "<li>No manual guests available.</li>";
@@ -172,7 +155,6 @@ async function loadManualGuests(manualGuests, containerId) {
 
   manualGuests.forEach(([guestId, guestData]) => {
     const guestItem = document.createElement("li");
-    // Remove download button and replace with email icon for manual participants
     guestItem.innerHTML = 
       `<img src="${guestData.photoUrl || "fallback.png"}" alt="Manual Guest Photo" class="guest-photo" />
       <span>${guestData.name || "Unnamed Manual Guest"}</span>
@@ -205,17 +187,23 @@ async function loadManualGuests(manualGuests, containerId) {
   });
 }
 
-// Existing fetchAndDisplayPhotos and toggleDialog remain unchanged
 async function fetchAndDisplayPhotos(folderPath, containerId) {
   const photoContainer = document.getElementById(containerId);
-  photoContainer.innerHTML = ""; // Clear any previous content
+  if (!photoContainer) {
+    // If the container doesn't exist, create it.
+    const newContainer = document.createElement("div");
+    newContainer.id = containerId;
+    document.body.appendChild(newContainer);
+  }
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
 
   try {
     const folderRef = storageRef(storage, folderPath);
     const listResult = await listAll(folderRef);
 
     if (listResult.items.length === 0) {
-      photoContainer.textContent = "No Photos Available.";
+      container.textContent = "No Photos Available.";
       return;
     }
 
@@ -225,11 +213,12 @@ async function fetchAndDisplayPhotos(folderPath, containerId) {
       img.src = photoUrl;
       img.alt = "Photo";
       img.classList.add("photo-thumbnail");
-      photoContainer.appendChild(img);
+      container.appendChild(img);
     }
   } catch (error) {
     console.error("Error fetching photos:", error);
-    photoContainer.textContent = "Failed to load photos.";
+    const c = document.getElementById(containerId);
+    if (c) c.textContent = "Failed to load photos.";
   }
 }
 
@@ -248,7 +237,6 @@ function toggleDialog(show) {
   dialog.style.display = show ? "flex" : "none";
 }
 
-// Host functions remain as is
 async function viewHostPhoto(hostData) {
   const hostMessage = document.getElementById("hostMessage");
   const folderPath = hostData.photoFolderPath;
@@ -285,29 +273,10 @@ async function downloadHostPhoto(hostData) {
 
   if (folderPath) {
     try {
-      const folderRef = storageRef(storage, folderPath);
-      const listResult = await listAll(folderRef);
-
-      if (listResult.items.length === 0) {
-        hostMessage.textContent = "No photos available to download for the host.";
-        return;
+      const zipName = await downloadPhotosAsZip(folderPath, "host");
+      if (zipName) {
+        alert("Host photos downloaded successfully.");
       }
-
-      const JSZip = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
-      const { saveAs } = await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js');
-      const zip = new JSZip();
-
-      for (const itemRef of listResult.items) {
-        const photoUrl = await getDownloadURL(itemRef);
-        const response = await fetch(photoUrl);
-        const blob = await response.blob();
-        const fileName = itemRef.name;
-        zip.file(fileName, blob);
-      }
-
-      const zipBlob = await zip.generateAsync({ type: "blob" });
-      saveAs(zipBlob, "host_photos.zip");
-      alert("Host photos downloaded successfully.");
     } catch (error) {
       console.error("Error downloading host photos:", error);
       hostMessage.textContent = "Failed to download host photos.";
@@ -317,7 +286,6 @@ async function downloadHostPhoto(hostData) {
   }
 }
 
-// Loading event room
 async function loadEventRoom(eventCode) {
   try {
     const roomRef = dbRef(database, `rooms/${eventCode}`);
@@ -345,23 +313,17 @@ async function loadEventRoom(eventCode) {
           }
         });
 
-        // Keep download button for host
         document.getElementById("downloadHostPhotoBtn").addEventListener("click", () => downloadHostPhoto(hostData));
       }
 
-      // Load normal participants and manual participants
       const participants = roomData.participants || {};
       const guests = Object.entries(participants)
         .filter(([key]) => key !== hostId)
-        .map(([id, data]) => {
-          return [id, { ...data, isManual: false }];
-        });
+        .map(([id, data]) => [id, { ...data, isManual: false }]);
       loadGuests(guests, "guestList");
 
       const manualGuests = roomData.manualParticipants || {};
-      const manualList = Object.entries(manualGuests).map(([id, data]) => {
-        return [id, { ...data, isManual: true }];
-      });
+      const manualList = Object.entries(manualGuests).map(([id, data]) => [id, { ...data, isManual: true }]);
       loadManualGuests(manualList, "manualGuestList");
     } else {
       alert("Room does not exist.");
@@ -371,22 +333,30 @@ async function loadEventRoom(eventCode) {
   }
 }
 
-// Load and arrange photos
 async function loadPhotos(eventCode) {
-  const folderPath = `rooms/${eventCode}/host`; 
-  const folderRef = storageRef(storage, folderPath);
   const photoContainer = document.getElementById("photoContainer");
+  if (!photoContainer) {
+    // Create if not found
+    const newContainer = document.createElement("div");
+    newContainer.id = "photoContainer";
+    document.body.appendChild(newContainer);
+  }
+  const container = document.getElementById("photoContainer");
+  
+  const folderPath = `rooms/${eventCode}/host`;
+  const folderRef = storageRef(storage, folderPath);
 
   try {
     const listResult = await listAll(folderRef);
-    photoContainer.innerHTML = "";
+    container.innerHTML = "";
 
-    const photoItems = []; 
-    const allPaths = [];  
+    if (listResult.items.length === 0) {
+      container.textContent = "No photos available.";
+      return;
+    }
 
     for (const itemRef of listResult.items) {
       const photoUrl = await getDownloadURL(itemRef);
-
       const photoItem = document.createElement("div");
       photoItem.classList.add("photo-item");
       photoItem.dataset.path = itemRef.fullPath;
@@ -398,21 +368,16 @@ async function loadPhotos(eventCode) {
       photoItem.querySelector(".delete-btn").addEventListener("click", async () => {
         if (confirm("Are you sure you want to delete this photo?")) {
           await deletePhoto(itemRef.fullPath);
-          loadPhotos(eventCode); 
+          loadPhotos(eventCode);
         }
       });
 
-      photoItems.push(photoItem);
-      allPaths.push(itemRef.fullPath);
+      container.appendChild(photoItem);
     }
-
-    photoItems.forEach((item) => {
-      photoContainer.appendChild(item);
-    });
 
   } catch (error) {
     console.error("Error loading photos:", error);
-    photoContainer.textContent = "Failed to load photos.";
+    if (container) container.textContent = "Failed to load photos.";
   }
 }
 
@@ -440,7 +405,6 @@ async function updateSortPhotoRequest(eventCode) {
     }
 
     const newSortValue = currentSortValue + 1.0;
-
     await set(hostRef, {
       ...snapshot.val(),
       sortPhotoRequest: newSortValue,
@@ -453,7 +417,6 @@ async function updateSortPhotoRequest(eventCode) {
   }
 }
 
-// Authentication and Initialization
 onAuthStateChanged(auth, (user) => {
   if (user) {
     const urlParams = new URLSearchParams(window.location.search);
