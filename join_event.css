@@ -38,7 +38,7 @@ body {
 
 /* Circular Profile Icon inside the container, positioned at top-right */
 .profile-icon {
-  position: absolute;
+  position: center;
   top: 20px;
   right: 20px;
   width: 50px;
