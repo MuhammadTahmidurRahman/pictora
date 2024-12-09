@@ -75,7 +75,7 @@ input:focus {
 
 .navbar {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   background: rgba(255, 255, 255, 0.7);
   padding: 16px 0;
   border-top: 1px solid #d1d9e6;
