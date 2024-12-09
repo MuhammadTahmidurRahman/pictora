@@ -6,7 +6,9 @@ import {
   signInWithPopup, 
   fetchSignInMethodsForEmail, 
   GoogleAuthProvider, 
-  onAuthStateChanged 
+  onAuthStateChanged,
+  sendEmailVerification,
+  signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import { getDatabase, ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
@@ -29,7 +31,23 @@ const database = getDatabase();
 // Redirect authenticated users to join_event.html
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    window.location.href = "join_event.html";
+    // Optionally, check if email is verified
+    if (user.emailVerified) {
+      window.location.href = "join_event.html";
+    } else {
+      alert("Please verify your email before proceeding. A verification email has been sent to your email address.");
+      // Optionally, you can resend verification email
+      sendEmailVerification(user)
+        .then(() => {
+          alert("Verification email sent. Please check your inbox.");
+        })
+        .catch((error) => {
+          console.error("Error sending verification email:", error);
+          alert("Failed to send verification email. Please try again.");
+        });
+      // Sign out the user to prevent access without verification
+      signOut(auth);
+    }
   }
 });
 
@@ -56,6 +74,7 @@ window.registerUser = async function () {
   const confirmPassword = document.getElementById("confirm-password").value.trim();
   const imageFile = document.getElementById("image").files[0];
 
+  // Validation checks
   if (!name || !email || !password || !confirmPassword || !imageFile) {
     alert("Please fill up all the fields and upload an image.");
     return;
@@ -72,30 +91,42 @@ window.registerUser = async function () {
   }
 
   try {
+    // Check if the email is already registered
     const signInMethods = await fetchSignInMethodsForEmail(auth, email);
     if (signInMethods.length > 0) {
-      alert("This email is already registered.");
+      alert("This email is already registered. Please log in.");
       return;
     }
 
+    // Create user with email and password
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    const storageRef = ref(storage, `uploads/${user.uid}`);
+    // Upload image to Firebase Storage
+    const storageRefPath = `uploads/${user.uid}`;
+    const storageRef = ref(storage, storageRefPath);
     await uploadBytes(storageRef, imageFile);
     const imageUrl = await getDownloadURL(storageRef);
 
+    // Save user data to Firebase Realtime Database
     await set(dbRef(database, `users/${user.uid}`), {
       email,
       name,
       photo: imageUrl,
     });
 
-    alert("Registration successful!");
-    window.location.href = "join_event.html";
+    // Send email verification
+    await sendEmailVerification(user);
+    alert("Registration successful! A verification email has been sent to your email address. Please verify to proceed.");
+    
+    // Sign out the user to prevent access without verification
+    await signOut(auth);
+
+    // Redirect to login page after signing out
+    window.location.href = "login.html";
   } catch (error) {
     console.error("Registration error:", error);
-    alert("Failed to register. Please try again.");
+    alert(`Failed to register. ${error.message}`);
   }
 };
 
@@ -113,6 +144,7 @@ window.signInWithGoogle = async function () {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
+    // Check if user exists in the database
     const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
     if (userSnapshot.exists()) {
       alert("Welcome back!");
@@ -120,13 +152,16 @@ window.signInWithGoogle = async function () {
       return;
     }
 
-    const storageRef = ref(storage, `uploads/${user.uid}`);
+    // Upload image to Firebase Storage
+    const storageRefPath = `uploads/${user.uid}`;
+    const storageRef = ref(storage, storageRefPath);
     await uploadBytes(storageRef, imageFile);
     const imageUrl = await getDownloadURL(storageRef);
 
+    // Save user data to Firebase Realtime Database
     await set(dbRef(database, `users/${user.uid}`), {
       email: user.email,
-      name: user.displayName,
+      name: user.displayName || "No Name",
       photo: imageUrl,
     });
 
@@ -134,8 +169,6 @@ window.signInWithGoogle = async function () {
     window.location.href = "join_event.html";
   } catch (error) {
     console.error("Google Sign-In error:", error);
-    alert("Failed to sign in with Google. Please try again.");
+    alert(`Failed to sign in with Google. ${error.message}`);
   }
 };
-
-// Removed the problematic onAuthStateChanged listener here
