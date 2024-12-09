@@ -22,7 +22,8 @@ let currentFolderName = "";
 async function downloadAllPhotosAsZip(folderName) {
   const JSZipModule = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
   const JSZip = JSZipModule.default;
-  await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js');
+  // Changed from FileSaver.min.js to FileSaver.js
+  await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.js');
   const saveAs = window.saveAs;
 
   const folderRef = storageRef(storage, folderName);
@@ -57,7 +58,6 @@ async function fetchImages(folderName) {
     photoGrid.innerHTML = ""; // Clear any previous content
 
     if (result.items.length === 0) {
-      // No images, do nothing (no message)
       return;
     }
 
@@ -68,7 +68,6 @@ async function fetchImages(folderName) {
       photoGrid.appendChild(img);
     });
 
-    // Add download all button after images loaded
     let downloadAllBtn = document.getElementById("downloadAllBtn");
     if (!downloadAllBtn) {
       downloadAllBtn = document.createElement("button");

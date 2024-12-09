@@ -41,8 +41,8 @@ document.getElementById("backButton").addEventListener("click", () => {
 async function downloadPhotosAsZip(folderPath, fileNamePrefix) {
   const JSZipModule = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
   const JSZip = JSZipModule.default;
-  await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js');
-  // FileSaver is a UMD that attaches saveAs to the window
+  // Changed from FileSaver.min.js to FileSaver.js
+  await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.js');
   const saveAs = window.saveAs;
 
   const folderRef = storageRef(storage, folderPath);
@@ -68,7 +68,6 @@ async function downloadPhotosAsZip(folderPath, fileNamePrefix) {
   return zipFileName;
 }
 
-// Normal participants general email
 function sendGeneralEmailToParticipants(normalParticipantEmails) {
   if (normalParticipantEmails.length === 0) {
     alert("No normal participants to email.");
@@ -81,7 +80,6 @@ function sendGeneralEmailToParticipants(normalParticipantEmails) {
   window.location.href = mailtoLink;
 }
 
-// Manual participant email
 async function sendEmailToManualGuest(guestData) {
   const folderPath = guestData.folderPath + "/photos";
   const zipName = await downloadPhotosAsZip(folderPath, guestData.name || "ManualGuest");
@@ -332,7 +330,6 @@ async function loadEventRoom(eventCode) {
 async function loadPhotos(eventCode) {
   let photoContainer = document.getElementById("photoContainer");
   if (!photoContainer) {
-    // Create if not found
     const newContainer = document.createElement("div");
     newContainer.id = "photoContainer";
     document.body.appendChild(newContainer);
