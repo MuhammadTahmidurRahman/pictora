@@ -6,13 +6,13 @@ import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObjec
 
 // Firebase Initialization
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_SENDER_ID",
-  databaseURL: "YOUR_DB_URL",
-  appId: "YOUR_APP_ID",
+  apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
+  authDomain: "pictora-7f0ad.firebaseapp.com",
+  projectId: "pictora-7f0ad",
+  storageBucket: "pictora-7f0ad.appspot.com",
+  messagingSenderId: "155732133141",
+  databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app",
+  appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -27,36 +27,6 @@ document.getElementById("backButton").addEventListener("click", () => {
 document.getElementById("closeDialogButton").addEventListener("click", () => {
   toggleDialog(false);  // Close the dialog
 });
-
-// Function to initialize participant folder and upload their profile picture if needed
-async function initializeParticipantFolder(eventCode, participantId, participantData) {
-  try {
-    // Check if folderPath already exists
-    if (!participantData.folderPath) {
-      const folderPath = `rooms/${eventCode}/${participantId}`;
-
-      // Fetch the participant's photoUrl
-      const photoUrl = participantData.photoUrl;
-      if (photoUrl) {
-        const response = await fetch(photoUrl);
-        const blob = await response.blob();
-
-        // Upload the profile picture to the participant's folder
-        const sanitizedName = (participantData.name || "profilePhoto").replace(/\s+/g, "_");
-        const participantImageRef = storageRef(storage, `${folderPath}/${sanitizedName}_profilePhoto.jpg`);
-        await uploadBytes(participantImageRef, blob);
-      }
-
-      // Update the participant's folderPath in the database
-      const participantRef = dbRef(database, `rooms/${eventCode}/participants/${participantId}`);
-      await update(participantRef, {
-        folderPath: folderPath,
-      });
-    }
-  } catch (error) {
-    console.error("Error initializing participant folder:", error);
-  }
-}
 
 // Load Event Room and Data
 async function loadEventRoom(eventCode) {
@@ -102,28 +72,33 @@ async function loadEventRoom(eventCode) {
           hostActions.appendChild(hostFolderIcon);
         }
 
-        // Add "Arrange Photo" button for the host
-        if (user.uid === hostId) {
-          const arrangePhotoButton = document.createElement("button");
-          arrangePhotoButton.textContent = "Arrange Photo";
-          arrangePhotoButton.classList.add("arrange-photo-button");
-          arrangePhotoButton.addEventListener("click", () => {
-            // Redirect to arrangedphoto.html with eventCode
-            window.location.href = `arrangedphoto.html?eventCode=${encodeURIComponent(eventCode)}`;
-          });
-          hostActions.appendChild(arrangePhotoButton);
-        }
-
         // Add "Add Member" button for the host
-        if (user.uid === hostId) {
-          const addMemberButton = document.createElement("button");
-          addMemberButton.textContent = "Add Member";
-          addMemberButton.classList.add("add-member-button");
-          addMemberButton.addEventListener("click", () => {
-            toggleDialog(true);
-          });
-          hostActions.appendChild(addMemberButton);
-        }
+        // Add "Arrange Photo" button for the host
+if (user.uid === hostId) {
+  const arrangePhotoButton = document.createElement("button");
+  arrangePhotoButton.textContent = "Arrange Photo";
+  arrangePhotoButton.classList.add("arrange-photo-button");
+
+  arrangePhotoButton.addEventListener("click", () => {
+    // Redirect to arrange_photos.html with eventCode
+    window.location.href = `arrangedphoto.html?eventCode=${encodeURIComponent(eventCode)}`;
+  });
+
+  hostActions.appendChild(arrangePhotoButton);
+}
+
+
+// Add "Add Member" button for the host
+if (user.uid === hostId) {
+  const addMemberButton = document.createElement("button");
+  addMemberButton.textContent = "Add Member";
+  addMemberButton.classList.add("add-member-button");
+  addMemberButton.addEventListener("click", () => {
+    toggleDialog(true);
+  });
+  hostActions.appendChild(addMemberButton);
+}
+
       }
 
       // Load guests list
@@ -135,7 +110,6 @@ async function loadEventRoom(eventCode) {
       // Load manual guests
       const manualGuests = roomData.manualParticipants || {};
       loadManualGuests(Object.entries(manualGuests), user.uid, hostId, eventCode);
-
     } else {
       alert("Room does not exist.");
     }
@@ -241,7 +215,7 @@ function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, i
   return guestItem;
 }
 
-// Add Guest Button Logic (for manual guests)
+// Add Guest Button Logic
 document.getElementById("addGuestButton").addEventListener("click", async () => {
   const guestName = document.getElementById("guestName").value.trim();
   const guestEmail = document.getElementById("guestEmail").value.trim();
@@ -263,7 +237,7 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
     await uploadBytes(fileRef, guestPhoto);
     const photoUrl = await getDownloadURL(fileRef);  // Get the download URL for the uploaded photo
 
-    // Update the manual guest with the photo URL and folder path
+    // Now, update the manual guest with the photo URL and folder path
     const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${participantId}`);
     await update(manualGuestRef, {
       name: guestName,
@@ -272,10 +246,12 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
       folderPath,
     });
 
+    // Ensure the profile picture is fetched from `photoUrl` and uploaded to the manual participant's folder
+    const response = await fetch(photoUrl); // Fetch the uploaded profile photo using its URL
+    const blob = await response.blob();  // Convert the fetched image to a Blob
+    const participantImageRef = storageRef(storage, `${folderPath}/${guestName.replace(/\s+/g, "_")}_profilePhoto.jpg`);  // Save with dynamic file name
+
     // Upload the profile picture to the folder path
-    const response = await fetch(photoUrl);
-    const blob = await response.blob();
-    const participantImageRef = storageRef(storage, `${folderPath}/${guestName.replace(/\s+/g, "_")}_profilePhoto.jpg`);
     await uploadBytes(participantImageRef, blob);
 
     alert("Guest added successfully and profile picture uploaded.");
@@ -286,6 +262,7 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
     alert("Failed to add guest.");
   }
 });
+
 
 // Delete Manual Guest
 async function deleteManualGuest(eventCode, guestId, folderPath) {
@@ -321,25 +298,11 @@ function toggleDialog(show) {
 }
 
 // Check Authentication and Load Event Room
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, (user) => {
   if (user) {
     const eventCode = new URLSearchParams(window.location.search).get("eventCode");
     if (eventCode) {
-      await loadEventRoom(eventCode);
-
-      // After loading the room, ensure the participant folder is initialized
-      const roomRef = dbRef(database, `rooms/${eventCode}`);
-      const snapshot = await get(roomRef);
-      if (snapshot.exists()) {
-        const roomData = snapshot.val();
-        const participants = roomData.participants || {};
-        const currentUserData = participants[user.uid];
-
-        // If the current user is a participant and doesn't have a folderPath, initialize it
-        if (currentUserData) {
-          await initializeParticipantFolder(eventCode, user.uid, currentUserData);
-        }
-      }
+      loadEventRoom(eventCode);
     } else {
       alert("Event Code is missing!");
       window.location.href = "join_event.html";
@@ -348,4 +311,4 @@ onAuthStateChanged(auth, async (user) => {
     alert("Please log in to access the event room.");
     window.location.href = "login.html";
   }
-});
+});//previous file
