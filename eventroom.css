@@ -30,7 +30,7 @@ body {
 }
 
 /* Scrollable List Styling */
-.	scrollable-list {
+.scrollable-list {
   max-height: 150px;
   overflow-y: auto;
   margin: 0;
