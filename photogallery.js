@@ -17,17 +17,47 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const storage = getStorage();
 
+let currentFolderName = "";
+
+async function downloadAllPhotosAsZip(folderName) {
+  const JSZipModule = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
+  const JSZip = JSZipModule.default;
+  await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js');
+  const saveAs = window.saveAs;
+
+  const folderRef = storageRef(storage, folderName);
+  const listResult = await listAll(folderRef);
+
+  if (listResult.items.length === 0) {
+    alert("No photos available.");
+    return;
+  }
+
+  const zip = new JSZip();
+  for (const itemRef of listResult.items) {
+    const photoUrl = await getDownloadURL(itemRef);
+    const response = await fetch(photoUrl);
+    const blob = await response.blob();
+    const fileName = itemRef.name;
+    zip.file(fileName, blob);
+  }
+
+  const zipBlob = await zip.generateAsync({ type: "blob" });
+  saveAs(zipBlob, "All_Photos.zip");
+  alert("Photos downloaded successfully.");
+}
+
 async function fetchImages(folderName) {
+  currentFolderName = folderName;
   try {
     const folderRef = storageRef(storage, folderName);
     const result = await listAll(folderRef);
 
     const photoGrid = document.getElementById("photoGrid");
-    // Clear any placeholder text
-    photoGrid.innerHTML = "";
+    photoGrid.innerHTML = ""; // Clear any previous content
 
     if (result.items.length === 0) {
-      // No photos found, just don't show anything
+      // No images, do nothing (no message)
       return;
     }
 
@@ -38,10 +68,21 @@ async function fetchImages(folderName) {
       photoGrid.appendChild(img);
     });
 
+    // Add download all button after images loaded
+    let downloadAllBtn = document.getElementById("downloadAllBtn");
+    if (!downloadAllBtn) {
+      downloadAllBtn = document.createElement("button");
+      downloadAllBtn.id = "downloadAllBtn";
+      downloadAllBtn.textContent = "Download All Photos";
+      downloadAllBtn.addEventListener("click", () => {
+        downloadAllPhotosAsZip(folderName);
+      });
+      const galleryContainer = document.getElementById("galleryContainer");
+      galleryContainer.appendChild(downloadAllBtn);
+    }
+
   } catch (error) {
     console.error("Error loading photos:", error);
-    // No message needed, just fail silently or show alert if you want
-    // But you said no extra messages, so do nothing here
   }
 }
 

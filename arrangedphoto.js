@@ -37,17 +37,14 @@ document.getElementById("backButton").addEventListener("click", () => {
   window.location.href = "eventroom.html";
 });
 
-/**
- * Existing Functionality
- */
-
-// Download photos as ZIP (general helper)
+// Download photos as ZIP (uses window.saveAs)
 async function downloadPhotosAsZip(folderPath, fileNamePrefix) {
   const JSZipModule = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
   const JSZip = JSZipModule.default;
-  const fileSaverModule = await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js');
-  const saveAs = fileSaverModule.saveAs;
-  
+  await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js');
+  // FileSaver is a UMD that attaches saveAs to the window
+  const saveAs = window.saveAs;
+
   const folderRef = storageRef(storage, folderPath);
   const listResult = await listAll(folderRef);
 
@@ -71,7 +68,7 @@ async function downloadPhotosAsZip(folderPath, fileNamePrefix) {
   return zipFileName;
 }
 
-// Normal participants: no download, but we have a general email button
+// Normal participants general email
 function sendGeneralEmailToParticipants(normalParticipantEmails) {
   if (normalParticipantEmails.length === 0) {
     alert("No normal participants to email.");
@@ -84,7 +81,7 @@ function sendGeneralEmailToParticipants(normalParticipantEmails) {
   window.location.href = mailtoLink;
 }
 
-// Manual participants: replace download with email button
+// Manual participant email
 async function sendEmailToManualGuest(guestData) {
   const folderPath = guestData.folderPath + "/photos";
   const zipName = await downloadPhotosAsZip(folderPath, guestData.name || "ManualGuest");
@@ -190,7 +187,6 @@ async function loadManualGuests(manualGuests, containerId) {
 async function fetchAndDisplayPhotos(folderPath, containerId) {
   const photoContainer = document.getElementById(containerId);
   if (!photoContainer) {
-    // If the container doesn't exist, create it.
     const newContainer = document.createElement("div");
     newContainer.id = containerId;
     document.body.appendChild(newContainer);
@@ -334,24 +330,24 @@ async function loadEventRoom(eventCode) {
 }
 
 async function loadPhotos(eventCode) {
-  const photoContainer = document.getElementById("photoContainer");
+  let photoContainer = document.getElementById("photoContainer");
   if (!photoContainer) {
     // Create if not found
     const newContainer = document.createElement("div");
     newContainer.id = "photoContainer";
     document.body.appendChild(newContainer);
+    photoContainer = newContainer;
   }
-  const container = document.getElementById("photoContainer");
   
   const folderPath = `rooms/${eventCode}/host`;
   const folderRef = storageRef(storage, folderPath);
 
   try {
     const listResult = await listAll(folderRef);
-    container.innerHTML = "";
+    photoContainer.innerHTML = "";
 
     if (listResult.items.length === 0) {
-      container.textContent = "No photos available.";
+      photoContainer.textContent = "No photos available.";
       return;
     }
 
@@ -372,12 +368,12 @@ async function loadPhotos(eventCode) {
         }
       });
 
-      container.appendChild(photoItem);
+      photoContainer.appendChild(photoItem);
     }
 
   } catch (error) {
     console.error("Error loading photos:", error);
-    if (container) container.textContent = "Failed to load photos.";
+    photoContainer.textContent = "Failed to load photos.";
   }
 }
 
