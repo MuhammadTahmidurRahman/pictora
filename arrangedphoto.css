@@ -13,13 +13,16 @@ body {
 #eventRoomContainer {
   width: 90%;
   max-width: 600px;
-  /* semi-transparent white box over bluish background */
-  background: rgba(255, 255, 255, 0.05);
+  /* Glass effect: semi-transparent background with blur */
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   padding: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border-radius: 12px;
   overflow-y: auto;
   position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 /* Move back button to the right side */
@@ -77,7 +80,7 @@ button {
   display: inline-block;
   text-align: center;
   white-space: nowrap; 
-  background: rgba(48,127,226, 0.8); /* semi-transparent blue for default buttons */
+  background: rgba(48,127,226, 0.8);
   color: #fff;
   box-sizing: border-box;
 }
