@@ -1,11 +1,10 @@
 // join_event.js
 
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
-import { getDatabase, ref, get, set, update, onValue } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
-import { getStorage, ref as storageRef, getDownloadURL } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js';
+import { getAuth } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
+import { getDatabase, ref, get, onValue } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
 
-// Firebase configuration
+// Firebase configuration (ensure this is correct)
 const firebaseConfig = {
   apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
   authDomain: "pictora-7f0ad.firebaseapp.com",
@@ -17,10 +16,9 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const firebaseApp = initializeApp(firebaseConfig);
-const auth = getAuth(firebaseApp);
-const database = getDatabase(firebaseApp);
-const storage = getStorage(firebaseApp);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
 
 /**
  * Fetches the user's profile photo URL from Firebase Realtime Database.
@@ -38,11 +36,11 @@ async function fetchUserProfilePhoto(uid) {
       photoUrl = snapshot.val(); // The correct photo URL from the Realtime Database
     } else {
       console.error("Profile photo not found in Realtime Database, using default image");
-      photoUrl = "default_image_url.jpg";  // Optional: Fallback image URL
+      photoUrl = "https://example.com/default_image.jpg";  // Replace with your default image URL
     }
   } catch (error) {
     console.error("Error fetching profile photo from Realtime Database:", error);
-    photoUrl = "default_image_url.jpg";  // Optional: Fallback image URL
+    photoUrl = "https://example.com/default_image.jpg";  // Replace with your default image URL
   }
 
   return photoUrl;
@@ -86,7 +84,15 @@ async function joinRoom() {
   }
 
   const roomRef = ref(database, `rooms/${roomCode}`);
-  const roomSnapshot = await get(roomRef);
+  let roomSnapshot;
+
+  try {
+    roomSnapshot = await get(roomRef);
+  } catch (error) {
+    console.error("Error fetching room data:", error);
+    displayMessage("An error occurred while fetching the room data.");
+    return;
+  }
 
   if (!roomSnapshot.exists()) {
     displayMessage("Room does not exist!");
@@ -102,7 +108,15 @@ async function joinRoom() {
   }
 
   const participantRef = ref(database, `rooms/${roomCode}/participants/${user.uid}`);
-  const participantSnapshot = await get(participantRef);
+  let participantSnapshot;
+
+  try {
+    participantSnapshot = await get(participantRef);
+  } catch (error) {
+    console.error("Error fetching participant data:", error);
+    displayMessage("An error occurred while checking your participation.");
+    return;
+  }
 
   if (participantSnapshot.exists()) {
     displayMessage("You are already a participant in this room!");
@@ -111,7 +125,14 @@ async function joinRoom() {
   }
 
   // Fetch the user's profile photo from Realtime Database (not from Firebase Storage)
-  const photoUrl = await fetchUserProfilePhoto(user.uid);
+  let photoUrl;
+  try {
+    photoUrl = await fetchUserProfilePhoto(user.uid);
+  } catch (error) {
+    console.error("Error fetching user profile photo:", error);
+    displayMessage("An error occurred while fetching your profile photo.");
+    return;
+  }
 
   // Create participant data and store the user's uploaded profile photo URL
   const participantData = {

@@ -1,7 +1,7 @@
 // signup.js
 
-// Firebase imports and initialization
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+// Import Firebase modules
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
 import { 
   getAuth, 
   createUserWithEmailAndPassword, 
@@ -11,9 +11,18 @@ import {
   onAuthStateChanged,
   sendEmailVerification,
   signOut
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import { getDatabase, ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+} from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
+import { 
+  getStorage, 
+  ref as storageRef, 
+  uploadBytes, 
+  getDownloadURL 
+} from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js';
+import { 
+  getDatabase, 
+  ref as dbRef, 
+  set 
+} from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -22,15 +31,15 @@ const firebaseConfig = {
   projectId: "pictora-7f0ad",
   storageBucket: "pictora-7f0ad.appspot.com",
   messagingSenderId: "155732133141",
-  databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app/",
+  databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app",
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const storage = getStorage();
-const database = getDatabase();
+const auth = getAuth(app);
+const storage = getStorage(app);
+const database = getDatabase(app);
 
 // Authentication State Listener
 onAuthStateChanged(auth, async (user) => {
@@ -53,8 +62,6 @@ onAuthStateChanged(auth, async (user) => {
     }
   }
 });
-
-// Utility Functions
 
 /**
  * Toggles the visibility of a password field.
@@ -117,14 +124,24 @@ window.goBack = function () {
  * Shows the loading overlay.
  */
 function showLoading() {
-  document.getElementById("loading-overlay").style.display = "block";
+  const overlay = document.getElementById("loading-overlay");
+  if (overlay) {
+    overlay.style.display = "block";
+  } else {
+    console.error("Loading overlay element not found.");
+  }
 }
 
 /**
  * Hides the loading overlay.
  */
 function hideLoading() {
-  document.getElementById("loading-overlay").style.display = "none";
+  const overlay = document.getElementById("loading-overlay");
+  if (overlay) {
+    overlay.style.display = "none";
+  } else {
+    console.error("Loading overlay element not found.");
+  }
 }
 
 /**
@@ -279,10 +296,11 @@ window.signInWithGoogle = async function () {
     }
 
     // Check if user exists in the database
-    const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
+    const userRef = dbRef(database, `users/${user.uid}`);
+    const userSnapshot = await get(userRef);
     if (userSnapshot.exists()) {
       alert("Welcome back!");
-      window.location.href = "join_event.html";
+      window.location.href = `/eventroom.html?eventCode=${roomCode}`;
       hideLoading(); // Hide loading overlay
       return;
     }
@@ -301,7 +319,7 @@ window.signInWithGoogle = async function () {
     console.log("Google Image URL:", imageUrl);
 
     // Save user data to Firebase Realtime Database
-    await set(dbRef(database, `users/${user.uid}`), {
+    await set(userRef, {
       email: user.email,
       name: user.displayName || "No Name",
       photo: imageUrl,
@@ -311,7 +329,7 @@ window.signInWithGoogle = async function () {
     console.log("Google user data written to Realtime Database.");
 
     alert("Google Sign-In successful!");
-    window.location.href = "join_event.html";
+    window.location.href = `/eventroom.html?eventCode=${roomCode}`;
   } catch (error) {
     console.error("Google Sign-In error:", error);
     alert(`Failed to sign in with Google. ${error.message}`);
@@ -319,3 +337,13 @@ window.signInWithGoogle = async function () {
     hideLoading(); // Hide loading overlay
   }
 };
+
+// Listen for "Go to EventRoom" button click
+document.addEventListener("DOMContentLoaded", () => {
+  const joinButton = document.getElementById("joinEventBtn");
+  if (joinButton) {
+    joinButton.addEventListener("click", joinRoom);
+  } else {
+    console.error("Join Event button not found in the DOM.");
+  }
+});
