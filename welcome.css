@@ -75,11 +75,11 @@ body, html {
 }
 
 .button {
-  width: 100%;
+  width: 50%; /* Reduced width for narrower buttons */
   padding: 15px;
   font-size: 16px;
   color: white;
-  background-color: black;
+  background: linear-gradient(to right, black, gray); /* Added black and white gradient */
   border: none;
   border-radius: 20px;
   cursor: pointer;
