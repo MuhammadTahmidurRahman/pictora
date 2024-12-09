@@ -17,7 +17,7 @@ body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border-radius: 12px;
   overflow-y: auto;
-  position: relative; /* To allow positioning of child elements if needed */
+  position: relative;
 }
 
 /* Move back button to the right side */
@@ -84,12 +84,12 @@ button:hover {
   background: rgba(35,99,183,0.8);
 }
 
-/* Action buttons for host and email - consistent size */
+/* Action buttons for host and email - slightly wider for Download Host Photo */
 .action-button {
   background: linear-gradient(to right, #ffffff, #307fe2);
   color: #000;
   border: 1px solid #000; /* ensure black outline */
-  width: 160px; /* fixed width for uniform size */
+  width: 180px; /* increased width for "📦 Download Host Photo" button */
   text-align: center;
 }
 
