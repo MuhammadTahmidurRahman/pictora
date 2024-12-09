@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Event Room</title>
-  <link rel="stylesheet" href="eventroom.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Room</title>
+<link rel="stylesheet" href="eventroom.css">
 </head>
 <body>
   <div id="eventRoomContainer">
-    <!-- Back Button -->
-    <button id="backButton" aria-label="Go Back"></button>
-    
+    <button id="backButton">Back</button>
     <h1 id="roomName">Loading Room...</h1>
     <p id="roomCode"></p>
     
@@ -19,21 +17,12 @@
       <h3>Host:</h3>
       <p id="hostName"></p>
       <img id="hostPhoto" src="" alt="Host Photo" />
-      
-      <!-- Host Actions -->
-      <div id="hostActions">
-        <!-- Example of how buttons should be inserted -->
-        <!-- These buttons can also be dynamically added via JavaScript -->
-        <button class="action-button folder-icon" aria-label="Open Folder"></button>
-        <button class="action-button arrange-photo-button" aria-label="Arrange Photos"></button>
-        <button class="action-button add-member-button" aria-label="Add Member"></button>
-        <button class="action-button view-sorted-button" aria-label="View Sorted Photos"></button>
-        <button id="uploadPhotoButton" aria-label="Upload Photos"></button>
-      </div>
+      <div id="hostActions"></div> <!-- Host actions go here -->
     </div>
     
-    <!-- Delete Room Button -->
-    <button id="deleteRoomButton" aria-label="Delete Room" style="display: none;"></button>
+    <!-- Upload Photo Button -->
+    <button id="uploadPhotoButton">Upload Photos</button>
+    <button id="deleteRoomButton" style="display: none;">Delete Room</button>
    
     <!-- Guests Section -->
     <h3>Guests:</h3>
@@ -51,13 +40,12 @@
         <input type="email" id="guestEmail" placeholder="Enter guest email" required />
         <input type="file" id="guestPhoto" accept="image/*" required />
         <div class="dialog-buttons">
-          <button id="addGuestButton" aria-label="Add Guest"></button>
-          <button id="closeDialogButton" aria-label="Cancel"></button>
+          <button id="addGuestButton">Add Guest</button>
+          <button id="closeDialogButton">Cancel</button>
         </div>
       </div>
     </div>
   </div>
-  
-  <script type="module" src="eventroom.js"></script>
+<script type="module" src="eventroom.js"></script>
 </body>
 </html>

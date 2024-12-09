@@ -1,7 +1,6 @@
 /* General Styling */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  /* Bluish gradient background for consistency */
   background: linear-gradient(to right, #b3d1f0, #4a5d70);
   margin: 0;
   display: flex;
@@ -10,42 +9,24 @@ body {
   height: 100vh;
 }
 
-/* Event Room Container with Glass Effect */
 #eventRoomContainer {
   width: 90%;
-  max-width: 600px; /* Fixed width for consistency */
-  background: rgba(255, 255, 255, 0.4); /* Semi-transparent background */
+  max-width: 600px; /* keep it 600px */
+  background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   padding: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
+  border-radius: 16px;
   overflow-y: auto;
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* Back Button Styling */
+/* Move back button to the right side */
 #backButton {
   float: right;
   margin-bottom: 10px;
-  background: linear-gradient(to right, #ffffff, #307fe2);
-  color: #000;
-  border: 1px solid #000;
-  border-radius: 5px;
-  padding: 8px 15px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  /* Hide the text inside the button */
-  font-size: 0;
-  overflow: hidden;
-}
-
-#backButton::before {
-  content: "🔙 Back";
-  font-size: 14px;
-  color: #000;
-  display: block;
 }
 
 /* Scrollable List Styling */
@@ -66,134 +47,154 @@ body {
   border-radius: 10px;
 }
 
-/* Headings and Text */
-#roomName {
-  text-align: center;
-  font-size: 24px;
-  margin-bottom: 5px;
-  color: #333;
-}
-
-#roomCode {
-  text-align: center;
-  font-size: 14px;
-  color: #666;
-}
-
-h3 {
-  color: #333;
-  margin-top: 20px;
-  margin-bottom: 10px;
-}
-
-/* Buttons */
-button {
-  cursor: pointer;
-  font-size: 14px;
-  border: 1px solid #000; /* Black outline */
-  border-radius: 5px;
-  padding: 8px 15px;
-  margin: 5px 0;
-  display: inline-block;
-  text-align: center;
-  white-space: nowrap;
-  background: linear-gradient(to right, #ffffff, #307fe2); /* Matched button color */
-  color: #000;
-  box-sizing: border-box;
-  transition: background 0.3s ease, color 0.3s ease;
-  /* Hide the base text */
-  font-size: 0;
-  overflow: hidden;
-}
-
-button::before,
-button::after {
-  display: block;
-  text-align: center;
-}
-
-button::before {
-  /* Icon will be set individually per button */
-}
-
-button::after {
-  /* Label will be set individually per button */
-}
-
-/* Hover effect */
-button:hover {
-  background: linear-gradient(to right, #e0eaff, #2363b7); /* Hover effect */
-  color: #fff;
-}
-
-button:hover::after {
-  color: #fff;
-}
-
-/* Action Buttons for Host and Email */
-.action-button {
-  background: linear-gradient(to right, #ffffff, #307fe2);
-  color: #000;
-  border: 1px solid #000;
-  width: 180px; /* Fixed width for uniform size */
-  text-align: center;
-  border-radius: 5px;
-  padding: 10px 0;
-  transition: background 0.3s ease, color 0.3s ease;
-  /* Hide the base text */
-  font-size: 0;
-  overflow: hidden;
-}
-
-.action-button::before,
-.action-button::after {
-  display: block;
-  text-align: center;
-}
-
-.action-button::before {
-  /* Icon will be set individually per button */
-}
-
-.action-button::after {
-  /* Label will be set individually per button */
-}
-
-.action-button:hover {
-  background: linear-gradient(to right, #e0eaff, #2363b7);
-  color: #fff;
-}
-
-.action-button:hover::after {
-  color: #fff;
-}
-
-/* Host Photo Styling */
+/* Host Photo */
 #hostPhoto {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  margin: 10px auto;
+  margin: 10px auto 5px auto; 
   display: block;
   object-fit: cover;
   border: 2px solid #307fe2;
 }
 
-/* Photo Grid */
-.photo-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: 10px;
-  margin: 15px 0;
-  color: transparent; /* Hide 'No Photos Available.' text */
+/* Four main buttons in one row (Folder, Arrange, Add, View Sorted) */
+#hostActions {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* space between buttons */
+  margin-top: 10px;
 }
 
-.photo-thumbnail {
-  width: 80px;
-  height: 80px;
-  border-radius: 10px;
-  object-fit: cover;
-  border: 2px solid #307fe2;
+/* Common styles for the four main buttons */
+#hostActions .folder-icon,
+#hostActions .arrange-photo-button,
+#hostActions .add-member-button,
+#hostActions .view-sorted-button {
+  width: 70px;
+  height: 70px;
+  padding: 5px;
+  border: 1px solid #000;
+  border-radius: 8px;
+  background: rgba(48,127,226, 0.8);
+  color: #fff;
+  box-sizing: border-box;
+  text-align: center;
+  cursor: pointer;
+  /* Display flex with column to put icon above text */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+}
+
+/* Hover effect */
+#hostActions .folder-icon:hover,
+#hostActions .arrange-photo-button:hover,
+#hostActions .add-member-button:hover,
+#hostActions .view-sorted-button:hover {
+  background: rgba(35,99,183,0.8);
+}
+
+/* Folder icon button: just show code "📁" as is (original design)
+   This means no pseudo-elements. The code sets textContent = "📁".
+   We do not set font-size:0 here, so the text "📁" displays as intended.
+   Just leave it as it is.
+*/
+
+/* Arrange button (was "Arrange Photo"): remove 'photo' reference */
+.arrange-photo-button {
+  font-size: 0; /* hide original text if any */
+}
+.arrange-photo-button::before {
+  content: "📷↺";
+  font-size: 18px;
+  display: block;
+  margin-bottom: 3px;
+  line-height: 1;
+}
+.arrange-photo-button::after {
+  content: "Arrange"; /* no mention of 'photo' */
+  font-size: 12px;
+  color: #fff;
+  line-height: 1;
+}
+
+/* Add button (was "Add Member"): remove 'member' reference */
+.add-member-button {
+  font-size: 0; /* hide original text if any */
+}
+.add-member-button::before {
+  content: "👤➕";
+  font-size: 18px;
+  display: block;
+  margin-bottom: 3px;
+  line-height: 1;
+}
+.add-member-button::after {
+  content: "Add"; /* no mention of 'member' */
+  font-size: 12px;
+  color: #fff;
+  line-height: 1;
+}
+
+/* View Sorted Photos Button */
+.view-sorted-button {
+  font-size: 0; /* hide original text if any */
+}
+.view-sorted-button::before {
+  content: "👁🗂";
+  font-size: 18px;
+  display: block;
+  margin-bottom: 3px;
+  line-height: 1;
+}
+.view-sorted-button::after {
+  content: "Sorted";
+  font-size: 12px;
+  color: #fff;
+  line-height: 1;
+}
+
+/* Upload Photos Button below the four buttons */
+#uploadPhotoButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  padding: 5px;
+  margin: 10px auto 0 auto; /* center it below the main row */
+  border: 1px solid #000;
+  border-radius: 8px;
+  background: rgba(48,127,226, 0.8);
+  color: #fff;
+  box-sizing: border-box;
+  text-align: center;
+  cursor: pointer;
+  font-size: 0; /* hide original text if any */
+  line-height: 0;
+}
+
+#uploadPhotoButton:hover {
+  background: rgba(35,99,183,0.8);
+}
+
+/* Upload Photos Button Icon/Text */
+#uploadPhotoButton::before {
+  content: "⬆📷";
+  font-size: 18px;
+  display: block;
+  margin-bottom: 3px;
+  line-height: 1;
+}
+#uploadPhotoButton::after {
+  content: "Upload";
+  font-size: 12px;
+  color: #fff;
+  line-height: 1;
 }
 
 /* Guest Lists */
@@ -203,10 +204,10 @@ button:hover::after {
   align-items: center;
   margin: 10px 0;
   padding: 8px;
-  background: rgba(247, 250, 255, 0.9);
+  background: rgba(247,250,255,0.9);
   border: 1px solid #cde0f5;
   border-radius: 8px;
-  justify-content: space-between; /* Buttons on right side */
+  justify-content: space-between; 
 }
 
 .guest-photo {
@@ -218,36 +219,31 @@ button:hover::after {
   margin-right: 10px;
 }
 
-/* Dialog Styles */
+/* Dialog Styles - slide from right */
 .dialog {
   position: fixed;
   top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  right: 0;
+  width: 100%; 
+  height: 100%;
   background: rgba(0, 0, 0, 0.6);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 1000;
+  transition: transform 0.3s ease-in-out;
+  transform: translateX(100%);
 }
-
-.dialog.hidden {
-  display: none;
+.dialog:not(.hidden) {
+  transform: translateX(0);
 }
-
 .dialog-content {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: #fff;
   padding: 20px;
   border-radius: 8px;
   width: 90%;
   max-width: 400px;
+  margin: 0 auto;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
-
 .dialog-content input {
   width: 90%;
   margin: 10px 0;
@@ -255,224 +251,21 @@ button:hover::after {
   border: 1px solid #ddd;
   border-radius: 5px;
 }
-
 .dialog-buttons {
   display: flex;
   justify-content: space-between;
   gap: 10px;
 }
-
 .dialog-buttons button {
   width: 45%;
-  background: linear-gradient(to right, #ffffff, #307fe2);
-  color: #000;
-  border: 1px solid #000;
-  border-radius: 5px;
-  padding: 8px 0;
-  cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease;
-  /* Hide the base text */
-  font-size: 0;
-  overflow: hidden;
 }
-
-.dialog-buttons button::before,
-.dialog-buttons button::after {
-  display: block;
-  text-align: center;
-}
-
-.dialog-buttons button::before {
-  /* Icon will be set individually per button */
-}
-
-.dialog-buttons button::after {
-  /* Label will be set individually per button */
-}
-
-.dialog-buttons button:hover {
-  background: linear-gradient(to right, #e0eaff, #2363b7);
-  color: #fff;
-}
-
-.dialog-buttons button:hover::after {
-  color: #fff;
-}
-
 .delete-guest-button {
-  background: rgba(255, 76, 76, 0.9);
+  background: rgba(255,76,76,0.9);
   color: #fff;
-  padding: 5px;
-  font-size: 12px;
-  margin-top: 5px;
-  max-width: 100px;
-  border: 1px solid #000; /* Black outline */
-  border-radius: 3px;
-  cursor: pointer;
-  transition: background 0.3s ease;
+  border: 1px solid #000;
+  font-size: 14px;
+  max-width: 180px;
 }
-
 .delete-guest-button:hover {
-  background: rgba(212, 53, 53, 0.9);
-}
-
-/* Five Action Buttons Under Host Profile Picture */
-#hostActions {
-  display: flex;
-  justify-content: center;
-  gap: 15px; /* Space between buttons */
-  margin-top: 20px;
-}
-
-#hostActions .action-button {
-  width: 120px; /* Adjusted width for rectangle */
-  height: 50px; /* Adjusted height for rectangle */
-  padding: 5px 10px;
-  border: 1px solid #000;
-  border-radius: 8px;
-  background: linear-gradient(to right, #ffffff, #307fe2);
-  color: #000;
-  box-sizing: border-box;
-  text-align: center;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.3s ease, color 0.3s ease;
-  /* Hide the base text */
-  font-size: 0;
-  overflow: hidden;
-}
-
-#hostActions .action-button::before,
-#hostActions .action-button::after {
-  display: block;
-  text-align: center;
-}
-
-#hostActions .action-button::before {
-  /* Icon will be set individually per button */
-}
-
-#hostActions .action-button::after {
-  /* Label will be set individually per button */
-}
-
-/* Specific Action Button Icons and Labels */
-#hostActions .folder-icon::before {
-  content: "📁";
-  font-size: 18px;
-  display: block;
-  margin-bottom: 3px;
-}
-
-#hostActions .folder-icon::after {
-  content: "Folder";
-  font-size: 12px;
-}
-
-#hostActions .arrange-photo-button::before {
-  content: "📷↺";
-  font-size: 18px;
-  display: block;
-  margin-bottom: 3px;
-}
-
-#hostActions .arrange-photo-button::after {
-  content: "Arrange";
-  font-size: 12px;
-}
-
-#hostActions .add-member-button::before {
-  content: "👤➕";
-  font-size: 18px;
-  display: block;
-  margin-bottom: 3px;
-}
-
-#hostActions .add-member-button::after {
-  content: "Add";
-  font-size: 12px;
-}
-
-#hostActions .view-sorted-button::before {
-  content: "👁🗂";
-  font-size: 18px;
-  display: block;
-  margin-bottom: 3px;
-}
-
-#hostActions .view-sorted-button::after {
-  content: "Sorted";
-  font-size: 12px;
-}
-
-#uploadPhotoButton {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 120px; /* Adjusted width for rectangle */
-  height: 50px; /* Adjusted height for rectangle */
-  padding: 5px 10px;
-  margin: 10px auto 0 auto; /* Center it below the main row */
-  border: 1px solid #000;
-  border-radius: 8px;
-  background: linear-gradient(to right, #ffffff, #307fe2);
-  color: #000;
-  box-sizing: border-box;
-  text-align: center;
-  cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease;
-  /* Hide the base text */
-  font-size: 0;
-  overflow: hidden;
-}
-
-#uploadPhotoButton::before {
-  content: "⬆📷";
-  font-size: 18px;
-  display: block;
-  margin-bottom: 3px;
-}
-
-#uploadPhotoButton::after {
-  content: "Upload";
-  font-size: 12px;
-}
-
-/* Photo Item (for deleting) */
-.photo-item {
-  position: relative;
-  background: rgba(247, 250, 255, 0.9);
-  padding: 5px;
-  border-radius: 8px;
-  border: 1px solid #cde0f5;
-  text-align: center;
-}
-
-.photo-item img {
-  width: 70px;
-  height: 70px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 2px solid #307fe2;
-}
-
-.delete-btn {
-  background: rgba(255, 76, 76, 0.9);
-  color: #fff;
-  padding: 5px;
-  font-size: 12px;
-  margin-top: 5px;
-  max-width: 100px;
-  border: 1px solid #000; /* Black outline */
-  border-radius: 3px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.delete-btn:hover {
-  background: rgba(212, 53, 53, 0.9);
+  background: rgba(212,53,53,0.9);
 }
