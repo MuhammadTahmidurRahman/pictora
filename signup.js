@@ -1,5 +1,3 @@
-// signup.js
-
 // Firebase imports and initialization
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { 
@@ -8,11 +6,9 @@ import {
   signInWithPopup, 
   fetchSignInMethodsForEmail, 
   GoogleAuthProvider, 
-  onAuthStateChanged,
-  sendEmailVerification,
-  signOut
+  onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import { getDatabase, ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 const firebaseConfig = {
@@ -28,7 +24,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const storage = getStorage();
-const database = getDatabase();
+const database = getDatabase();s
 
 // Redirect authenticated users to join_event.html if their email is verified
 onAuthStateChanged(auth, async (user) => {
