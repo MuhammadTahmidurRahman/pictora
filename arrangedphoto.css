@@ -1,7 +1,8 @@
 /* General Styling */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(to right, #e6f1fa, #ffffff);
+  /* More bluish background */
+  background: linear-gradient(to right, #b3d1f0, #80b2e6);
   margin: 0;
   display: flex;
   justify-content: center;
@@ -12,7 +13,8 @@ body {
 #eventRoomContainer {
   width: 90%;
   max-width: 600px;
-  background: rgba(255, 255, 255, 0.9); /* semi-transparent layer */
+  /* semi-transparent white box over bluish background */
+  background: rgba(255, 255, 255, 0.85);
   padding: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border-radius: 12px;
@@ -74,7 +76,7 @@ button {
   margin: 5px 0;
   display: inline-block;
   text-align: center;
-  white-space: nowrap; /* Prevent text wrapping */
+  white-space: nowrap; 
   background: rgba(48,127,226, 0.8); /* semi-transparent blue for default buttons */
   color: #fff;
   box-sizing: border-box;
@@ -84,12 +86,12 @@ button:hover {
   background: rgba(35,99,183,0.8);
 }
 
-/* Action buttons for host and email - slightly wider for Download Host Photo */
+/* Action buttons for host and email */
 .action-button {
   background: linear-gradient(to right, #ffffff, #307fe2);
   color: #000;
-  border: 1px solid #000; /* ensure black outline */
-  width: 180px; /* increased width for "📦 Download Host Photo" button */
+  border: 1px solid #000;
+  width: 180px; /* fixed width for uniform size */
   text-align: center;
 }
 
