@@ -47,7 +47,7 @@ button:hover {
 
 /* Move back button to the right side */
 #backButton {
-  content:"Back"
+  content:"Back";
   float: right;
   margin-bottom: 10px;
   /* Inherit global button styles */
