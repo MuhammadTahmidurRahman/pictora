@@ -30,7 +30,7 @@ body {
 }
 
 /* Scrollable List Styling */
-.scrollable-list {
+.	scrollable-list {
   max-height: 150px;
   overflow-y: auto;
   margin: 0;
@@ -58,25 +58,26 @@ body {
   border: 2px solid #307fe2;
 }
 
-/* Four main buttons in one row (Folder, Arrange, Add, View Sorted) */
+/* Five main buttons in rectangular shape */
 #hostActions {
   display: flex;
   justify-content: center;
-  gap: 20px; /* space between buttons */
+  gap: 15px; /* space between buttons */
   margin-top: 10px;
 }
 
-/* Common styles for the four main buttons */
+/* Common styles for the five main buttons */
 #hostActions .folder-icon,
 #hostActions .arrange-photo-button,
 #hostActions .add-member-button,
-#hostActions .view-sorted-button {
-  width: 70px;
-  height: 70px;
-  padding: 5px;
+#hostActions .view-sorted-button,
+#uploadPhotoButton {
+  width: 100px; /* adjusted width for rectangle */
+  height: 50px; /* adjusted height for rectangle */
+  padding: 5px 10px; /* slightly adjusted padding */
   border: 1px solid #000;
   border-radius: 8px;
-  background: rgba(48,127,226, 0.8);
+  background: rgba(48,127,226, 0.8); /* Matched button color */
   color: #fff;
   box-sizing: border-box;
   text-align: center;
@@ -87,26 +88,35 @@ body {
   align-items: center;
   justify-content: center;
   line-height: 1.2;
+  font-size: 14px; /* Added font size for better text visibility */
 }
 
 /* Hover effect */
 #hostActions .folder-icon:hover,
 #hostActions .arrange-photo-button:hover,
 #hostActions .add-member-button:hover,
-#hostActions .view-sorted-button:hover {
-  background: rgba(35,99,183,0.8);
+#hostActions .view-sorted-button:hover,
+#uploadPhotoButton:hover {
+  background: rgba(35,99,183,0.8); /* Matched hover color */
 }
 
-/* Folder icon button: just show code "📁" as is (original design)
-   This means no pseudo-elements. The code sets textContent = "📁".
-   We do not set font-size:0 here, so the text "📁" displays as intended.
-   Just leave it as it is.
-*/
-
-/* Arrange button (was "Arrange Photo"): remove 'photo' reference */
-.arrange-photo-button {
-  font-size: 0; /* hide original text if any */
+/* Folder icon button: just show code "📁" as is */
+#hostActions .folder-icon::before {
+  content: "📁";
+  font-size: 18px;
+  display: block;
+  margin-bottom: 3px;
+  line-height: 1;
 }
+
+#hostActions .folder-icon::after {
+  content: "Folder";
+  font-size: 12px;
+  color: #fff;
+  line-height: 1;
+}
+
+/* Arrange button */
 .arrange-photo-button::before {
   content: "📷↺";
   font-size: 18px;
@@ -114,17 +124,15 @@ body {
   margin-bottom: 3px;
   line-height: 1;
 }
+
 .arrange-photo-button::after {
-  content: "Arrange"; /* no mention of 'photo' */
+  content: "Arrange";
   font-size: 12px;
   color: #fff;
   line-height: 1;
 }
 
-/* Add button (was "Add Member"): remove 'member' reference */
-.add-member-button {
-  font-size: 0; /* hide original text if any */
-}
+/* Add button */
 .add-member-button::before {
   content: "👤➕";
   font-size: 18px;
@@ -132,17 +140,15 @@ body {
   margin-bottom: 3px;
   line-height: 1;
 }
+
 .add-member-button::after {
-  content: "Add"; /* no mention of 'member' */
+  content: "Add";
   font-size: 12px;
   color: #fff;
   line-height: 1;
 }
 
 /* View Sorted Photos Button */
-.view-sorted-button {
-  font-size: 0; /* hide original text if any */
-}
 .view-sorted-button::before {
   content: "👁🗂";
   font-size: 18px;
@@ -150,6 +156,7 @@ body {
   margin-bottom: 3px;
   line-height: 1;
 }
+
 .view-sorted-button::after {
   content: "Sorted";
   font-size: 12px;
@@ -157,32 +164,7 @@ body {
   line-height: 1;
 }
 
-/* Upload Photos Button below the four buttons */
-#uploadPhotoButton {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 70px;
-  height: 70px;
-  padding: 5px;
-  margin: 10px auto 0 auto; /* center it below the main row */
-  border: 1px solid #000;
-  border-radius: 8px;
-  background: rgba(48,127,226, 0.8);
-  color: #fff;
-  box-sizing: border-box;
-  text-align: center;
-  cursor: pointer;
-  font-size: 0; /* hide original text if any */
-  line-height: 0;
-}
-
-#uploadPhotoButton:hover {
-  background: rgba(35,99,183,0.8);
-}
-
-/* Upload Photos Button Icon/Text */
+/* Upload Photos Button below the five buttons */
 #uploadPhotoButton::before {
   content: "⬆📷";
   font-size: 18px;
