@@ -143,22 +143,31 @@ button:hover {
   background: rgba(35,99,183,0.8);
 }
 
-/* Remove Text Below Icons in Buttons */
+/* Remove Text Below Icons in Buttons and Show on Hover */
 #hostActions .folder-icon::after,
 #hostActions .arrange-photo-button::after,
 #hostActions .add-member-button::after,
 #hostActions .view-sorted-button::after,
 #uploadPhotoButton::after {
-  display: none;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
-/* Arrange button (was "Arrange Photo"): remove 'photo' reference */
+#hostActions .folder-icon:hover::after,
+#hostActions .arrange-photo-button:hover::after,
+#hostActions .add-member-button:hover::after,
+#hostActions .view-sorted-button:hover::after,
+#uploadPhotoButton:hover::after {
+  opacity: 1;
+}
+
+/* Arrange button (was "Arrange Photo"): remove 'photo' reference and update icon */
 .arrange-photo-button {
   font-size: 0; /* hide original text if any */
 }
 
 .arrange-photo-button::before {
-  content: "📷↺";
+  content: "'🔄'"; /* Changed from "📷↺" to "🔄" */
   font-size: 18px;
   display: block;
   margin-bottom: 3px;
@@ -166,7 +175,7 @@ button:hover {
 }
 
 .arrange-photo-button::after {
-  content: "Arrange"; /* This will be hidden by the above rule */
+  content: "Arrange"; /* Hidden by opacity */
 }
 
 /* Add button (was "Add Member"): remove 'member' reference */
@@ -175,7 +184,7 @@ button:hover {
 }
 
 .add-member-button::before {
-  content: "👤➕";
+  content: "+1"; /* Assuming same icon as arrange-photo-button */
   font-size: 18px;
   display: block;
   margin-bottom: 3px;
@@ -183,7 +192,7 @@ button:hover {
 }
 
 .add-member-button::after {
-  content: "Add"; /* This will be hidden by the above rule */
+  content: "Add"; /* Hidden by opacity */
 }
 
 /* View Sorted Photos Button */
@@ -200,7 +209,7 @@ button:hover {
 }
 
 .view-sorted-button::after {
-  content: "Sorted"; /* This will be hidden by the above rule */
+  content: "Sorted"; /* Hidden by opacity */
 }
 
 /* Upload Photos Button below the five buttons */
@@ -229,7 +238,7 @@ button:hover {
 
 /* Upload Photos Button Icon/Text */
 #uploadPhotoButton::before {
-  content: "⬆📷";
+  content: "📤"; /* Changed from "⬆📷" to "📤" */
   font-size: 18px;
   display: block;
   margin-bottom: 3px;
@@ -237,7 +246,7 @@ button:hover {
 }
 
 #uploadPhotoButton::after {
-  content: "Upload"; /* This will be hidden by the above rule */
+  content: "Upload"; /* Hidden by opacity */
 }
 
 /* Headings and Text */
