@@ -149,7 +149,6 @@ button:hover {
 #hostActions .add-member-button::after,
 #hostActions .view-sorted-button::after,
 #uploadPhotoButton::after {
-  content:"📁";
   opacity: 0;
   transition: opacity 0.3s;
 }
@@ -159,7 +158,6 @@ button:hover {
 #hostActions .add-member-button:hover::after,
 #hostActions .view-sorted-button:hover::after,
 #uploadPhotoButton:hover::after {
-  content:"See Photos";
   opacity: 1;
 }
 
@@ -394,4 +392,39 @@ h3 {
 
 .delete-btn:hover {
   background: rgba(212,53,53,0.9);
+}
+/* Folder Icon Button */
+.folder-icon {
+  width: 100px;
+  height: 50px;
+  padding: 5px 10px;
+  border: 1px solid #000;
+  border-radius: 8px;
+  background: rgba(48,127,226, 0.8);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.folder-icon::before {
+  content: "📁"; /* Folder icon */
+  font-size: 18px;
+  display: block;
+  margin-bottom: 3px;
+  line-height: 1;
+}
+
+.folder-icon::after {
+  content: ""; /* Hidden text */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.folder-icon:hover::after {
+  opacity: 1;
+  content: "View Photos"; /* Text on hover */
 }
