@@ -18,7 +18,7 @@ body, html {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Ensures content is spaced vertically */
+  justify-content: space-between; /* Keeps title at top and buttons near bottom */
   align-items: center;
   background-color: #000;
 }
@@ -68,37 +68,41 @@ body, html {
 .button-section {
   position: relative;
   z-index: 2;
-  margin-bottom: 50px; /* Positions buttons towards the bottom */
+  margin-bottom: 50px; /* Positions buttons towards bottom */
   display: flex;
   flex-direction: column;
   gap: 20px;
-  width: 80%;
   align-items: center; /* Centers buttons horizontally */
+  width: 100%;
 }
 
-/* Updated Button Styles */
+/* Updated Button Styles:
+   - Shorter width
+   - Black and whitish gradient
+   - Slightly rounded corners
+*/
 .button {
-  width: 60%; /* Adjusted width for better proportion */
-  padding: 14px 0; /* Increased vertical padding */
-  border: 1px solid #000; /* Adds a border similar to the desired style */
-  border-radius: 8px; /* Rounded corners for a modern look */
+  width: 150px; /* Shorter width for a more compact look */
+  padding: 10px 0;
   font-size: 16px;
-  font-weight: 600; /* Bold text for better readability */
-  color: #fff; /* Ensures text is visible against the gradient */
-  background: linear-gradient(to right, #ffffff, #307fe2); /* Bluish gradient background */
+  font-weight: 600;
+  color: #fff; 
+  background: linear-gradient(to right, #f0f0f0, #000000); /* White-to-black gradient */
+  border: 1px solid #000;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s ease; /* Smooth transition for hover effect */
-  margin-top: 20px; /* Adds spacing above the buttons */
-  text-align: center; /* Centers the button text */
+  transition: background 0.3s ease;
+  text-align: center;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.6); /* Improves text legibility */
 }
 
 .button:hover {
-  background: rgba(35, 99, 183, 0.8); /* Darker shade on hover */
+  background: linear-gradient(to right, #e0e0e0, #222222); /* Slight variant on hover */
 }
 
-/* Responsive Adjustments (Optional) */
+/* Responsive Adjustments */
 @media (max-width: 600px) {
   .button {
-    width: 80%; /* Ensures buttons look good on smaller screens */
+    width: 120px; /* Slightly narrower on smaller screens */
   }
 }
