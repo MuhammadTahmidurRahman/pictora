@@ -12,7 +12,6 @@ import { getDatabase, ref as dbRef, get } from "https://www.gstatic.com/firebase
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
   authDomain: "pictora-7f0ad.firebaseapp.com",
   projectId: "pictora-7f0ad",
   storageBucket: "pictora-7f0ad.appspot.com",
