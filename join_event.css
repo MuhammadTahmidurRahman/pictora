@@ -8,7 +8,7 @@
 /* Body with bluish gradient background (same style as arrangedphoto.css) */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(to right, #b3d1f0, #80b2e6);
+  background: linear-gradient(to right, #b3d1f0, #4a5d70);
   margin: 0;
   display: flex;
   justify-content: center;
@@ -25,7 +25,7 @@ body {
   width: 90%;
   max-height: 600px;
   max-width: 600px; /* Increased width for a nicer look */
-  border-radius: 12px;
+  border-radius: 16px;
   text-align: center;
   margin: auto;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
