@@ -54,9 +54,14 @@ button:hover {
   background: rgba(48,127,226, 0.8);
   color: #fff;
   border: 1px solid #000;
-  border-radius: 5px;
-  padding: 8px 15px;
-  font-size: 14px;
+  border-radius: 8px; /* Updated to match .folder-icon */
+  padding: 5px 10px; /* Updated to match .folder-icon */
+  width: 100px; /* Added to match .folder-icon */
+  height: 50px; /* Added to match .folder-icon */
+  font-size: 18px; /* Increased font size for better visibility */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #backButton:hover {
@@ -121,7 +126,7 @@ button:hover {
   height: 50px; /* Decreased height for smaller size */
   padding: 5px 10px; /* Adjusted padding for better appearance */
   border: 1px solid #000;
-  border-radius: 8px;
+  border-radius: 8px; /* Updated to match .folder-icon */
   background: rgba(48,127,226, 0.8);
   color: #fff;
   box-sizing: border-box;
@@ -223,7 +228,7 @@ button:hover {
   padding: 5px 10px;
   margin: 10px auto 0 auto; /* center it below the main row */
   border: 1px solid #000;
-  border-radius: 8px;
+  border-radius: 8px; /* Updated to match .folder-icon */
   background: rgba(48,127,226, 0.8);
   color: #fff;
   box-sizing: border-box;
@@ -231,6 +236,8 @@ button:hover {
   cursor: pointer;
   font-size: 14px;
   transition: background 0.3s;
+  width: 100px; /* Added to match .folder-icon */
+  height: 50px; /* Added to match .folder-icon */
 }
 
 #uploadPhotoButton:hover {
@@ -345,23 +352,28 @@ h3 {
   background: rgba(255,76,76,0.9);
   color: #fff;
   border: 1px solid #000;
-  max-width: 180px;
-  border-radius: 5px;
-  font-size: 18px;
-  display: block;
+  max-width: 100px; /* Updated to match .folder-icon */
+  width: 100px; /* Added to match .folder-icon */
+  height: 50px; /* Added to match .folder-icon */
+  border-radius: 8px; /* Updated to match .folder-icon */
+  font-size: 18px; /* Increased font size for better visibility */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 3px;
   line-height: 1;
   cursor: pointer;
   transition: background 0.3s;
 }
 
-.delete-guest-button:hover {
-  background: rgba(212,53,53,0.9);
+.delete-guest-button::before {
+  content: "🗑️"; /* Dustbin icon */
+  font-size: 18px;
+  margin-right: 5px;
 }
 
-/* Additional Utility Classes */
-.hidden {
-  display: none !important;
+.delete-guest-button:hover {
+  background: rgba(212,53,53,0.9);
 }
 
 /* Photo Item (for deleting) */
@@ -387,20 +399,30 @@ h3 {
   background: rgba(255,76,76,0.9);
   color: #fff;
   border: 1px solid #000;
-  max-width: 180px;
-  border-radius: 5px;
-  font-size: 18px;
-  display: block;
+  max-width: 100px; /* Updated to match .folder-icon */
+  width: 100px; /* Added to match .folder-icon */
+  height: 50px; /* Added to match .folder-icon */
+  border-radius: 8px; /* Updated to match .folder-icon */
+  font-size: 18px; /* Increased font size for better visibility */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 3px;
   line-height: 1;
   cursor: pointer;
   transition: background 0.3s;
 }
 
+.delete-btn::before {
+  content: "🗑️"; /* Dustbin icon */
+  font-size: 18px;
+  margin-right: 5px;
+}
+
 .delete-btn:hover {
   background: rgba(212,53,53,0.9);
-  content: "🗑️";
 }
+
 /* Folder Icon Button */
 .folder-icon {
   width: 100px;
