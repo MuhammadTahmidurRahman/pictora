@@ -190,17 +190,22 @@ async function fetchAndDisplayPhotos(folderPath, containerId) {
     document.body.appendChild(newContainer);
   }
   const container = document.getElementById(containerId);
-  container.innerHTML = ""; // Clear container before loading
+
+  // Clear container before loading
+  container.innerHTML = "";
 
   try {
     const folderRef = storageRef(storage, folderPath);
     const listResult = await listAll(folderRef);
 
     if (listResult.items.length === 0) {
-      container.innerHTML = ""; // Ensure container is empty
-      container.textContent = "No Photos Available."; // Show message only if truly no items
+      container.innerHTML = ""; 
+      container.textContent = "No Photos Available.";
       return;
     }
+
+    // If we have photos, ensure no leftover "No Photos Available." text remains
+    container.textContent = "";
 
     for (const itemRef of listResult.items) {
       const photoUrl = await getDownloadURL(itemRef);
@@ -210,13 +215,13 @@ async function fetchAndDisplayPhotos(folderPath, containerId) {
       img.classList.add("photo-thumbnail");
       container.appendChild(img);
     }
+
   } catch (error) {
     console.error("Error fetching photos:", error);
     const c = document.getElementById(containerId);
     if (c) c.textContent = "Failed to load photos.";
   }
 }
-
 
 function toggleDialog(show) {
   let dialog = document.getElementById("photoDialog");
@@ -235,7 +240,8 @@ function toggleDialog(show) {
 
 async function viewHostPhoto(hostData) {
   const hostMessage = document.getElementById("hostMessage");
-  hostMessage.textContent = ""; // Clear any previous messages before loading
+  // Clear any previous messages
+  hostMessage.textContent = "";
 
   const folderPath = hostData.photoFolderPath;
 
@@ -249,6 +255,9 @@ async function viewHostPhoto(hostData) {
         return;
       }
 
+      // If photos are found, clear any leftover text
+      hostMessage.textContent = "";
+      
       const photoUrl = await getDownloadURL(listResult.items[0]);
       const img = document.createElement("img");
       img.src = photoUrl;
@@ -351,6 +360,9 @@ async function loadPhotos(eventCode) {
       photoContainer.textContent = "No photos available.";
       return;
     }
+
+    // If photos are found, clear any leftover text
+    photoContainer.textContent = "";
 
     for (const itemRef of listResult.items) {
       const photoUrl = await getDownloadURL(itemRef);

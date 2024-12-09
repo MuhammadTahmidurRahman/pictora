@@ -2,8 +2,7 @@
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   /* More bluish background */
-  background: url('hpbg1.png') no-repeat center center fixed;
-  background-size: cover;
+  background: linear-gradient(to right, rgb(123, 176, 229), #80b2e6);
   margin: 0;
   display: flex;
   justify-content: center;
