@@ -18,7 +18,7 @@ body, html {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-between; /* Ensures content is spaced vertically */
   align-items: center;
   background-color: #000;
 }
@@ -64,28 +64,41 @@ body, html {
   box-shadow: 1.5px 1.5px 2px black;
 }
 
+/* Button Section */
 .button-section {
   position: relative;
   z-index: 2;
-  margin-bottom: 50px;
+  margin-bottom: 50px; /* Positions buttons towards the bottom */
   display: flex;
   flex-direction: column;
   gap: 20px;
   width: 80%;
+  align-items: center; /* Centers buttons horizontally */
 }
 
+/* Updated Button Styles */
 .button {
-  width: 100%;
-  padding: 15px;
+  width: 60%; /* Adjusted width for better proportion */
+  padding: 14px 0; /* Increased vertical padding */
+  border: 1px solid #000; /* Adds a border similar to the desired style */
+  border-radius: 8px; /* Rounded corners for a modern look */
   font-size: 16px;
-  color: white;
-  background-color: black;
-  border: none;
-  border-radius: 20px;
+  font-weight: 600; /* Bold text for better readability */
+  color: #fff; /* Ensures text is visible against the gradient */
+  background: linear-gradient(to right, #ffffff, #307fe2); /* Bluish gradient background */
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background 0.3s ease; /* Smooth transition for hover effect */
+  margin-top: 20px; /* Adds spacing above the buttons */
+  text-align: center; /* Centers the button text */
 }
 
 .button:hover {
-  background-color: #333;
+  background: rgba(35, 99, 183, 0.8); /* Darker shade on hover */
+}
+
+/* Responsive Adjustments (Optional) */
+@media (max-width: 600px) {
+  .button {
+    width: 80%; /* Ensures buttons look good on smaller screens */
+  }
 }
