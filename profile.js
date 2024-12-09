@@ -2,9 +2,27 @@
 
 // Import necessary Firebase services
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, updateProfile, signOut, deleteUser } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref as dbRef, onValue, get, update, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { getStorage, ref as storageRef, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { 
+  getAuth, 
+  onAuthStateChanged, 
+  updateProfile, 
+  signOut, 
+  deleteUser 
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { 
+  getDatabase, 
+  ref as dbRef, 
+  onValue, 
+  get, 
+  update, 
+  remove 
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { 
+  getStorage, 
+  ref as storageRef, 
+  getDownloadURL, 
+  deleteObject 
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -30,6 +48,12 @@ const emailField = document.getElementById("profileEmail");
 const editButton = document.getElementById("editButton");
 const deleteButton = document.getElementById("deleteButton");
 const logoutButton = document.getElementById("logoutButton");
+
+// Modal DOM elements
+const editModal = document.getElementById("editModal");
+const closeButton = document.querySelector(".close-button");
+const saveNameButton = document.getElementById("saveNameButton");
+const newNameField = document.getElementById("newName");
 
 // Listen for auth state changes and fetch profile data if logged in
 onAuthStateChanged(auth, (user) => {
@@ -95,37 +119,58 @@ function listenForProfileChanges(user) {
   });
 }
 
-// Edit name logic
+// Show modal on edit button click
 editButton.addEventListener("click", () => {
-  const user = auth.currentUser;
-  if (!user) {
-    console.error("User not authenticated");
-    return;
-  }
+  editModal.style.display = "block";
+  newNameField.value = nameField.value;
+});
 
-  const newName = prompt("Enter your new name:");
-  if (newName && newName.trim() !== "") {
+// Close modal when the close button is clicked
+closeButton.addEventListener("click", () => {
+  editModal.style.display = "none";
+});
+
+// Close modal when clicking outside the modal content
+window.addEventListener("click", (event) => {
+  if (event.target == editModal) {
+    editModal.style.display = "none";
+  }
+});
+
+// Save new name
+saveNameButton.addEventListener("click", () => {
+  const newName = newNameField.value.trim();
+  if (newName) {
+    const user = auth.currentUser;
+    if (!user) {
+      console.error("User not authenticated");
+      return;
+    }
+
     updateProfile(user, { displayName: newName })
       .then(() => {
         const userRef = dbRef(database, `users/${user.uid}`);
-        update(userRef, { name: newName })
-          .then(() => {
-            updateNameInRooms(user.uid, newName);
-          })
-          .catch((error) => {
-            console.error("Error updating database name:", error);
-          });
+        return update(userRef, { name: newName });
+      })
+      .then(() => {
+        return updateNameInRooms(user.uid, newName);
+      })
+      .then(() => {
+        editModal.style.display = "none";
       })
       .catch((error) => {
-        console.error("Error updating profile:", error);
+        console.error("Error updating name:", error);
+        alert(`Error updating name: ${error.message}`);
       });
+  } else {
+    alert("Name cannot be empty.");
   }
 });
 
 // Update name in all rooms where the user is a host or participant
 function updateNameInRooms(uid, newName) {
   const roomsRef = dbRef(database, `rooms`);
-  get(roomsRef)
+  return get(roomsRef)
     .then((snapshot) => {
       if (snapshot.exists()) {
         const roomsData = snapshot.val();
