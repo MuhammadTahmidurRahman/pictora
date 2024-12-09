@@ -61,32 +61,27 @@ h3 {
 button {
   cursor: pointer;
   font-size: 14px;
-  border: none;
+  border: 1px solid #000; /* Added black outline to every button */
   border-radius: 5px;
-}
-
-.button {
   background: #307fe2;
   color: #fff;
   padding: 8px 15px;
   margin: 5px 0;
   display: inline-block;
   text-align: center;
-  max-width: 150px;
+  max-width: 150px; /* Ensuring a consistent max-width for all buttons */
 }
 
-.button:hover {
+button:hover {
   background: #2363b7;
 }
 
 .action-button {
   background: #ffc107;
   color: #333;
-  padding: 8px 12px;
+  padding: 8px 15px;
   margin: 5px;
-  display: inline-block;
-  text-align: center;
-  max-width: 160px;
+  max-width: 150px; /* Same max-width as other buttons for uniform size */
 }
 
 .action-button:hover {
@@ -112,6 +107,7 @@ button {
   margin: 15px 0;
 }
 
+/* No default text; container is empty by default, text only appears if no photos found via JS. */
 .photo-thumbnail {
   width: 80px;
   height: 80px;
@@ -211,6 +207,7 @@ button {
   font-size: 12px;
   margin-top: 5px;
   max-width: 100px;
+  border: 1px solid #000; /* Black outline for consistency */
 }
 
 .delete-btn:hover {
