@@ -75,7 +75,7 @@ function sendGeneralEmailToParticipants(normalParticipantEmails) {
   }
 
   const subject = `Your Photos from ${globalRoomName} (${globalEventCode})`;
-  const body = `Hello everyone,\n\nHere are your photos from the ${globalRoomName} (${globalEventCode}).\n\nBest regards,\nYour Event Team`;
+  const body = `Hello everyone,\n\nYour Photos has been sorted,Hurrah!!! ${globalRoomName} (${globalEventCode}).\n\nBest regards,\nYour Event Team,\nDeveloped By-,\nTahmid,Disha,Anika from NSU`;
   const mailtoLink = `mailto:${encodeURIComponent(normalParticipantEmails.join(','))}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   window.location.href = mailtoLink;
 }
