@@ -38,17 +38,15 @@ button {
   background: rgba(48,127,226, 0.8);
   color: #fff;
   box-sizing: border-box;
-  transition: background 0.3s, color 0.3s;
-  -webkit-text-stroke: 0.5px black; /* Adds black outline to text */
-  text-shadow:
-    1px 1px 0 #000,
-    -1px 1px 0 #000,
-    1px -1px 0 #000,
-    -1px -1px 0 #000; /* Enhances text visibility with shadow */
+  transition: background 0.3s, box-shadow 0.3s;
+  /* Removed text stroke and outline shadows */
+  /* Added deep shadow for better aesthetics */
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 button:hover {
   background: rgba(35,99,183,0.8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* Move back button to the right side */
@@ -69,21 +67,19 @@ button:hover {
   align-items: center;
   justify-content: center;
   position: relative;
+  /* Removed text stroke and outline shadows */
+  /* Added deep shadow */
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 #backButton::before {
   content: "← Back"; /* Added arrow and text */
   display: block;
-  -webkit-text-stroke: 0.5px black; /* Adds black outline to text */
-  text-shadow:
-    1px 1px 0 #000,
-    -1px 1px 0 #000,
-    1px -1px 0 #000,
-    -1px -1px 0 #000; /* Enhances text visibility with shadow */
 }
 
 #backButton:hover {
   background: rgba(35,99,183,0.8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* Scrollable List Styling */
@@ -156,13 +152,10 @@ button:hover {
   justify-content: center;
   line-height: 1.2;
   font-size: 14px; /* Adjusted font size for readability */
-  transition: background 0.3s, color 0.3s;
-  -webkit-text-stroke: 0.5px black; /* Adds black outline to text */
-  text-shadow:
-    1px 1px 0 #000,
-    -1px 1px 0 #000,
-    1px -1px 0 #000,
-    -1px -1px 0 #000; /* Enhances text visibility with shadow */
+  transition: background 0.3s, box-shadow 0.3s;
+  /* Removed text stroke and outline shadows */
+  /* Added deep shadow */
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 #hostActions .folder-icon:hover,
@@ -171,6 +164,7 @@ button:hover {
 #hostActions .view-sorted-button:hover,
 #uploadPhotoButton:hover {
   background: rgba(35,99,183,0.8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* Remove Text Below Icons in Buttons and Show on Hover */
@@ -202,12 +196,9 @@ button:hover {
   display: block;
   margin-bottom: 3px;
   line-height: 1;
-  -webkit-text-stroke: 0.5px black; /* Adds black outline to icon */
-  text-shadow:
-    1px 1px 0 #000,
-    -1px 1px 0 #000,
-    1px -1px 0 #000,
-    -1px -1px 0 #000; /* Enhances icon visibility with shadow */
+  /* Removed text stroke and outline shadows */
+  /* Added deep shadow */
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .arrange-photo-button::after {
@@ -225,12 +216,9 @@ button:hover {
   display: block;
   margin-bottom: 3px;
   line-height: 1;
-  -webkit-text-stroke: 0.5px black; /* Adds black outline to icon */
-  text-shadow:
-    1px 1px 0 #000,
-    -1px 1px 0 #000,
-    1px -1px 0 #000,
-    -1px -1px 0 #000; /* Enhances icon visibility with shadow */
+  /* Removed text stroke and outline shadows */
+  /* Added deep shadow */
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .add-member-button::after {
@@ -248,12 +236,9 @@ button:hover {
   display: block;
   margin-bottom: 3px;
   line-height: 1;
-  -webkit-text-stroke: 0.5px black; /* Adds black outline to icon */
-  text-shadow:
-    1px 1px 0 #000,
-    -1px 1px 0 #000,
-    1px -1px 0 #000,
-    -1px -1px 0 #000; /* Enhances icon visibility with shadow */
+  /* Removed text stroke and outline shadows */
+  /* Added deep shadow */
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .view-sorted-button::after {
@@ -277,19 +262,17 @@ button:hover {
   text-align: center;
   cursor: pointer;
   font-size: 14px;
-  transition: background 0.3s, color 0.3s;
+  transition: background 0.3s, box-shadow 0.3s;
   width: 100px; /* Added to match .folder-icon */
   height: 50px; /* Added to match .folder-icon */
-  -webkit-text-stroke: 0.5px black; /* Adds black outline to text */
-  text-shadow:
-    1px 1px 0 #000,
-    -1px 1px 0 #000,
-    1px -1px 0 #000,
-    -1px -1px 0 #000; /* Enhances text visibility with shadow */
+  /* Removed text stroke and outline shadows */
+  /* Added deep shadow */
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 #uploadPhotoButton:hover {
   background: rgba(35,99,183,0.8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* Upload Photos Button Icon/Text */
@@ -299,12 +282,9 @@ button:hover {
   display: block;
   margin-bottom: 3px;
   line-height: 1;
-  -webkit-text-stroke: 0.5px black; /* Adds black outline to icon */
-  text-shadow:
-    1px 1px 0 #000,
-    -1px 1px 0 #000,
-    1px -1px 0 #000,
-    -1px -1px 0 #000; /* Enhances icon visibility with shadow */
+  /* Removed text stroke and outline shadows */
+  /* Added deep shadow */
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 #uploadPhotoButton::after {
@@ -417,29 +397,21 @@ h3 {
   margin-bottom: 3px;
   line-height: 1;
   cursor: pointer;
-  transition: background 0.3s, color 0.3s;
-  -webkit-text-stroke: 0.5px black; /* Adds black outline to text */
-  text-shadow:
-    1px 1px 0 #000,
-    -1px 1px 0 #000,
-    1px -1px 0 #000,
-    -1px -1px 0 #000; /* Enhances text visibility with shadow */
+  transition: background 0.3s, box-shadow 0.3s;
+  /* Removed text stroke and outline shadows */
+  /* Added deep shadow */
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .delete-guest-button::before {
   content: "🗑️"; /* Dustbin icon */
   font-size: 18px;
   margin-right: 5px;
-  -webkit-text-stroke: 0.5px black; /* Adds black outline to icon */
-  text-shadow:
-    1px 1px 0 #000,
-    -1px 1px 0 #000,
-    1px -1px 0 #000,
-    -1px -1px 0 #000; /* Enhances icon visibility with shadow */
 }
 
 .delete-guest-button:hover {
   background: rgba(212,53,53,0.9);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* Photo Item (for deleting) */
@@ -476,29 +448,21 @@ h3 {
   margin-bottom: 3px;
   line-height: 1;
   cursor: pointer;
-  transition: background 0.3s, color 0.3s;
-  -webkit-text-stroke: 0.5px black; /* Adds black outline to text */
-  text-shadow:
-    1px 1px 0 #000,
-    -1px 1px 0 #000,
-    1px -1px 0 #000,
-    -1px -1px 0 #000; /* Enhances text visibility with shadow */
+  transition: background 0.3s, box-shadow 0.3s;
+  /* Removed text stroke and outline shadows */
+  /* Added deep shadow */
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .delete-btn::before {
   content: "🗑️"; /* Dustbin icon */
   font-size: 18px;
   margin-right: 5px;
-  -webkit-text-stroke: 0.5px black; /* Adds black outline to icon */
-  text-shadow:
-    1px 1px 0 #000,
-    -1px 1px 0 #000,
-    1px -1px 0 #000,
-    -1px -1px 0 #000; /* Enhances icon visibility with shadow */
 }
 
 .delete-btn:hover {
   background: rgba(212,53,53,0.9);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* Folder Icon Button */
@@ -515,13 +479,10 @@ h3 {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.3s, color 0.3s;
-  -webkit-text-stroke: 0.5px black; /* Adds black outline to text */
-  text-shadow:
-    1px 1px 0 #000,
-    -1px 1px 0 #000,
-    1px -1px 0 #000,
-    -1px -1px 0 #000; /* Enhances text visibility with shadow */
+  transition: background 0.3s, box-shadow 0.3s;
+  /* Removed text stroke and outline shadows */
+  /* Added deep shadow */
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .folder-icon::before {
@@ -530,12 +491,9 @@ h3 {
   display: block;
   margin-bottom: 3px;
   line-height: 1;
-  -webkit-text-stroke: 0.5px black; /* Adds black outline to icon */
-  text-shadow:
-    1px 1px 0 #000,
-    -1px 1px 0 #000,
-    1px -1px 0 #000,
-    -1px -1px 0 #000; /* Enhances icon visibility with shadow */
+  /* Removed text stroke and outline shadows */
+  /* Added deep shadow */
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .folder-icon::after {
@@ -547,4 +505,6 @@ h3 {
 .folder-icon:hover::after {
   opacity: 1;
   content: "View Photos"; /* Text on hover */
+  /* Added shadow to the hover text */
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
