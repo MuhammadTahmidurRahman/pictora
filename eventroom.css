@@ -35,20 +35,17 @@ body {
   border-radius: 5px;
   padding: 8px 15px;
   cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease;
-  /* Visually hide the inner text */
-  color: transparent;
-  position: relative;
+  transition: background 0.3s ease;
+  /* Hide the text inside the button */
+  font-size: 0;
+  overflow: hidden;
 }
 
 #backButton::before {
   content: "🔙 Back";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  color: #000; /* Visible text color */
   font-size: 14px;
+  color: #000;
+  display: block;
 }
 
 /* Scrollable List Styling */
@@ -101,30 +98,32 @@ button {
   text-align: center;
   white-space: nowrap;
   background: linear-gradient(to right, #ffffff, #307fe2); /* Matched button color */
-  color: transparent; /* Hide inner text */
+  color: #000;
   box-sizing: border-box;
   transition: background 0.3s ease, color 0.3s ease;
-  position: relative;
+  /* Hide the base text */
+  font-size: 0;
+  overflow: hidden;
 }
 
 button::before,
 button::after {
   display: block;
   text-align: center;
-  pointer-events: none; /* Ensure pseudo-elements don't interfere with clicks */
 }
 
 button::before {
-  /* Icons and labels will be set individually */
+  /* Icon will be set individually per button */
 }
 
 button::after {
-  /* Labels will be set individually */
+  /* Label will be set individually per button */
 }
 
 /* Hover effect */
 button:hover {
   background: linear-gradient(to right, #e0eaff, #2363b7); /* Hover effect */
+  color: #fff;
 }
 
 button:hover::after {
@@ -134,33 +133,35 @@ button:hover::after {
 /* Action Buttons for Host and Email */
 .action-button {
   background: linear-gradient(to right, #ffffff, #307fe2);
-  color: transparent; /* Hide inner text */
+  color: #000;
   border: 1px solid #000;
   width: 180px; /* Fixed width for uniform size */
   text-align: center;
   border-radius: 5px;
   padding: 10px 0;
   transition: background 0.3s ease, color 0.3s ease;
-  position: relative;
+  /* Hide the base text */
+  font-size: 0;
+  overflow: hidden;
 }
 
 .action-button::before,
 .action-button::after {
   display: block;
   text-align: center;
-  pointer-events: none;
 }
 
 .action-button::before {
-  /* Icons will be set individually */
+  /* Icon will be set individually per button */
 }
 
 .action-button::after {
-  /* Labels will be set individually */
+  /* Label will be set individually per button */
 }
 
 .action-button:hover {
   background: linear-gradient(to right, #e0eaff, #2363b7);
+  color: #fff;
 }
 
 .action-button:hover::after {
@@ -264,62 +265,41 @@ button:hover::after {
 .dialog-buttons button {
   width: 45%;
   background: linear-gradient(to right, #ffffff, #307fe2);
-  color: transparent; /* Hide inner text */
+  color: #000;
   border: 1px solid #000;
   border-radius: 5px;
   padding: 8px 0;
   cursor: pointer;
   transition: background 0.3s ease, color 0.3s ease;
-  position: relative;
+  /* Hide the base text */
+  font-size: 0;
+  overflow: hidden;
 }
 
 .dialog-buttons button::before,
 .dialog-buttons button::after {
   display: block;
   text-align: center;
-  pointer-events: none;
 }
 
 .dialog-buttons button::before {
-  /* Icons will be set individually */
+  /* Icon will be set individually per button */
 }
 
 .dialog-buttons button::after {
-  /* Labels will be set individually */
+  /* Label will be set individually per button */
 }
 
 .dialog-buttons button:hover {
   background: linear-gradient(to right, #e0eaff, #2363b7);
+  color: #fff;
 }
 
 .dialog-buttons button:hover::after {
   color: #fff;
 }
 
-/* Additional Utility Classes */
-.hidden {
-  display: none !important;
-}
-
-/* Photo Item (for deleting) */
-.photo-item {
-  position: relative;
-  background: rgba(247, 250, 255, 0.9);
-  padding: 5px;
-  border-radius: 8px;
-  border: 1px solid #cde0f5;
-  text-align: center;
-}
-
-.photo-item img {
-  width: 70px;
-  height: 70px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 2px solid #307fe2;
-}
-
-.delete-btn {
+.delete-guest-button {
   background: rgba(255, 76, 76, 0.9);
   color: #fff;
   padding: 5px;
@@ -332,7 +312,7 @@ button:hover::after {
   transition: background 0.3s ease;
 }
 
-.delete-btn:hover {
+.delete-guest-button:hover {
   background: rgba(212, 53, 53, 0.9);
 }
 
@@ -351,7 +331,7 @@ button:hover::after {
   border: 1px solid #000;
   border-radius: 8px;
   background: linear-gradient(to right, #ffffff, #307fe2);
-  color: transparent; /* Hide inner text */
+  color: #000;
   box-sizing: border-box;
   text-align: center;
   cursor: pointer;
@@ -360,22 +340,23 @@ button:hover::after {
   align-items: center;
   justify-content: center;
   transition: background 0.3s ease, color 0.3s ease;
-  position: relative;
+  /* Hide the base text */
+  font-size: 0;
+  overflow: hidden;
 }
 
 #hostActions .action-button::before,
 #hostActions .action-button::after {
   display: block;
   text-align: center;
-  pointer-events: none;
 }
 
 #hostActions .action-button::before {
-  /* Icons will be set individually per button */
+  /* Icon will be set individually per button */
 }
 
 #hostActions .action-button::after {
-  /* Labels will be set individually per button */
+  /* Label will be set individually per button */
 }
 
 /* Specific Action Button Icons and Labels */
@@ -427,6 +408,28 @@ button:hover::after {
   font-size: 12px;
 }
 
+#uploadPhotoButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 120px; /* Adjusted width for rectangle */
+  height: 50px; /* Adjusted height for rectangle */
+  padding: 5px 10px;
+  margin: 10px auto 0 auto; /* Center it below the main row */
+  border: 1px solid #000;
+  border-radius: 8px;
+  background: linear-gradient(to right, #ffffff, #307fe2);
+  color: #000;
+  box-sizing: border-box;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease;
+  /* Hide the base text */
+  font-size: 0;
+  overflow: hidden;
+}
+
 #uploadPhotoButton::before {
   content: "⬆📷";
   font-size: 18px;
@@ -439,27 +442,37 @@ button:hover::after {
   font-size: 12px;
 }
 
-/* Dialog Buttons Labels */
-.dialog-buttons #addGuestButton::before {
-  content: "➕";
-  font-size: 16px;
-  display: block;
-  margin-bottom: 3px;
+/* Photo Item (for deleting) */
+.photo-item {
+  position: relative;
+  background: rgba(247, 250, 255, 0.9);
+  padding: 5px;
+  border-radius: 8px;
+  border: 1px solid #cde0f5;
+  text-align: center;
 }
 
-.dialog-buttons #addGuestButton::after {
-  content: "Add Guest";
+.photo-item img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #307fe2;
+}
+
+.delete-btn {
+  background: rgba(255, 76, 76, 0.9);
+  color: #fff;
+  padding: 5px;
   font-size: 12px;
+  margin-top: 5px;
+  max-width: 100px;
+  border: 1px solid #000; /* Black outline */
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.3s ease;
 }
 
-.dialog-buttons #closeDialogButton::before {
-  content: "❌";
-  font-size: 16px;
-  display: block;
-  margin-bottom: 3px;
-}
-
-.dialog-buttons #closeDialogButton::after {
-  content: "Cancel";
-  font-size: 12px;
+.delete-btn:hover {
+  background: rgba(212, 53, 53, 0.9);
 }
