@@ -11,7 +11,7 @@ body {
 
 #eventRoomContainer {
   width: 90%;
-  max-width: 800px; /* Increased max-width to accommodate all 5 buttons in one row */
+  max-width: 800px; /* Increased width to accommodate all 5 buttons in one row */
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -58,25 +58,22 @@ body {
   border: 2px solid #307fe2;
 }
 
-/* All 5 buttons in a single row (including the folder icon) */
+/* We'll use #hostActions to hold all 5 buttons in one horizontal row */
 #hostActions {
-  margin-top: 10px;
   display: flex;
-  justify-content: center;
-}
-
-#hostActionsRow {
-  display: flex;
-  flex-direction: row;
   justify-content: center;
   gap: 20px;
   margin-top: 10px;
 }
 
-/* Common styles for the 5 buttons: folder icon, arrange photo, add member, view sorted photos, upload photos */
-#hostActionsRow button, .folder-icon {
+/* Common button styles for all 5 buttons */
+#hostActions .folder-icon,
+#hostActions .arrange-photo-button,
+#hostActions .add-member-button,
+#hostActions .view-sorted-button,
+#hostActions #uploadPhotoButton {
   display: flex;
-  flex-direction: column; /* icon above text */
+  flex-direction: column; /* icon above, text below */
   align-items: center;
   justify-content: center;
   width: 70px;
@@ -90,53 +87,79 @@ body {
   box-sizing: border-box;
   text-align: center;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 0; /* font-size:0 to hide original text if any */
 }
 
-#hostActionsRow button:hover, .folder-icon:hover {
+#hostActions .folder-icon:hover,
+#hostActions .arrange-photo-button:hover,
+#hostActions .add-member-button:hover,
+#hostActions .view-sorted-button:hover,
+#hostActions #uploadPhotoButton:hover {
   background: rgba(35,99,183,0.8);
 }
 
-/* Fancy icons for main buttons */
-.arrange-photo-button::before {
-  content: "📷↺";
-  font-size: 18px;
-  margin-bottom: 3px;
-}
+/* Fancy icons and text using pseudo-elements */
 
-.add-member-button::before {
-  content: "👤➕";
-  font-size: 18px;
-  margin-bottom: 3px;
-}
-
-.view-sorted-button::before {
-  content: "👁🗂";
-  font-size: 18px;
-  margin-bottom: 3px;
-}
-
-#uploadPhotoButton::before {
-  content: "⬆📷";
-  font-size: 18px;
-  margin-bottom: 3px;
-}
-
-/* Folder icon button: Show icon above, text below */
-.folder-icon {
-  position: relative;
-  font-size: 12px; 
-}
-
+/* Folder icon button:
+   Hide original text (since code sets textContent="📁")
+   We'll show icon and text via pseudo-elements.
+*/
 .folder-icon::before {
   content: "📂";
   font-size: 18px;
   display: block;
   margin-bottom: 3px;
 }
-
 .folder-icon::after {
   content: "Folder";
+  font-size: 12px;
+  color: #fff;
+}
+
+/* Arrange Photo Button */
+.arrange-photo-button::before {
+  content: "📷↺";
+  font-size: 18px;
+  margin-bottom: 3px;
+}
+.arrange-photo-button::after {
+  content: "Arrange";
+  font-size: 12px;
+  color: #fff;
+}
+
+/* Add Member Button */
+.add-member-button::before {
+  content: "👤➕";
+  font-size: 18px;
+  margin-bottom: 3px;
+}
+.add-member-button::after {
+  content: "Member";
+  font-size: 12px;
+  color: #fff;
+}
+
+/* View Sorted Photos Button */
+.view-sorted-button::before {
+  content: "👁🗂";
+  font-size: 18px;
+  margin-bottom: 3px;
+}
+.view-sorted-button::after {
+  content: "Sorted";
+  font-size: 12px;
+  color: #fff;
+}
+
+/* Upload Photos Button */
+#uploadPhotoButton::before {
+  content: "⬆📷";
+  font-size: 18px;
+  margin-bottom: 3px;
+}
+#uploadPhotoButton::after {
+  content: "Upload";
   font-size: 12px;
   color: #fff;
 }
@@ -163,22 +186,22 @@ body {
   margin-right: 10px;
 }
 
-/* Dialog Styles - slide from right over whole page */
+/* Dialog Styles - slide from right */
 .dialog {
   position: fixed;
   top: 0;
   right: 0;
-  width: 100%;
+  width: 100%; /* full page width */
   height: 100%;
   background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   transition: transform 0.3s ease-in-out;
-  transform: translateX(100%); /* off-screen to right initially */
+  transform: translateX(100%); /* Initially off-screen to the right */
 }
 
 .dialog:not(.hidden) {
-  transform: translateX(0); /* slide in */
+  transform: translateX(0); /* Slide in */
 }
 
 .dialog-content {
