@@ -97,6 +97,31 @@ async function loadEventRoom(eventCode) {
           hostActions.appendChild(addMemberButton);
         }
 
+        // View Sorted Photos button
+        const sortedPhotoButton = document.createElement("button");
+        sortedPhotoButton.textContent = "View Sorted Photos";
+        sortedPhotoButton.classList.add("action-button");
+        sortedPhotoButton.addEventListener("click", () => {
+          if (user.uid === hostId) {
+            // Host uses hostData.hostUploadedPhotoFolderPath + "/photos"
+            if (hostData.hostUploadedPhotoFolderPath) {
+              window.location.href = `arrangedphoto.html?eventCode=${encodeURIComponent(eventCode)}&folderName=${encodeURIComponent(hostData.hostUploadedPhotoFolderPath + "/photos")}`;
+            } else {
+              alert("No sorted photos available for host.");
+            }
+          } else {
+            // Participant uses participantData.folderPath + "/photos"
+            const participants = roomData.participants || {};
+            const participantData = participants[user.uid];
+            if (participantData && participantData.folderPath) {
+              window.location.href = `photogallery.html?eventCode=${encodeURIComponent(eventCode)}&folderName=${encodeURIComponent(participantData.folderPath + "/photos")}&userId=${encodeURIComponent(user.uid)}`;
+            } else {
+              alert("No sorted photos available for you.");
+            }
+          }
+        });
+        hostActions.appendChild(sortedPhotoButton);
+
       }
 
       // Load guests list
@@ -167,7 +192,7 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
   input.click();
 });
 
-// Load Guests and Display Their Profile Pictures and Folder Icons
+// Load Guests
 function loadGuests(guests, currentUserId, hostId, eventCode) {
   const guestListElem = document.getElementById("guestList");
   guestListElem.innerHTML = "";
@@ -245,12 +270,12 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
   const storagePath = `uploads/${participantId}`;
 
   try {
-    // Upload the guest photo to storage
+    // Upload guest photo
     const fileRef = storageRef(storage, storagePath);
     await uploadBytes(fileRef, guestPhoto);
-    const photoUrl = await getDownloadURL(fileRef);  // Get the download URL for the uploaded photo
+    const photoUrl = await getDownloadURL(fileRef);
 
-    // Now, update the manual guest with the photo URL and folder path
+    // Update manual guest with photo URL and folder path
     const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${participantId}`);
     await update(manualGuestRef, {
       name: guestName,
@@ -259,12 +284,10 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
       folderPath,
     });
 
-    // Ensure the profile picture is fetched from photoUrl and uploaded to the manual participant's folder
-    const response = await fetch(photoUrl); // Fetch the uploaded profile photo using its URL
-    const blob = await response.blob();  // Convert the fetched image to a Blob
-    const participantImageRef = storageRef(storage, `${folderPath}/${guestName.replace(/\s+/g, "_")}_profilePhoto.jpg`);  // Save with dynamic file name
-
-    // Upload the profile picture to the folder path
+    // Upload profile picture to folder path
+    const response = await fetch(photoUrl);
+    const blob = await response.blob();
+    const participantImageRef = storageRef(storage, `${folderPath}/${guestName.replace(/\s+/g, "_")}_profilePhoto.jpg`);
     await uploadBytes(participantImageRef, blob);
 
     alert("Guest added successfully and profile picture uploaded.");
@@ -276,8 +299,6 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
   }
 });
 
-
-// Delete Manual Guest
 async function deleteManualGuest(eventCode, guestId, folderPath) {
   try {
     const guestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${guestId}`);
@@ -297,12 +318,10 @@ async function deleteManualGuest(eventCode, guestId, folderPath) {
   }
 }
 
-// Toggle Add Guest Dialog
 function toggleDialog(show) {
   const dialog = document.getElementById("addGuestDialog");
   dialog.classList.toggle("hidden", !show);
 
-  // Clear previous inputs
   if (show) {
     document.getElementById("guestName").value = "";
     document.getElementById("guestEmail").value = "";
@@ -310,7 +329,6 @@ function toggleDialog(show) {
   }
 }
 
-// Check Authentication and Load Event Room
 onAuthStateChanged(auth, (user) => {
   if (user) {
     const eventCode = new URLSearchParams(window.location.search).get("eventCode");

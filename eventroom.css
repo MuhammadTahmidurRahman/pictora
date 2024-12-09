@@ -1,155 +1,205 @@
-/* General styling */
+/* General Styling */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f4f9;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-  
-  #eventRoomContainer {
-    width: 90%;
-    max-width: 600px;
-    background: #fff;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    overflow-y: auto; /* Enable scrolling */
-  }
-  
-  /* Scrollable list styles */
-  .scrollable-list {
-    max-height: 150px;
-    overflow-y: auto;
-    margin: 0;
-    padding: 0;
-    list-style-type: none;
-  }
-  
-  /* Button styles */
-  button {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    background: #333;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background: #555;
-  }
-  
-  /* Host photo styles */
-  #hostPhoto {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin: 10px auto;
-    display: block;
-    object-fit: cover; /* Ensure proper scaling */
-  }
-  
-  /* Folder icon styles */
-  .folder-icon {
-    margin-left: 10px;
-    cursor: pointer;
-    background: none;
-    border: none;
-    font-size: 18px;
-  }
-  
-  .folder-icon:disabled {
-    cursor: not-allowed;
-    color: #ccc;
-  }
-  
-  
-  /* Guest list styles */
-  #guestList, #manualGuestList {
-    padding: 0;
-    margin: 10px 0;
-  }
-  
-  #guestList li, #manualGuestList li {
-    display: flex;
-    align-items: center;
-    margin: 10px 0;
-    padding: 10px;
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-  }
-  
-  /* Guest photo styles */
-  .guest-photo {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin-right: 10px;
-    object-fit: cover; /* Ensure proper scaling */
-  }
-  
-  /* Dialog styles */
-  .dialog {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .dialog.hidden {
-    display: none;
-  }
-  
-  .dialog-content {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
-  }
-  
-  .dialog-content input {
-    width: 90%;
-    margin: 10px 0;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-  }
-  
-  /* Buttons in the dialog */
-  .dialog-buttons {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-  }
-  
-  .dialog-buttons button {
-    width: 45%;
-  }
-  
-  .add-member-button {
-    background-color: #007BFF;
-    color: white;
-    font-size: 16px;
-    margin-top: 10px;
-  }
-  
-  .delete-guest-button {
-    background-color: #ff4c4c;
-    color: white;
-    font-size: 14px;
-    margin-left: 10px;
-  }
-  
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(to right, #b3d1f0, #80b2e6);
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+#eventRoomContainer {
+  width: 90%;
+  max-width: 600px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Scrollable List Styling */
+.scrollable-list {
+  max-height: 150px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.scrollable-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollable-list::-webkit-scrollbar-thumb {
+  background: #a2cbe8;
+  border-radius: 10px;
+}
+
+/* Button Styles */
+button {
+  cursor: pointer;
+  font-size: 14px;
+  border: 1px solid #000; /* black outline */
+  border-radius: 5px;
+  padding: 8px 15px;
+  margin: 5px 0;
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap;
+  background: rgba(48,127,226, 0.8); /* semi-transparent blue */
+  color: #fff;
+  box-sizing: border-box;
+  max-width: 180px; /* keep a consistent width */
+}
+
+button:hover {
+  background: rgba(35,99,183,0.8);
+}
+
+/* Action buttons for host and email (reusing same .action-button style) */
+.action-button {
+  background: linear-gradient(to right, #ffffff, #307fe2);
+  color: #000;
+  border: 1px solid #000;
+  width: 180px;
+  text-align: center;
+}
+
+.action-button:hover {
+  background: linear-gradient(to right, #e0eaff, #2363b7);
+}
+
+/* Host Photo Styling */
+#hostPhoto {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin: 10px auto;
+  display: block;
+  object-fit: cover;
+  border: 2px solid #307fe2;
+}
+
+/* Guest Lists */
+#guestList, #manualGuestList {
+  padding: 0;
+  margin: 10px 0;
+}
+
+#guestList li, #manualGuestList li {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  padding: 8px;
+  background: rgba(247,250,255,0.9);
+  border: 1px solid #cde0f5;
+  border-radius: 8px;
+  justify-content: space-between; /* buttons on right side */
+}
+
+/* Guest Photo Styles */
+.guest-photo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #307fe2;
+  margin-right: 10px;
+}
+
+/* Folder Icon Styles */
+.folder-icon {
+  background: none;
+  border: 1px solid #000;
+  border-radius: 5px;
+  color: #000;
+  padding: 5px 8px;
+  font-size: 14px;
+  cursor: pointer;
+  background: rgba(48,127,226, 0.8);
+  color: #fff;
+}
+
+.folder-icon:hover {
+  background: rgba(35,99,183,0.8);
+}
+
+.folder-icon:disabled {
+  cursor: not-allowed;
+  background: #ccc;
+}
+
+/* Dialog Styles */
+.dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dialog.hidden {
+  display: none;
+}
+
+.dialog-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.dialog-content input {
+  width: 90%;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+/* Dialog Buttons */
+.dialog-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.dialog-buttons button {
+  width: 45%;
+}
+
+/* Additional Buttons */
+.add-member-button {
+  background: linear-gradient(to right, #ffffff, #307fe2);
+  color: #000;
+  border: 1px solid #000;
+  width: 180px;
+}
+
+.add-member-button:hover {
+  background: linear-gradient(to right, #e0eaff, #2363b7);
+}
+
+.delete-guest-button {
+  background: rgba(255,76,76,0.9);
+  color: #fff;
+  border: 1px solid #000;
+  font-size: 14px;
+  max-width: 180px;
+}
+
+.delete-guest-button:hover {
+  background: rgba(212,53,53,0.9);
+}
