@@ -39,7 +39,7 @@ body {
 /* Circular Profile Icon inside the container, positioned at top-right */
 .profile-icon {
   position: absolute; /* Change this to absolute for centering relative to a container */
-  top: 50%; /* Move to the vertical center */
+  top: 20px; /* Move to the vertical center */
   left: 50%; /* Move to the horizontal center */
   transform: translate(-50%, -50%); /* Adjust position by half its width and height */
   width: 50px;
