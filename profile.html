@@ -2,22 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Profile Page</title>
   <link rel="stylesheet" href="profile.css">
 </head>
 <body>
-  <div class="profile-container">
+  <div class="container">
     <div class="profile-image-container">
       <img id="profileImage" class="profile-image" src="default-avatar.png" alt="Profile Picture">
     </div>
+    <h1>Profile</h1>
     <input type="text" id="profileName" class="profile-field" readonly>
     <input type="text" id="profileEmail" class="profile-field" readonly>
     <div class="button-container">
-      <button id="editButton" class="button">Edit</button>
+      <button id="editButton" class="button">Edit Profile</button>
+      <button id="deleteButton" class="button delete-button">Delete Account</button>
       <button id="logoutButton" class="button">Log Out</button>
     </div>
   </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js"></script>
 
   <script src="profile.js" type="module"></script>
 </body>
