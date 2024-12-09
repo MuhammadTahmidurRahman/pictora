@@ -1,9 +1,11 @@
+// photogallery.js
+
 // Import necessary Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref as storageRef, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-const firebaseConfig = {
+const firebaseConfig2 = {
   apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
   authDomain: "pictora-7f0ad.firebaseapp.com",
   projectId: "pictora-7f0ad",
@@ -13,20 +15,18 @@ const firebaseConfig = {
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const storage = getStorage();
+const app2 = initializeApp(firebaseConfig2);
+const auth2 = getAuth();
+const storage2 = getStorage();
 
 let currentFolderName = "";
 
 async function downloadAllPhotosAsZip(folderName) {
   const JSZipModule = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
   const JSZip = JSZipModule.default;
-  // Changed from FileSaver.min.js to FileSaver.js
-  await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.js');
-  const saveAs = window.saveAs;
+  const { saveAs } = await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.js');
 
-  const folderRef = storageRef(storage, folderName);
+  const folderRef = storageRef(storage2, folderName);
   const listResult = await listAll(folderRef);
 
   if (listResult.items.length === 0) {
@@ -51,7 +51,7 @@ async function downloadAllPhotosAsZip(folderName) {
 async function fetchImages(folderName) {
   currentFolderName = folderName;
   try {
-    const folderRef = storageRef(storage, folderName);
+    const folderRef = storageRef(storage2, folderName);
     const result = await listAll(folderRef);
 
     const photoGrid = document.getElementById("photoGrid");
@@ -90,7 +90,7 @@ document.getElementById("backButton").addEventListener("click", () => {
   window.history.back(); 
 });
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth2, (user) => {
   if (user) {
     const urlParams = new URLSearchParams(window.location.search);
     const folderName = urlParams.get("folderName");
