@@ -1,121 +1,68 @@
-/* Reset styling */
+/* General Page Styles */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Body and HTML setup */
-body, html {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
+body {
   font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-/* Welcome Page Container */
 #welcome-page {
   position: relative;
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between; /* Distributes space between top and bottom */
-  align-items: center;
-  background-color: #000;
+  text-align: center;
 }
 
-/* Background Image Styling */
 .background-image {
+  width: 100%;
+  height: 100vh;
+  object-fit: cover;
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0.9;
-  z-index: 1;
+  z-index: -1;
 }
 
-/* Title Section */
-.title-section {
-  position: relative;
-  z-index: 2;
-  margin-top: 10vh; /* Adjusted to position title higher */
-  text-align: center;
-}
-
-.title {
-  font-size: 40px;
-  font-weight: bold;
-  color: white;
-  text-shadow: 2px 2px 3px black;
-}
-
-.title .icon {
-  font-size: 35px;
-  vertical-align: middle;
-}
-
-.welcome-message {
-  margin: 20px auto;
-  padding: 15px 20px;
-  max-width: 80%;
-  font-size: 20px;
-  color: white;
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 10px;
-  box-shadow: 1.5px 1.5px 2px black;
-}
-
-/* Button Section */
+/* Button Section Styles */
 .button-section {
-  position: relative;
-  z-index: 2;
-  margin-bottom: 50px; /* Positions buttons towards the bottom */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
-  flex-direction: column;
-  gap: 15px;
-  align-items: center; /* Centers buttons horizontally */
-  /* Removed width: 100%; to prevent stretching */
+  gap: 20px;
 }
 
-/* Button Styles */
 .button {
-  position: absolute; /* Absolute positioning to anchor at the bottom */
-  bottom: 25%; /* Positioned in the lower 25% portion of the screen */
-  left: 50%; /* Center horizontally */
-  transform: translateX(-50%); /* Center alignment fix */
-  display: flex;
-  flex-direction: column;
-  gap: 15px; /* Space between buttons */
-  align-items: center;
-  background: linear-gradient(to right, #f0f0f0, #000000); /* Whitish to black gradient */
-  border: 1px solid #000;
-  border-radius: 8px;
+  padding: 12px 30px;
+  font-size: 16px;
+  color: #fff;
+  background: linear-gradient(to right, #f0f0f0, #282525);
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
-  transition: background 0.3s ease;
-  text-align: center;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.6); /* Enhances text legibility */
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .button:hover {
-  background: linear-gradient(to right, #e0e0e0, #222222); /* Darker gradient on hover */
+  transform: translateY(-5px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* Responsive Adjustments */
+/* Mobile Responsiveness */
 @media (max-width: 600px) {
-  .button {
-    width: 140px; /* Slightly narrower on smaller screens */
-    font-size: 14px; /* Adjust font size for readability */
-  }
-  
-  .title {
-    font-size: 32px; /* Adjust title size for smaller screens */
+  .button-section {
+    flex-direction: column;
+    gap: 10px;
   }
 
-  .welcome-message {
-    font-size: 18px; /* Adjust message font size */
-    padding: 12px 16px; /* Adjust padding */
+  .button {
+    width: 80%;
   }
 }
