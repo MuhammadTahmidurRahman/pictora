@@ -1,4 +1,6 @@
-//Import necessary Firebase modules
+// photogallery.js
+
+// Import necessary Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref as storageRef, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
@@ -20,11 +22,6 @@ const storage2 = getStorage();
 let currentFolderName = "";
 
 async function downloadAllPhotosAsZip(folderName) {
-  const JSZipModule = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
-  const JSZip = JSZipModule.default;
-  await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/FileSaver.min.js');
-  const saveAs = window.saveAs;
-
   const folderRef = storageRef(storage2, folderName);
   const listResult = await listAll(folderRef);
 
@@ -33,14 +30,19 @@ async function downloadAllPhotosAsZip(folderName) {
     return;
   }
 
-  const zip = new JSZip();
-  for (const itemRef of listResult.items) {
+  const blobPromises = listResult.items.map(async (itemRef) => {
     const photoUrl = await getDownloadURL(itemRef);
     const response = await fetch(photoUrl);
-    const blob = await response.blob();
-    const fileName = itemRef.name;
+    return response.blob();
+  });
+
+  const blobs = await Promise.all(blobPromises);
+
+  const zip = new JSZip();
+  blobs.forEach((blob, index) => {
+    const fileName = `photo_${index + 1}.jpg`;
     zip.file(fileName, blob);
-  }
+  });
 
   const zipBlob = await zip.generateAsync({ type: "blob" });
   saveAs(zipBlob, "All_Photos.zip");

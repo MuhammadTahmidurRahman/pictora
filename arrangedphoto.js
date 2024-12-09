@@ -39,12 +39,8 @@ document.getElementById("backButton").addEventListener("click", () => {
   window.location.href = "eventroom.html";
 });
 
+// Download photos as ZIP
 async function downloadPhotosAsZip(folderPath, fileNamePrefix) {
-  const JSZipModule = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
-  const JSZip = JSZipModule.default;
-  await import('https://cdn.jsdelivr.net/npm/file-saver@2.0.5/FileSaver.min.js');
-  const saveAs = window.saveAs;
-
   const folderRef = storageRef(storage, folderPath);
   const listResult = await listAll(folderRef);
 
@@ -53,19 +49,23 @@ async function downloadPhotosAsZip(folderPath, fileNamePrefix) {
     return null;
   }
 
-  const zip = new JSZip();
-  for (const itemRef of listResult.items) {
+  const blobPromises = listResult.items.map(async (itemRef) => {
     const photoUrl = await getDownloadURL(itemRef);
     const response = await fetch(photoUrl);
-    const blob = await response.blob();
-    const fileName = itemRef.name;
+    return response.blob();
+  });
+
+  const blobs = await Promise.all(blobPromises);
+
+  const zip = new JSZip();
+  blobs.forEach((blob, index) => {
+    const fileName = `photo_${index + 1}.jpg`;
     zip.file(fileName, blob);
-  }
+  });
 
   const zipBlob = await zip.generateAsync({ type: "blob" });
-  const zipFileName = `${fileNamePrefix.replace(/\s+/g, '_')}_Photos.zip`;
-  saveAs(zipBlob, zipFileName);
-  return zipFileName;
+  saveAs(zipBlob, `${fileNamePrefix.replace(/\s+/g, '_')}_Photos.zip`);
+  return `${fileNamePrefix.replace(/\s+/g, '_')}_Photos.zip`;
 }
 
 function sendGeneralEmailToParticipants(normalParticipantEmails) {
