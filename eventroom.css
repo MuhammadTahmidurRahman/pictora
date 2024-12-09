@@ -1,6 +1,7 @@
 /* General Styling */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* More bluish background similar to arrangedphoto.css */
   background: linear-gradient(to right, #b3d1f0, #80b2e6);
   margin: 0;
   display: flex;
@@ -12,15 +13,22 @@ body {
 #eventRoomContainer {
   width: 90%;
   max-width: 600px;
-  background: rgba(255, 255, 255, 0.2);
+  /* Glass effect: slightly more transparent to match arrangedphoto.css style */
+  background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   padding: 20px;
-  border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
   overflow-y: auto;
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Move back button to the right side (as in arrangedphoto.css) */
+#backButton {
+  float: right;
+  margin-bottom: 10px;
 }
 
 /* Scrollable List Styling */
@@ -41,7 +49,7 @@ body {
   border-radius: 10px;
 }
 
-/* Host Photo and Folder Icon */
+/* Host Photo and placing folder icon below it */
 #hostPhoto {
   width: 100px;
   height: 100px;
@@ -54,11 +62,12 @@ body {
 
 #hostActions {
   display: flex;
-  flex-direction: column; 
+  flex-direction: column; /* ensure folder icon is below host image */
   align-items: center;
   margin-top: 10px;
 }
 
+/* Folder icon below host image */
 .folder-icon {
   background: none;
   border: 1px solid #000;
@@ -83,7 +92,7 @@ body {
   background: #ccc;
 }
 
-/* Row for the 4 main buttons */
+/* Four main buttons in a single horizontal row */
 #hostActionsRow {
   display: flex;
   flex-direction: row;
@@ -92,11 +101,10 @@ body {
   margin-top: 10px;
 }
 
-/* Four main buttons horizontally in one row */
-/* Icon above text: use flex-direction: column inside the button */
+/* Four main buttons styling similar to arrangedphoto but with icon above text */
 #hostActionsRow button {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* icon above text */
   align-items: center;
   justify-content: center;
   width: 70px;
@@ -117,7 +125,7 @@ body {
   background: rgba(35,99,183,0.8);
 }
 
-/* Fancy icons for each button */
+/* Fancy icons for each button, icon above text */
 .arrange-photo-button::before {
   content: "📷↺";
   font-size: 18px;
@@ -142,13 +150,9 @@ body {
   margin-bottom: 3px;
 }
 
-/* Guest Lists */
-#guestList, #manualGuestList {
-  padding: 0;
-  margin: 10px 0;
-}
-
-#guestList li, #manualGuestList li {
+/* Guest Lists similar to arrangedphoto.css */
+#guestList li,
+#manualGuestList li {
   display: flex;
   align-items: center;
   margin: 10px 0;
@@ -160,20 +164,20 @@ body {
 }
 
 .guest-photo {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #307fe2;
   margin-right: 10px;
 }
 
-/* Dialog Styles - slide from right */
+/* Dialog Styles - slide from right (cover whole page) */
 .dialog {
   position: fixed;
   top: 0;
   right: 0;
-  width: 100%; /* full page width */
+  width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.6);
   display: flex;
@@ -183,7 +187,7 @@ body {
 }
 
 .dialog:not(.hidden) {
-  transform: translateX(0); /* Slide in from right */
+  transform: translateX(0);
 }
 
 .dialog-content {
