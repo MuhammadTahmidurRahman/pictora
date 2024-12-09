@@ -39,7 +39,6 @@ button {
   color: #fff;
   box-sizing: border-box;
   transition: background 0.3s, box-shadow 0.3s;
-  /* Removed text stroke and outline shadows */
   /* Added deep shadow for better aesthetics */
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
@@ -67,7 +66,6 @@ button:hover {
   align-items: center;
   justify-content: center;
   position: relative;
-  /* Removed text stroke and outline shadows */
   /* Added deep shadow */
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
@@ -153,8 +151,7 @@ button:hover {
   line-height: 1.2;
   font-size: 14px; /* Adjusted font size for readability */
   transition: background 0.3s, box-shadow 0.3s;
-  /* Removed text stroke and outline shadows */
-  /* Added deep shadow */
+  /* Added deep shadow for better aesthetics */
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
@@ -196,9 +193,6 @@ button:hover {
   display: block;
   margin-bottom: 3px;
   line-height: 1;
-  /* Removed text stroke and outline shadows */
-  /* Added deep shadow */
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .arrange-photo-button::after {
@@ -216,9 +210,6 @@ button:hover {
   display: block;
   margin-bottom: 3px;
   line-height: 1;
-  /* Removed text stroke and outline shadows */
-  /* Added deep shadow */
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .add-member-button::after {
@@ -236,9 +227,6 @@ button:hover {
   display: block;
   margin-bottom: 3px;
   line-height: 1;
-  /* Removed text stroke and outline shadows */
-  /* Added deep shadow */
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .view-sorted-button::after {
@@ -265,8 +253,7 @@ button:hover {
   transition: background 0.3s, box-shadow 0.3s;
   width: 100px; /* Added to match .folder-icon */
   height: 50px; /* Added to match .folder-icon */
-  /* Removed text stroke and outline shadows */
-  /* Added deep shadow */
+  /* Added deep shadow for better aesthetics */
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
@@ -282,9 +269,6 @@ button:hover {
   display: block;
   margin-bottom: 3px;
   line-height: 1;
-  /* Removed text stroke and outline shadows */
-  /* Added deep shadow */
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 #uploadPhotoButton::after {
@@ -378,6 +362,12 @@ h3 {
 
 .dialog-buttons button {
   width: 45%;
+  /* Ensure dialog buttons display their text */
+  font-size: 14px;
+  /* Remove any pseudo-elements if mistakenly applied */
+  /* No font-size: 0 or text hiding properties */
+  /* Retain text-shadow for consistency */
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 /* Delete Guest Button */
@@ -398,8 +388,7 @@ h3 {
   line-height: 1;
   cursor: pointer;
   transition: background 0.3s, box-shadow 0.3s;
-  /* Removed text stroke and outline shadows */
-  /* Added deep shadow */
+  /* Added deep shadow for better aesthetics */
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
@@ -449,8 +438,7 @@ h3 {
   line-height: 1;
   cursor: pointer;
   transition: background 0.3s, box-shadow 0.3s;
-  /* Removed text stroke and outline shadows */
-  /* Added deep shadow */
+  /* Added deep shadow for better aesthetics */
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
@@ -480,8 +468,7 @@ h3 {
   justify-content: center;
   cursor: pointer;
   transition: background 0.3s, box-shadow 0.3s;
-  /* Removed text stroke and outline shadows */
-  /* Added deep shadow */
+  /* Added deep shadow for better aesthetics */
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
@@ -491,7 +478,6 @@ h3 {
   display: block;
   margin-bottom: 3px;
   line-height: 1;
-  /* Removed text stroke and outline shadows */
   /* Added deep shadow */
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
