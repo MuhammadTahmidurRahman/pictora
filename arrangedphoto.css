@@ -2,7 +2,7 @@
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   /* More bluish background */
-  background: linear-gradient(to right, #b3d1f0, #80b2e6);
+  background: url('hpbg1.png') no-repeat center center fixed;
   margin: 0;
   display: flex;
   justify-content: center;
@@ -14,7 +14,7 @@ body {
   width: 90%;
   max-width: 600px;
   /* semi-transparent white box over bluish background */
-  background: rgba(255, 255, 255, 0.50);
+  background: rgba(255, 255, 255, 0.45);
   padding: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border-radius: 12px;

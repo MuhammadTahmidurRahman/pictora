@@ -235,6 +235,8 @@ function toggleDialog(show) {
 
 async function viewHostPhoto(hostData) {
   const hostMessage = document.getElementById("hostMessage");
+  hostMessage.textContent = ""; // Clear any previous messages before loading
+
   const folderPath = hostData.photoFolderPath;
 
   if (folderPath) {
