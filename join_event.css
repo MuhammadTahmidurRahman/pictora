@@ -5,26 +5,31 @@
   box-sizing: border-box;
 }
 
+/* Body with bluish gradient background (same style as arrangedphoto.css) */
 body {
-  font-family: 'Inter', Arial, sans-serif;
-  background: url('hpbg1.png') no-repeat center center fixed;
-  background-size: cover;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(to right, #b3d1f0, #80b2e6);
   margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
+/* Container styled like arrangedphoto.css: semi-transparent, glass-like, slightly bigger */
 .container {
-  background: rgba(255, 255, 255, 0.7); /* Semi-transparent white background */
-  padding: 32px;
-  width: 100%;
-  max-width: 450px;
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.4); /* More glass-like */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 20px;
+  width: 90%;
+  max-width: 600px; /* Increased width for a nicer look */
+  border-radius: 12px;
   text-align: center;
   margin: auto;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative; /* So we can position the profile icon inside */
 }
 
 h1 {
@@ -34,24 +39,7 @@ h1 {
   margin-bottom: 16px;
 }
 
-button {
-  width: 100%;
-  padding: 12px 0;
-  background: #4c8bf5;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  margin-top: 16px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-button:hover {
-  background: #356ac3;
-}
-
+/* Inputs styled similarly to arrangedphoto.css (soft backgrounds, blue focus) */
 input {
   width: 100%;
   padding: 12px 16px;
@@ -69,31 +57,55 @@ input::placeholder {
 
 input:focus {
   outline: none;
-  border: 1px solid #4c8bf5;
-  box-shadow: 0 0 0 3px rgba(76, 139, 245, 0.2);
+  border: 1px solid #307fe2;
+  box-shadow: 0 0 0 3px rgba(48,127,226,0.2);
 }
 
-.navbar {
-  display: flex;
-  justify-content: space-around;
-  background: rgba(255, 255, 255, 0.7);
-  padding: 16px 0;
-  border-top: 1px solid #d1d9e6;
-}
-
-.navbar button {
-  width: 45%;
+/* Buttons styled like arrangedphoto: bluish and with a slight gradient look */
+button {
+  width: 100%;
   padding: 12px 0;
-  background: #4c8bf5;
-  color: white;
-  border: none;
-  border-radius: 50px;
-  font-size: 14px;
+  border: 1px solid #000;
+  border-radius: 5px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
+  background: rgba(48,127,226,0.8);
+  color: #fff;
   transition: background 0.3s ease;
+  margin-top: 16px;
 }
 
-.navbar button:hover {
-  background: #356ac3;
+button:hover {
+  background: rgba(35,99,183,0.8);
+}
+
+/* Hide the navbar since we are removing the profile button from there */
+.navbar {
+  display: none;
+}
+
+/* Profile icon (circular) inside the container, at top-right corner */
+.profile-icon {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(48,127,226,0.8);
+  border: 1px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  /* Use a simple user icon (emoji) or a background image if desired */
+  font-size: 24px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.profile-icon:hover {
+  background: rgba(35,99,183,0.8);
 }
