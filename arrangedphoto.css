@@ -12,7 +12,7 @@ body {
 #eventRoomContainer {
   width: 90%;
   max-width: 600px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.9); /* semi-transparent layer */
   padding: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border-radius: 12px;
@@ -61,31 +61,33 @@ h3 {
 button {
   cursor: pointer;
   font-size: 14px;
-  border: 1px solid #000; /* Added black outline to every button */
+  border: 1px solid #000; /* black outline */
   border-radius: 5px;
-  background: #307fe2;
-  color: #fff;
   padding: 8px 15px;
   margin: 5px 0;
   display: inline-block;
   text-align: center;
-  max-width: 150px; /* Ensuring a consistent max-width for all buttons */
+  max-width: 150px;
+  background: rgba(48,127,226, 0.8); /* semi-transparent blue for default buttons */
+  color: #fff;
 }
 
 button:hover {
-  background: #2363b7;
+  background: rgba(35,99,183,0.8);
 }
 
+/* Action buttons for host (white and blue combo) */
 .action-button {
-  background: #ffc107;
-  color: #333;
+  background: linear-gradient(to right, #ffffff, #307fe2);
+  color: #000;
   padding: 8px 15px;
   margin: 5px;
-  max-width: 150px; /* Same max-width as other buttons for uniform size */
+  max-width: 150px;
+  border: 1px solid #000; /* ensure black outline here as well */
 }
 
 .action-button:hover {
-  background: #e0a800;
+  background: linear-gradient(to right, #e0eaff, #2363b7);
 }
 
 /* Host Photo Styling */
@@ -105,9 +107,9 @@ button:hover {
   grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   gap: 10px;
   margin: 15px 0;
+  color: transparent; /* Hide 'No Photos Available.' text */
 }
 
-/* No default text; container is empty by default, text only appears if no photos found via JS. */
 .photo-thumbnail {
   width: 80px;
   height: 80px;
@@ -123,18 +125,25 @@ button:hover {
   align-items: center;
   margin: 10px 0;
   padding: 8px;
-  background: #f7faff;
+  background: rgba(247,250,255,0.9);
   border: 1px solid #cde0f5;
   border-radius: 8px;
+  justify-content: space-between; /* buttons go to right side */
 }
 
+/* Guest Photo */
 .guest-photo {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  margin-right: 10px;
   object-fit: cover;
   border: 2px solid #307fe2;
+  margin-right: 10px;
+}
+
+/* Positioning buttons to the right side */
+.folder-icon, .email-button {
+  margin-left: auto;
 }
 
 /* Dialog Styles */
@@ -185,7 +194,7 @@ button:hover {
 /* Photo Item (for deleting) */
 .photo-item {
   position: relative;
-  background: #f7faff;
+  background: rgba(247,250,255,0.9);
   padding: 5px;
   border-radius: 8px;
   border: 1px solid #cde0f5;
@@ -201,15 +210,15 @@ button:hover {
 }
 
 .delete-btn {
-  background: #ff4c4c;
+  background: rgba(255,76,76,0.9);
   color: #fff;
   padding: 5px;
   font-size: 12px;
   margin-top: 5px;
   max-width: 100px;
-  border: 1px solid #000; /* Black outline for consistency */
+  border: 1px solid #000; /* black outline */
 }
 
 .delete-btn:hover {
-  background: #d43535;
+  background: rgba(212,53,53,0.9);
 }
