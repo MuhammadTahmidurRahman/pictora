@@ -1,3 +1,5 @@
+// join_event.js
+
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
 import { getDatabase, ref, get, set, update, onValue } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
@@ -20,7 +22,12 @@ const auth = getAuth(firebaseApp);
 const database = getDatabase(firebaseApp);
 const storage = getStorage(firebaseApp);
 
-// Fetch the user's profile photo from Firebase Realtime Database
+/**
+ * Fetches the user's profile photo URL from Firebase Realtime Database.
+ * If not found, returns a default image URL.
+ * @param {string} uid - The user's unique ID.
+ * @returns {Promise<string>} - The URL of the user's profile photo.
+ */
 async function fetchUserProfilePhoto(uid) {
   let photoUrl = "";
   const userProfileRef = ref(database, `users/${uid}/photo`);  // Fetch the 'photo' field
@@ -41,7 +48,29 @@ async function fetchUserProfilePhoto(uid) {
   return photoUrl;
 }
 
-// Join Room function
+/**
+ * Displays a message to the user.
+ * @param {string} message - The message to display.
+ */
+function displayMessage(message) {
+  const messageElement = document.createElement("p");
+  messageElement.innerText = message;
+  messageElement.style.color = "red";
+  const container = document.querySelector(".container");
+  if (container) {
+    container.appendChild(messageElement);
+
+    setTimeout(() => {
+      messageElement.remove();
+    }, 3000);
+  } else {
+    console.error("Container element not found to display message.");
+  }
+}
+
+/**
+ * Handles the process of joining a room/event.
+ */
 async function joinRoom() {
   const roomCode = document.getElementById("eventCodeInput").value.trim();
   const user = auth.currentUser;
@@ -91,62 +120,82 @@ async function joinRoom() {
     photoUrl: photoUrl,  // Use the correct photo URL from Realtime Database
   };
 
-  await set(participantRef, participantData);
-  window.location.href = `/eventroom.html?eventCode=${roomCode}`;
+  try {
+    await set(participantRef, participantData);
+    window.location.href = `/eventroom.html?eventCode=${roomCode}`;
+  } catch (error) {
+    console.error("Error adding participant to Realtime Database:", error);
+    displayMessage("Failed to join the room. Please try again.");
+  }
 }
 
-// Function to display messages
-function displayMessage(message) {
-  const messageElement = document.createElement("p");
-  messageElement.innerText = message;
-  messageElement.style.color = "red";
-  const container = document.querySelector(".container");
-  container.appendChild(messageElement);
+/**
+ * Listens for changes in the user's profile and updates their information in all rooms they are part of.
+ */
+function listenForUserProfileChanges() {
+  const user = auth.currentUser;
+  if (!user) {
+    console.error("No authenticated user found for profile changes.");
+    return;
+  }
 
-  setTimeout(() => {
-    messageElement.remove();
-  }, 3000);
+  const userRef = ref(database, `users/${user.uid}`);
+
+  onValue(userRef, async (snapshot) => {
+    if (snapshot.exists()) {
+      const userData = snapshot.val();
+      const updatedName = userData.name || user.displayName || "Guest";
+      let updatedPhotoUrl = userData.photo || "";
+
+      // Fetch the updated user profile photo from Firebase Realtime Database if not present
+      if (!updatedPhotoUrl) {
+        updatedPhotoUrl = await fetchUserProfilePhoto(user.uid);
+      }
+
+      try {
+        const roomsSnapshot = await get(ref(database, 'rooms'));
+        roomsSnapshot.forEach((room) => {
+          const eventCode = room.key;
+          const participantRef = ref(database, `rooms/${eventCode}/participants/${user.uid}`);
+
+          get(participantRef).then((participantSnapshot) => {
+            if (participantSnapshot.exists()) {
+              update(participantRef, {
+                name: updatedName,
+                photoUrl: updatedPhotoUrl,
+              }).then(() => {
+                console.log(`Participant data updated for room ${eventCode}`);
+              }).catch((error) => {
+                console.error(`Error updating participant data for room ${eventCode}:`, error);
+              });
+            }
+          }).catch((error) => {
+            console.error(`Error fetching participant data for room ${eventCode}:`, error);
+          });
+        });
+      } catch (error) {
+        console.error("Error fetching rooms data:", error);
+      }
+    } else {
+      console.error("User profile data does not exist in Realtime Database.");
+      // Optional: Handle scenarios where user data is missing
+    }
+  });
 }
+
+// Listen for user authentication state changes
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    listenForUserProfileChanges();
+  }
+});
 
 // Listen for "Go to EventRoom" button click
 document.addEventListener("DOMContentLoaded", () => {
   const joinButton = document.getElementById("joinEventBtn");
-  joinButton.addEventListener("click", joinRoom);
-});
-
-// Listen for user profile changes
-function listenForUserProfileChanges() {
-  const user = auth.currentUser;
-  const userRef = ref(database, `users/${user.uid}`);
-
-  onValue(userRef, async (snapshot) => {
-    const updatedName = snapshot.val().name || user.displayName || "Guest";
-    let updatedPhotoUrl = snapshot.val().photo || "";  // You can also store this in the database
-
-    // Fetch the updated user profile photo from Firebase Realtime Database
-    if (!updatedPhotoUrl) {
-      updatedPhotoUrl = await fetchUserProfilePhoto(user.uid);
-    }
-
-    const roomsSnapshot = await get(ref(database, 'rooms'));
-    roomsSnapshot.forEach((room) => {
-      const eventCode = room.key;
-      const participantRef = ref(database, `rooms/${eventCode}/participants/${user.uid}`);
-
-      get(participantRef).then((participantSnapshot) => {
-        if (participantSnapshot.exists()) {
-          update(participantRef, {
-            name: updatedName,
-            photoUrl: updatedPhotoUrl,
-          });
-        }
-      });
-    });
-  });
-}
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    listenForUserProfileChanges(); 
+  if (joinButton) {
+    joinButton.addEventListener("click", joinRoom);
+  } else {
+    console.error("Join Event button not found in the DOM.");
   }
 });
