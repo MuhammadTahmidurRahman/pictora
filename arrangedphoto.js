@@ -17,13 +17,13 @@ import {
 
 // Firebase Initialization
 const firebaseConfig = {
-  apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
-  authDomain: "pictora-7f0ad.firebaseapp.com",
-  projectId: "pictora-7f0ad",
-  storageBucket: "pictora-7f0ad.appspot.com",
-  messagingSenderId: "155732133141",
-  databaseURL: "https://pictora-7f0ad-default-rtdb.asia-southeast1.firebasedatabase.app",
-  appId: "1:155732133141:web:c5646717494a496a6dd51c",
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_BUCKET",
+  messagingSenderId: "YOUR_SENDER_ID",
+  databaseURL: "YOUR_DATABASE_URL",
+  appId: "YOUR_APP_ID",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -92,18 +92,17 @@ async function loadGuests(guests, containerId) {
 
     guestListContainer.appendChild(guestItem);
 
-    // Add event listener to view photos
+    // Modified event listener to redirect to photogallery
     const folderButton = guestItem.querySelector(".folder-icon");
     folderButton.addEventListener("click", () => {
       if (guestData.folderPath) {
-        fetchAndDisplayPhotos(guestData.folderPath, "photoDialogContent");
-        toggleDialog(true); // Open photo dialog
+        // Redirect to photogallery with "/photos" appended
+        window.location.href = "photogallery.html?folderName=" + encodeURIComponent(guestData.folderPath + "/photos");
       } else {
         alert("No photos available for this guest.");
       }
     });
 
-    // Add event listener to download photos
     const downloadButton = guestItem.querySelector(".download-button");
     downloadButton.addEventListener("click", () => {
       if (guestData.folderPath) {
@@ -139,18 +138,17 @@ async function loadManualGuests(manualGuests, containerId) {
 
     manualGuestListContainer.appendChild(guestItem);
 
-    // Add event listener to view photos
+    // Modified event listener to redirect to photogallery
     const folderButton = guestItem.querySelector(".folder-icon");
     folderButton.addEventListener("click", () => {
       if (guestData.folderPath) {
-        fetchAndDisplayPhotos(guestData.folderPath, "photoDialogContent");
-        toggleDialog(true); // Open photo dialog
+        // Redirect to photogallery with "/photos" appended
+        window.location.href = "photogallery.html?folderName=" + encodeURIComponent(guestData.folderPath + "/photos");
       } else {
         alert("No photos available for this manual guest.");
       }
     });
 
-    // Add event listener to download photos
     const downloadButton = guestItem.querySelector(".download-button");
     downloadButton.addEventListener("click", () => {
       if (guestData.folderPath) {
@@ -302,8 +300,16 @@ async function loadEventRoom(eventCode) {
         // Assign the host's folder path
         hostData.photoFolderPath = roomData.hostUploadedPhotoFolderPath;
 
-        // Add event listeners for the host photo buttons
-        document.getElementById("viewHostPhotoBtn").addEventListener("click", () => viewHostPhoto(hostData));
+        // Modified host photo button event to redirect to photogallery
+        document.getElementById("viewHostPhotoBtn").addEventListener("click", () => {
+          if (hostData.photoFolderPath) {
+            // Redirect to photogallery with "/photos" appended
+            window.location.href = "photogallery.html?folderName=" + encodeURIComponent(hostData.photoFolderPath + "/photos");
+          } else {
+            alert("No photo folder available for the host.");
+          }
+        });
+
         document.getElementById("downloadHostPhotoBtn").addEventListener("click", () => downloadHostPhoto(hostData));
       }
 
