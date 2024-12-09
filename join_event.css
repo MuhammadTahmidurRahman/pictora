@@ -16,78 +16,27 @@ body {
   height: 100vh;
 }
 
-/* Container styled like arrangedphoto.css: semi-transparent, glass-like, slightly bigger */
+/* Container styled like arrangedphoto.css: semi-transparent, glass-like, larger height */
 .container {
   background: rgba(255, 255, 255, 0.4); /* More glass-like */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  padding: 20px;
+  padding: 40px; /* Increased padding for better spacing */
   width: 90%;
-  max-height: 600px;
-  max-width: 600px; /* Increased width for a nicer look */
+  max-width: 600px; /* Keep it 600px */
+  height: 700px; /* Increased height */
   border-radius: 16px;
   text-align: center;
   margin: auto;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.3);
   position: relative; /* So we can position the profile icon inside */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Center content vertically */
 }
 
-h1 {
-  font-size: 24px;
-  font-weight: 600;
-  color: #2d3a45;
-  margin-bottom: 16px;
-}
-
-/* Inputs styled similarly to arrangedphoto.css (soft backgrounds, blue focus) */
-input {
-  width: 100%;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  border-radius: 8px;
-  border: 1px solid #d1d9e6;
-  background-color: #f7f9fc;
-  color: #4a5568;
-  font-size: 14px;
-}
-
-input::placeholder {
-  color: #a0aec0;
-}
-
-input:focus {
-  outline: none;
-  border: 1px solid #307fe2;
-  box-shadow: 0 0 0 3px rgba(48,127,226,0.2);
-}
-
-/* Buttons styled like arrangedphoto: bluish and with a slight gradient look */
-button {
-  width: 100%;
-  padding: 12px 0;
-  border: 1px solid #000;
-  border-radius: 5px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  background: linear-gradient(to right, #ffffff, #307fe2);
-  color: #fff;
-  transition: background 0.3s ease;
-  margin-top: 16px;
-}
-
-button:hover {
-  background: rgba(35,99,183,0.8);
-}
-
-/* Hide the navbar since we are removing the profile button from there */
-.navbar {
-  display: none;
-}
-
-/* Profile icon (circular) inside the container, at top-right corner */
+/* Circular Profile Icon inside the container, positioned at top-right */
 .profile-icon {
   position: absolute;
   top: 20px;
@@ -109,4 +58,78 @@ button:hover {
 
 .profile-icon:hover {
   background: rgba(35,99,183,0.8);
+}
+
+/* Headings */
+h1 {
+  font-size: 28px; /* Slightly larger for better visibility */
+  font-weight: 600;
+  color: #2d3a45;
+  margin-bottom: 24px; /* Increased margin for spacing */
+}
+
+/* Inputs styled similarly to arrangedphoto.css (soft backgrounds, blue focus) */
+input {
+  width: 100%;
+  padding: 14px 20px; /* Increased padding for better usability */
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 1px solid #d1d9e6;
+  background-color: #f7f9fc;
+  color: #4a5568;
+  font-size: 16px; /* Increased font size for readability */
+}
+
+input::placeholder {
+  color: #a0aec0;
+}
+
+input:focus {
+  outline: none;
+  border: 1px solid #307fe2;
+  box-shadow: 0 0 0 3px rgba(48,127,226,0.2);
+}
+
+/* Buttons styled like arrangedphoto: bluish and with a slight gradient look */
+button {
+  width: 100%;
+  padding: 14px 0; /* Increased padding for better touch targets */
+  border: 1px solid #000;
+  border-radius: 8px; /* More rounded for a modern look */
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  background: linear-gradient(to right, #ffffff, #307fe2);
+  color: #fff;
+  transition: background 0.3s ease;
+  margin-top: 20px; /* Increased margin for spacing */
+}
+
+button:hover {
+  background: rgba(35,99,183,0.8);
+}
+
+/* Hide the navbar since we are removing the profile button from there */
+.navbar {
+  display: none;
+}
+
+/* Additional Styles to Ensure Layout Looks Good with Increased Container Height */
+
+/* Adjust the container's internal layout if necessary */
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Center content vertically within the container */
+}
+
+/* Ensure buttons are spaced out properly */
+button#joinEventBtn {
+  margin-top: 20px; /* Additional spacing if needed */
+}
+
+/* Optional: Add some spacing below the Join button */
+.container > button {
+  margin-bottom: 10px;
 }
