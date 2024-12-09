@@ -1,23 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <!-- Meta Tags -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Page Title -->
   <title>Sign Up - PicTora</title>
+  
+  <!-- External CSS -->
   <link rel="stylesheet" href="signup.css">
 </head>
 <body>
   <div class="signup-page">
     <div class="content">
+      <!-- Back Button -->
       <button onclick="goBack()" class="back-button">← Back</button>
+      
+      <!-- Page Heading -->
       <h1>Create an Account</h1>
       <p>Please fill in the information below to create an account.</p>
 
-      <!-- Upload Image Button -->
+      <!-- Upload Image Section -->
       <div class="upload-container" onclick="showImagePicker()">
         <span id="upload-text">Upload your photo here</span>
       </div>
+      
+      <!-- Hidden File Input -->
       <input type="file" id="image" accept="image/*" style="display:none" onchange="displayImage(this)">
 
       <!-- Name Input -->
@@ -52,6 +64,8 @@
       <p class="login-link">Already have an account? <a href="login.html">Login</a></p>
     </div>
   </div>
+
+  <!-- Import Signup JavaScript Module -->
   <script type="module" src="signup.js"></script>
 </body>
 </html>

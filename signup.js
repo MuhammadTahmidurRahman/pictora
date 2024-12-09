@@ -15,6 +15,7 @@ import {
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import { getDatabase, ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
   authDomain: "pictora-7f0ad.firebaseapp.com",
@@ -25,22 +26,24 @@ const firebaseConfig = {
   appId: "1:155732133141:web:c5646717494a496a6dd51c",
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const storage = getStorage();
 const database = getDatabase();
 
-// Redirect authenticated users to join_event.html if their email is verified
+// Authentication State Listener
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     if (user.emailVerified) {
+      // User is authenticated and email is verified
       window.location.href = "join_event.html";
     } else {
+      // User is authenticated but email is not verified
       alert("Please verify your email before proceeding. A verification email has been sent to your email address.");
-      // Optionally, resend verification email
       try {
         await sendEmailVerification(user);
-        alert("Verification email sent. Please check your inbox.");
+        alert("Verification email resent. Please check your inbox.");
       } catch (error) {
         console.error("Error sending verification email:", error);
         alert("Failed to send verification email. Please try again.");
@@ -147,7 +150,6 @@ window.registerUser = async function () {
     }
 
     // Upload image to Firebase Storage
-    // Include file extension in the storage path
     const fileExtension = imageFile.name.split('.').pop();
     const storagePath = `uploads/${user.uid}/profile.${fileExtension}`;
     const imageStorageRef = storageRef(storage, storagePath);
@@ -197,8 +199,25 @@ window.signInWithGoogle = async function () {
   }
 
   try {
-    // Debugging: Log image file
-    console.log("Google Sign-In Image File:", imageFile);
+    // Sign in with Google
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    // Debugging: Log authenticated user
+    console.log("Authenticated User:", user);
+
+    if (!user) {
+      alert("Failed to sign in with Google. Please try again.");
+      return;
+    }
+
+    // Check if user exists in the database
+    const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
+    if (userSnapshot.exists()) {
+      alert("Welcome back!");
+      window.location.href = "join_event.html";
+      return;
+    }
 
     // Upload image to Firebase Storage
     const fileExtension = imageFile.name.split('.').pop();
@@ -213,23 +232,6 @@ window.signInWithGoogle = async function () {
 
     // Debugging: Log image URL
     console.log("Google Image URL:", imageUrl);
-
-    // Sign in with Google
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-
-    if (!user) {
-      alert("Failed to sign in with Google. Please try again.");
-      return;
-    }
-
-    // Check if user exists in the database
-    const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
-    if (userSnapshot.exists()) {
-      alert("Welcome back!");
-      window.location.href = "join_event.html";
-      return;
-    }
 
     // Save user data to Firebase Realtime Database
     await set(dbRef(database, `users/${user.uid}`), {
