@@ -1,6 +1,7 @@
 /* General Styling */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* Bluish gradient background for consistency */
   background: linear-gradient(to right, #b3d1f0, #4a5d70);
   margin: 0;
   display: flex;
@@ -9,24 +10,36 @@ body {
   height: 100vh;
 }
 
+/* Event Room Container with Glass Effect */
 #eventRoomContainer {
   width: 90%;
-  max-width: 600px; /* keep it 600px */
-  background: rgba(255, 255, 255, 0.4);
+  max-width: 600px; /* Fixed width for consistency */
+  background: rgba(255, 255, 255, 0.4); /* Semi-transparent background */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   padding: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  border-radius: 16px;
+  border-radius: 12px;
   overflow-y: auto;
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* Move back button to the right side */
+/* Back Button Styling */
 #backButton {
   float: right;
   margin-bottom: 10px;
+  background: linear-gradient(to right, #ffffff, #307fe2);
+  color: #000;
+  border: 1px solid #000;
+  border-radius: 5px;
+  padding: 8px 15px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+#backButton:hover {
+  background: linear-gradient(to right, #e0eaff, #2363b7);
 }
 
 /* Scrollable List Styling */
@@ -47,136 +60,91 @@ body {
   border-radius: 10px;
 }
 
-/* Host Photo */
+/* Headings and Text */
+#roomName {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+#roomCode {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+}
+
+h3 {
+  color: #333;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+/* Buttons */
+button {
+  cursor: pointer;
+  font-size: 14px;
+  border: 1px solid #000; /* Black outline */
+  border-radius: 5px;
+  padding: 8px 15px;
+  margin: 5px 0;
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap;
+  background: linear-gradient(to right, #ffffff, #307fe2); /* Matched button color */
+  color: #000;
+  box-sizing: border-box;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+button:hover {
+  background: linear-gradient(to right, #e0eaff, #2363b7); /* Hover effect */
+  color: #fff;
+}
+
+/* Action Buttons for Host and Email */
+.action-button {
+  background: linear-gradient(to right, #ffffff, #307fe2);
+  color: #000;
+  border: 1px solid #000;
+  width: 180px; /* Fixed width for uniform size */
+  text-align: center;
+  border-radius: 5px;
+  padding: 10px 0;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.action-button:hover {
+  background: linear-gradient(to right, #e0eaff, #2363b7);
+  color: #fff;
+}
+
+/* Host Photo Styling */
 #hostPhoto {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  margin: 10px auto 5px auto; 
+  margin: 10px auto;
   display: block;
   object-fit: cover;
   border: 2px solid #307fe2;
 }
 
-/* Five main buttons in rectangular shape */
-#hostActions {
-  display: flex;
-  justify-content: center;
-  gap: 15px; /* space between buttons */
-  margin-top: 10px;
+/* Photo Grid */
+.photo-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 10px;
+  margin: 15px 0;
+  color: transparent; /* Hide 'No Photos Available.' text */
 }
 
-/* Common styles for the five main buttons */
-#hostActions .folder-icon,
-#hostActions .arrange-photo-button,
-#hostActions .add-member-button,
-#hostActions .view-sorted-button,
-#uploadPhotoButton {
-  width: 100px; /* adjusted width for rectangle */
-  height: 50px; /* adjusted height for rectangle */
-  padding: 5px 10px; /* slightly adjusted padding */
-  border: 1px solid #000;
-  border-radius: 8px;
-  background: rgba(48,127,226, 0.8); /* Matched button color */
-  color: #fff;
-  box-sizing: border-box;
-  text-align: center;
-  cursor: pointer;
-  /* Display flex with column to put icon above text */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  line-height: 1.2;
-  font-size: 14px; /* Added font size for better text visibility */
-}
-
-/* Hover effect */
-#hostActions .folder-icon:hover,
-#hostActions .arrange-photo-button:hover,
-#hostActions .add-member-button:hover,
-#hostActions .view-sorted-button:hover,
-#uploadPhotoButton:hover {
-  background: rgba(35,99,183,0.8); /* Matched hover color */
-}
-
-/* Folder icon button: just show code "📁" as is */
-#hostActions .folder-icon::before {
-  content: "📁";
-  font-size: 18px;
-  display: block;
-  margin-bottom: 3px;
-  line-height: 1;
-}
-
-#hostActions .folder-icon::after {
-  content: "Folder";
-  font-size: 12px;
-  color: #fff;
-  line-height: 1;
-}
-
-/* Arrange button */
-.arrange-photo-button::before {
-  content: "📷↺";
-  font-size: 18px;
-  display: block;
-  margin-bottom: 3px;
-  line-height: 1;
-}
-
-.arrange-photo-button::after {
-  content: "Arrange";
-  font-size: 12px;
-  color: #fff;
-  line-height: 1;
-}
-
-/* Add button */
-.add-member-button::before {
-  content: "👤➕";
-  font-size: 18px;
-  display: block;
-  margin-bottom: 3px;
-  line-height: 1;
-}
-
-.add-member-button::after {
-  content: "Add";
-  font-size: 12px;
-  color: #fff;
-  line-height: 1;
-}
-
-/* View Sorted Photos Button */
-.view-sorted-button::before {
-  content: "👁🗂";
-  font-size: 18px;
-  display: block;
-  margin-bottom: 3px;
-  line-height: 1;
-}
-
-.view-sorted-button::after {
-  content: "Sorted";
-  font-size: 12px;
-  color: #fff;
-  line-height: 1;
-}
-
-/* Upload Photos Button below the five buttons */
-#uploadPhotoButton::before {
-  content: "⬆📷";
-  font-size: 18px;
-  display: block;
-  margin-bottom: 3px;
-  line-height: 1;
-}
-#uploadPhotoButton::after {
-  content: "Upload";
-  font-size: 12px;
-  color: #fff;
-  line-height: 1;
+.photo-thumbnail {
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 2px solid #307fe2;
 }
 
 /* Guest Lists */
@@ -186,10 +154,10 @@ body {
   align-items: center;
   margin: 10px 0;
   padding: 8px;
-  background: rgba(247,250,255,0.9);
+  background: rgba(247, 250, 255, 0.9);
   border: 1px solid #cde0f5;
   border-radius: 8px;
-  justify-content: space-between; 
+  justify-content: space-between; /* Buttons on right side */
 }
 
 .guest-photo {
@@ -201,31 +169,36 @@ body {
   margin-right: 10px;
 }
 
-/* Dialog Styles - slide from right */
+/* Dialog Styles */
 .dialog {
   position: fixed;
   top: 0;
-  right: 0;
-  width: 100%; 
-  height: 100%;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.6);
   display: flex;
+  justify-content: center;
   align-items: center;
-  transition: transform 0.3s ease-in-out;
-  transform: translateX(100%);
+  z-index: 1000;
 }
-.dialog:not(.hidden) {
-  transform: translateX(0);
+
+.dialog.hidden {
+  display: none;
 }
+
 .dialog-content {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   padding: 20px;
   border-radius: 8px;
   width: 90%;
   max-width: 400px;
-  margin: 0 auto;
   text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
+
 .dialog-content input {
   width: 90%;
   margin: 10px 0;
@@ -233,21 +206,181 @@ body {
   border: 1px solid #ddd;
   border-radius: 5px;
 }
+
 .dialog-buttons {
   display: flex;
   justify-content: space-between;
   gap: 10px;
 }
+
 .dialog-buttons button {
   width: 45%;
-}
-.delete-guest-button {
-  background: rgba(255,76,76,0.9);
-  color: #fff;
+  background: linear-gradient(to right, #ffffff, #307fe2);
+  color: #000;
   border: 1px solid #000;
-  font-size: 14px;
-  max-width: 180px;
+  border-radius: 5px;
+  padding: 8px 0;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease;
 }
-.delete-guest-button:hover {
-  background: rgba(212,53,53,0.9);
+
+.dialog-buttons button:hover {
+  background: linear-gradient(to right, #e0eaff, #2363b7);
+  color: #fff;
+}
+
+/* Additional Utility Classes */
+.hidden {
+  display: none !important;
+}
+
+/* Photo Item (for deleting) */
+.photo-item {
+  position: relative;
+  background: rgba(247, 250, 255, 0.9);
+  padding: 5px;
+  border-radius: 8px;
+  border: 1px solid #cde0f5;
+  text-align: center;
+}
+
+.photo-item img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #307fe2;
+}
+
+.delete-btn {
+  background: rgba(255, 76, 76, 0.9);
+  color: #fff;
+  padding: 5px;
+  font-size: 12px;
+  margin-top: 5px;
+  max-width: 100px;
+  border: 1px solid #000; /* Black outline */
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.delete-btn:hover {
+  background: rgba(212, 53, 53, 0.9);
+}
+
+/* Five Action Buttons Under Host Profile Picture */
+#hostActions {
+  display: flex;
+  justify-content: center;
+  gap: 15px; /* Space between buttons */
+  margin-top: 20px;
+}
+
+#hostActions .action-button {
+  width: 120px; /* Adjusted width for rectangle */
+  height: 50px; /* Adjusted height for rectangle */
+  padding: 5px 10px;
+  border: 1px solid #000;
+  border-radius: 8px;
+  background: linear-gradient(to right, #ffffff, #307fe2);
+  color: #000;
+  box-sizing: border-box;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+#hostActions .action-button:hover {
+  background: linear-gradient(to right, #e0eaff, #2363b7);
+  color: #fff;
+}
+
+/* Specific Action Button Icons and Labels */
+#hostActions .folder-icon::before {
+  content: "📁";
+  font-size: 18px;
+  display: block;
+  margin-bottom: 3px;
+}
+
+#hostActions .folder-icon::after {
+  content: "Folder";
+  font-size: 12px;
+}
+
+#hostActions .arrange-photo-button::before {
+  content: "📷↺";
+  font-size: 18px;
+  display: block;
+  margin-bottom: 3px;
+}
+
+#hostActions .arrange-photo-button::after {
+  content: "Arrange";
+  font-size: 12px;
+}
+
+#hostActions .add-member-button::before {
+  content: "👤➕";
+  font-size: 18px;
+  display: block;
+  margin-bottom: 3px;
+}
+
+#hostActions .add-member-button::after {
+  content: "Add";
+  font-size: 12px;
+}
+
+#hostActions .view-sorted-button::before {
+  content: "👁🗂";
+  font-size: 18px;
+  display: block;
+  margin-bottom: 3px;
+}
+
+#hostActions .view-sorted-button::after {
+  content: "Sorted";
+  font-size: 12px;
+}
+
+#uploadPhotoButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 120px; /* Adjusted width for rectangle */
+  height: 50px; /* Adjusted height for rectangle */
+  padding: 5px 10px;
+  margin: 10px auto 0 auto; /* Center it below the main row */
+  border: 1px solid #000;
+  border-radius: 8px;
+  background: linear-gradient(to right, #ffffff, #307fe2);
+  color: #000;
+  box-sizing: border-box;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+#uploadPhotoButton:hover {
+  background: linear-gradient(to right, #e0eaff, #2363b7);
+  color: #fff;
+}
+
+#uploadPhotoButton::before {
+  content: "⬆📷";
+  font-size: 18px;
+  display: block;
+  margin-bottom: 3px;
+}
+
+#uploadPhotoButton::after {
+  content: "Upload";
+  font-size: 12px;
 }
