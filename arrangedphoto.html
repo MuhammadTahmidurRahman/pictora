@@ -21,11 +21,9 @@
       <p id="hostName">Host Name</p>
       <img id="hostPhoto" src="" alt="Host Photo" class="photo-thumbnail" />
       <div id="hostActions">
-        <!-- Add these buttons in the host section -->
-<button id="viewHostPhotoBtn"> View Host Photo</button>
-<button id="downloadHostPhotoBtn">📦 Download Host Photo</button>
-<div id="hostMessage"></div> <!-- Message for no photo available -->
-
+        <button id="viewHostPhotoBtn" class="action-button">View Host Photo</button>
+        <button id="downloadHostPhotoBtn" class="action-button">📦 Download Host Photo</button>
+        <div id="hostMessage"></div>
       </div>
     </div>
     
@@ -48,7 +46,7 @@
         <input type="email" id="guestEmail" placeholder="Enter guest email" required />
         <input type="file" id="guestPhoto" accept="image/*" required />
         <div class="dialog-buttons">
-          <button id="addGuestButton" class="button">Add Guest</button>s
+          <button id="addGuestButton" class="button">Add Guest</button>
           <button id="closeDialogButton" class="button">Cancel</button>
         </div>
       </div>
@@ -58,7 +56,6 @@
   <!-- Scripts -->
   <script type="module" src="arrangedphoto.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 </body>
 </html>

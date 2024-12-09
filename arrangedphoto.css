@@ -1,7 +1,7 @@
 /* General Styling */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4f4f9;
+  background: linear-gradient(to right, #e6f1fa, #ffffff);
   margin: 0;
   display: flex;
   justify-content: center;
@@ -12,11 +12,11 @@ body {
 #eventRoomContainer {
   width: 90%;
   max-width: 600px;
-  background: #fff;
+  background: #ffffff;
   padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  overflow-y: auto; /* Enable scrolling */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow-y: auto;
 }
 
 /* Scrollable List Styling */
@@ -33,34 +33,64 @@ body {
 }
 
 .scrollable-list::-webkit-scrollbar-thumb {
-  background: #ccc;
+  background: #a2cbe8;
   border-radius: 10px;
 }
 
-.scrollable-list::-webkit-scrollbar-thumb:hover {
-  background: #aaa;
+/* Headings and Text */
+#roomName {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 5px;
+  color: #333;
 }
 
-/* Button Styles */
+#roomCode {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+}
+
+h3 {
+  color: #333;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+/* Buttons */
 button {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  background: #333;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
   cursor: pointer;
   font-size: 14px;
+  border: none;
+  border-radius: 5px;
 }
 
-button:hover {
-  background: #555;
+.button {
+  background: #307fe2;
+  color: #fff;
+  padding: 8px 15px;
+  margin: 5px 0;
+  display: inline-block;
+  text-align: center;
+  max-width: 150px;
 }
 
-/* Hidden Button */
-.hidden {
-  display: none !important;
+.button:hover {
+  background: #2363b7;
+}
+
+.action-button {
+  background: #ffc107;
+  color: #333;
+  padding: 8px 12px;
+  margin: 5px;
+  display: inline-block;
+  text-align: center;
+  max-width: 160px;
+}
+
+.action-button:hover {
+  background: #e0a800;
 }
 
 /* Host Photo Styling */
@@ -70,42 +100,45 @@ button:hover {
   border-radius: 50%;
   margin: 10px auto;
   display: block;
-  object-fit: cover; /* Ensure proper scaling */
+  object-fit: cover;
+  border: 2px solid #307fe2;
 }
 
-/* Host Photos Section */
+/* Photo Grid */
 .photo-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   gap: 10px;
   margin: 15px 0;
 }
 
 .photo-thumbnail {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   border-radius: 10px;
   object-fit: cover;
+  border: 2px solid #307fe2;
 }
 
-/* Guest List Styles */
+/* Guest Lists */
 #guestList li,
 #manualGuestList li {
   display: flex;
   align-items: center;
   margin: 10px 0;
-  padding: 10px;
-  background: #f9f9f9;
-  border: 1px solid #ddd;
+  padding: 8px;
+  background: #f7faff;
+  border: 1px solid #cde0f5;
   border-radius: 8px;
 }
 
 .guest-photo {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   margin-right: 10px;
   object-fit: cover;
+  border: 2px solid #307fe2;
 }
 
 /* Dialog Styles */
@@ -142,68 +175,44 @@ button:hover {
   border-radius: 5px;
 }
 
-/* Dialog Buttons */
 .dialog-buttons {
   display: flex;
   justify-content: space-between;
   gap: 10px;
 }
 
-.dialog-buttons button {
-  width: 45%;
+/* Additional Utility Classes */
+.hidden {
+  display: none !important;
 }
 
-/* Additional Button Styling */
-.add-member-button {
-  background-color: #007BFF;
-  color: white;
-  font-size: 16px;
-  margin-top: 10px;
-}
-
-.delete-guest-button {
-  background-color: #ff4c4c;
-  color: white;
-  font-size: 14px;
-  margin-left: 10px;
-}
-
-/* Room Header Styles */
-#roomName {
+/* Photo Item (for deleting) */
+.photo-item {
+  position: relative;
+  background: #f7faff;
+  padding: 5px;
+  border-radius: 8px;
+  border: 1px solid #cde0f5;
   text-align: center;
-  font-size: 24px;
-  margin-bottom: 5px;
 }
 
-#roomCode {
-  text-align: center;
-  font-size: 14px;
-  color: #666;
+.photo-item img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #307fe2;
 }
 
-/* Download Button Styling */
-/* Button styling for downloading photos */
-.download-button {
-  width: 100%;
-  padding: 10px;
-  background: #007BFF;
+.delete-btn {
+  background: #ff4c4c;
   color: #fff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+  padding: 5px;
+  font-size: 12px;
+  margin-top: 5px;
+  max-width: 100px;
 }
 
-.download-button:hover {
-  background: #0056b3;
-}
-
-
-/* Add Guest Button */
-button#addGuestButton {
-  background-color: #007BFF;
-  color: #fff;
-}
-
-button#addGuestButton:hover {
-  background-color: #0056b3;
+.delete-btn:hover {
+  background: #d43535;
 }
