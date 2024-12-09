@@ -53,6 +53,9 @@ async function loadEventRoom(eventCode) {
         document.getElementById("hostName").textContent = hostData.name || "Host";
         document.getElementById("hostPhoto").src = hostData.photoUrl || "fallback.png";
 
+        // Set the hostUploadedPhotoFolderPath from roomData
+        hostData.hostUploadedPhotoFolderPath = roomData.hostUploadedPhotoFolderPath;
+
         // Add folder icon for host if they have uploaded photos
         if (hostData.folderPath) {
           const hostFolderIcon = document.createElement("button");
@@ -105,7 +108,7 @@ async function loadEventRoom(eventCode) {
           if (user.uid === hostId) {
             // Host uses hostData.hostUploadedPhotoFolderPath + "/photos"
             if (hostData.hostUploadedPhotoFolderPath) {
-              window.location.href = `arrangedphoto.html?eventCode=${encodeURIComponent(eventCode)}&folderName=${encodeURIComponent(hostData.hostUploadedPhotoFolderPath + "/photos")}`;
+              window.location.href = `photogallery.html?eventCode=${encodeURIComponent(eventCode)}&folderName=${encodeURIComponent(hostData.hostUploadedPhotoFolderPath + "/photos")}&userId=${encodeURIComponent(hostId)}`;
             } else {
               alert("No sorted photos available for host.");
             }
@@ -192,7 +195,6 @@ document.getElementById("uploadPhotoButton").addEventListener("click", async () 
   input.click();
 });
 
-// Load Guests
 function loadGuests(guests, currentUserId, hostId, eventCode) {
   const guestListElem = document.getElementById("guestList");
   guestListElem.innerHTML = "";
@@ -203,7 +205,6 @@ function loadGuests(guests, currentUserId, hostId, eventCode) {
   });
 }
 
-// Load Manual Guests
 function loadManualGuests(manualGuests, currentUserId, hostId, eventCode) {
   const manualGuestListElem = document.getElementById("manualGuestList");
   manualGuestListElem.innerHTML = "";
@@ -214,7 +215,6 @@ function loadManualGuests(manualGuests, currentUserId, hostId, eventCode) {
   });
 }
 
-// Create a Guest or Manual Guest List Item
 function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, isManual = false) {
   const guestItem = document.createElement("li");
   guestItem.classList.add("guest-item");
@@ -253,11 +253,10 @@ function createGuestItem(guestId, guestData, currentUserId, hostId, eventCode, i
   return guestItem;
 }
 
-// Add Guest Button Logic
 document.getElementById("addGuestButton").addEventListener("click", async () => {
   const guestName = document.getElementById("guestName").value.trim();
   const guestEmail = document.getElementById("guestEmail").value.trim();
-  const guestPhoto = document.getElementById("guestPhoto").files[0];  // This is the image to upload
+  const guestPhoto = document.getElementById("guestPhoto").files[0];  
   const eventCode = new URLSearchParams(window.location.search).get("eventCode");
 
   if (!guestName || !guestEmail || !guestPhoto) {
@@ -270,12 +269,10 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
   const storagePath = `uploads/${participantId}`;
 
   try {
-    // Upload guest photo
     const fileRef = storageRef(storage, storagePath);
     await uploadBytes(fileRef, guestPhoto);
     const photoUrl = await getDownloadURL(fileRef);
 
-    // Update manual guest with photo URL and folder path
     const manualGuestRef = dbRef(database, `rooms/${eventCode}/manualParticipants/${participantId}`);
     await update(manualGuestRef, {
       name: guestName,
@@ -284,7 +281,6 @@ document.getElementById("addGuestButton").addEventListener("click", async () => 
       folderPath,
     });
 
-    // Upload profile picture to folder path
     const response = await fetch(photoUrl);
     const blob = await response.blob();
     const participantImageRef = storageRef(storage, `${folderPath}/${guestName.replace(/\s+/g, "_")}_profilePhoto.jpg`);
