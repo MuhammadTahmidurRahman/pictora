@@ -33,6 +33,9 @@ window.togglePassword = function (fieldId) {
 window.showImagePicker = function () {
   document.getElementById("image").click();
 };
+function goBack() {
+  window.location.href = 'welcome.html'; // Redirect to the welcome page
+}
 
 // Function to display selected image message
 window.displayImage = function (input) {
