@@ -45,7 +45,7 @@ async function downloadPhotosAsZip(folderPath, fileNamePrefix) {
   const listResult = await listAll(folderRef);
 
   if (listResult.items.length === 0) {
-    //alert("No photos available.");
+    alert("No photos available.");
     return null;
   }
 
@@ -357,7 +357,7 @@ async function loadPhotos(eventCode) {
     photoContainer.innerHTML = "";
 
     if (listResult.items.length === 0) {
-      photoContainer.textContent = "No photos available.";
+      //photoContainer.textContent = "No photos available.";
       return;
     }
 
