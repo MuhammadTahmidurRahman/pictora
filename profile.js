@@ -113,7 +113,7 @@ function listenForProfileChanges(user) {
             profileImage.src = "default-avatar.png"; // Fallback to default avatar
           });
       } else {
-        profileImage.src = "default-avatar.png"; // Set default avatar if no photo
+        profileImage.src = "default-avatar.png";
       }
     }
   });
@@ -228,6 +228,29 @@ async function deleteAccount() {
       if (userData.photo) {
         const photoRef = storageRef(storage, userData.photo);
         await deleteObject(photoRef);
+      }
+    }
+
+    // Remove user from all participants lists in rooms
+    const roomsSnapshotBefore = await get(dbRef(database, `rooms`));
+    if (roomsSnapshotBefore.exists()) {
+      const roomsDataBefore = roomsSnapshotBefore.val();
+      const updatesBefore = {};
+
+      Object.keys(roomsDataBefore).forEach((roomId) => {
+        const roomData = roomsDataBefore[roomId];
+
+        // If user is the host, skip removing them here as they will be handled later
+        if (roomData.hostId === uid) return;
+
+        // If user is a participant, remove them
+        if (roomData.participants && roomData.participants[uid]) {
+          updatesBefore[`/rooms/${roomId}/participants/${uid}`] = null;
+        }
+      });
+
+      if (Object.keys(updatesBefore).length > 0) {
+        await update(dbRef(database), updatesBefore);
       }
     }
 
