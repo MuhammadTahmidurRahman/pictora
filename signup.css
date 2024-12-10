@@ -15,7 +15,18 @@ body, html {
   overflow: hidden; /* Prevent scrolling */
 }
 
+.signup-page, .content {
+  visibility: hidden;
+}
+body {
+  visibility: visible;
+  transition: visibility 0.3s ease-in-out; /* Smooth fade-in after content loads */
+}
 
+/* Make sure that the page fades in after styles are applied */
+.signup-page.loaded, .content.loaded {
+  visibility: visible;
+}
 .signup-page {
   display: flex;
   justify-content: center;
