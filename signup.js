@@ -156,4 +156,3 @@ window.signInWithGoogle = async function () {
     alert("Google Sign-In failed. Please try again.");
   }
 };
-
