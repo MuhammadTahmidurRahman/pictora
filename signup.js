@@ -1,10 +1,9 @@
 // Ensure no duplicate imports and only import necessary functions once
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword,GoogleAuthProvider,signInWithPopup, fetchSignInMethodsForEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import { getDatabase, ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// Firebase configuration
 // Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
@@ -153,7 +152,7 @@ window.signInWithGoogle = async function () {
     const user = result.user;
 
     // Check if the user is already registered in Realtime Database
-    const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
+    const userSnapshot = await get(dbRef(database, `users/${user.uid}`)); // Use get() to retrieve data
     if (userSnapshot.exists()) {
       alert("You have already signed up. Redirecting you to the join event page.");
       window.location.href = "join_event.html";
