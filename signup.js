@@ -1,8 +1,8 @@
-// Ensure no duplicate imports and only import necessary functions once
+// Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithPopup, fetchSignInMethodsForEmail, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, fetchSignInMethodsForEmail, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import { getDatabase, ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref as dbRef, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -29,24 +29,24 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// Function to toggle password visibility
+// Toggle password visibility
 window.togglePassword = function (fieldId) {
   const field = document.getElementById(fieldId);
   field.type = field.type === "password" ? "text" : "password";
 };
 
-// Function to show the file picker
+// Show image picker
 window.showImagePicker = function () {
   document.getElementById("image").click();
 };
 
-// Function to display selected image message
+// Display selected image message
 window.displayImage = function (input) {
   const uploadText = document.getElementById("upload-text");
   uploadText.textContent = input.files && input.files[0] ? "Photo selected" : "Upload your photo here";
 };
 
-// Function to register a user and upload the profile image
+// Register user and upload profile image
 window.registerUser = async function () {
   const name = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
@@ -63,15 +63,17 @@ window.registerUser = async function () {
     alert("Wrong email. Please type again.");
     return;
   }
-  
+
   if (password.length < 8) {
     alert("The password must be 8 characters long.");
     return;
   }
+
   if (password !== confirmPassword) {
     alert("Passwords do not match.");
     return;
   }
+
   if (!imageFile) {
     alert("Please upload a profile image.");
     return;
@@ -84,39 +86,35 @@ window.registerUser = async function () {
       return;
     }
 
-    // Create user and upload photo
+    // Create user
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+    console.log("User registered:", user);
 
-    console.log("Uploading image...");
+    // Upload image to Firebase Storage
     const storageRef = ref(storage, `uploads/${user.uid}`);
     await uploadBytes(storageRef, imageFile);
-    console.log("Image uploaded successfully.");
     const imageUrl = await getDownloadURL(storageRef);
-    console.log("Image URL:", imageUrl);
 
-    // Store user data in Realtime Database
+    // Save user data to Firebase Realtime Database
     await set(dbRef(database, `users/${user.uid}`), {
       email: email,
       name: name,
       photo: imageUrl,
     });
 
-    alert("User registered successfully with image uploaded!");
+    alert("User registered successfully!");
     window.location.href = "join_event.html";
   } catch (error) {
-    console.error("Error creating user:", error);
+    console.error("Error registering user:", error);
     alert("Failed to register user. Please try again.");
   }
 };
 
-// Google Sign-In function with image upload validation
-// Google Sign-In function with account selection and image upload validation
+// Google sign-in function
 window.signInWithGoogle = async function () {
   const provider = new GoogleAuthProvider();
-  provider.setCustomParameters({
-    prompt: "select_account", // Ensures the user is prompted to select an account
-  });
+  provider.setCustomParameters({ prompt: "select_account" });
 
   const imageFile = document.getElementById("image").files[0];
 
@@ -128,31 +126,30 @@ window.signInWithGoogle = async function () {
   try {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
-
-    // Check if the user is already registered in Realtime Database
     const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
+    
     if (userSnapshot.exists()) {
-      alert("You have already signed up. Redirecting you to the join event page.");
+      alert("User already signed up, redirecting to join event...");
       window.location.href = "join_event.html";
       return;
     }
 
-    // Upload profile image to Firebase Storage
+    // Upload image to Firebase Storage
     const storageRef = ref(storage, `uploads/${user.uid}`);
     await uploadBytes(storageRef, imageFile);
     const imageUrl = await getDownloadURL(storageRef);
 
-    // Store user data in Realtime Database
+    // Save user data to Firebase Realtime Database
     await set(dbRef(database, `users/${user.uid}`), {
       email: user.email,
       name: user.displayName,
       photo: imageUrl,
     });
 
-    alert("Google Sign-In successful and image uploaded!");
+    alert("Google Sign-In successful!");
     window.location.href = "join_event.html";
   } catch (error) {
     console.error("Error with Google Sign-In:", error);
-    alert("Google Sign-In failed. Please try again.");
+    alert("Google Sign-In failed.");
   }
 };
