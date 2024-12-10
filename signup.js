@@ -60,6 +60,13 @@ window.registerUser = async function () {
   const imageFile = document.getElementById("image").files[0];
   const uploadText = document.getElementById("upload-text");
 
+    // Log inputs for debugging
+    console.log("Name:", name);
+    console.log("Email:", email);
+    console.log("Password Length:", password.length);
+    console.log("Confirm Password Length:", confirmPassword.length);
+    console.log("Image file:", imageFile);
+
   if (!name || !email || !password || !confirmPassword) {
     alert("Please fill up all the information boxes.");
     return;
