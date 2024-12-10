@@ -1,8 +1,8 @@
 // Ensure no duplicate imports and only import necessary functions once
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import { getDatabase, ref as dbRef, set, get, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -21,13 +21,7 @@ const auth = getAuth();
 const storage = getStorage();
 const database = getDatabase();
 
-// Check auth state and handle redirection
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log("User is logged in, redirecting to join event...");
-    window.location.href = 'join_event.html';
-  }
-});
+// Removed the onAuthStateChanged listener to prevent premature redirection
 
 // Function to toggle password visibility
 window.togglePassword = function (fieldId) {
@@ -66,6 +60,8 @@ window.registerUser = async function () {
   console.log("Password Length:", password.length);
   console.log("Confirm Password Length:", confirmPassword.length);
   console.log("Image file:", imageFile);
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Added email regex
 
   if (!name || !email || !password || !confirmPassword) {
     alert("Please fill up all the information boxes.");
@@ -122,6 +118,7 @@ window.registerUser = async function () {
       name: name,
       photo: imageUrl,
     });
+    console.log("User data successfully written to Realtime Database."); // Added log
 
     uploadText.textContent = "Photo uploaded successfully."; // Show success message
     alert("User registered successfully!");
@@ -170,6 +167,8 @@ window.signInWithGoogle = async function () {
       name: user.displayName,
       photo: imageUrl,
     });
+
+    console.log("Google Sign-In user data successfully written to Realtime Database."); // Added log
 
     alert("Google Sign-In successful and image uploaded!");
     window.location.href = "join_event.html"; // Redirect after successful Google sign-in
