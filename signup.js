@@ -43,7 +43,11 @@ window.showImagePicker = function () {
 // Display selected image message
 window.displayImage = function (input) {
   const uploadText = document.getElementById("upload-text");
-  uploadText.textContent = input.files && input.files[0] ? "Photo selected" : "Upload your photo here";
+  if (input.files && input.files[0]) {
+    uploadText.textContent = "Photo selected"; // Show message when a photo is selected
+  } else {
+    uploadText.textContent = "Upload your photo here"; // Show default message if no photo selected
+  }
 };
 
 // Register user and upload profile image
@@ -53,6 +57,7 @@ window.registerUser = async function () {
   const password = document.getElementById("password").value.trim();
   const confirmPassword = document.getElementById("confirm-password").value.trim();
   const imageFile = document.getElementById("image").files[0];
+  const uploadText = document.getElementById("upload-text");
 
   if (!name || !email || !password || !confirmPassword) {
     alert("Please fill up all the information boxes.");
@@ -75,7 +80,7 @@ window.registerUser = async function () {
   }
 
   if (!imageFile) {
-    alert("Please upload a profile image.");
+    uploadText.textContent = "No photo uploaded."; // Show message when no photo is uploaded
     return;
   }
 
@@ -89,7 +94,9 @@ window.registerUser = async function () {
     // Create user
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-    console.log("User registered:", user);
+
+    // Show uploading message
+    uploadText.textContent = "Uploading photo...";
 
     // Upload image to Firebase Storage
     const storageRef = ref(storage, `uploads/${user.uid}`);
@@ -103,10 +110,12 @@ window.registerUser = async function () {
       photo: imageUrl,
     });
 
+    uploadText.textContent = "Photo uploaded successfully."; // Show success message
     alert("User registered successfully!");
     window.location.href = "join_event.html";
   } catch (error) {
     console.error("Error registering user:", error);
+    uploadText.textContent = "Error uploading photo."; // Show error message
     alert("Failed to register user. Please try again.");
   }
 };
@@ -117,8 +126,10 @@ window.signInWithGoogle = async function () {
   provider.setCustomParameters({ prompt: "select_account" });
 
   const imageFile = document.getElementById("image").files[0];
+  const uploadText = document.getElementById("upload-text");
 
   if (!imageFile) {
+    uploadText.textContent = "No photo uploaded.";
     alert("Please upload an image before signing up with Google.");
     return;
   }
@@ -129,6 +140,7 @@ window.signInWithGoogle = async function () {
     const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
     
     if (userSnapshot.exists()) {
+      uploadText.textContent = "Photo uploaded successfully.";
       alert("User already signed up, redirecting to join event...");
       window.location.href = "join_event.html";
       return;
@@ -146,10 +158,12 @@ window.signInWithGoogle = async function () {
       photo: imageUrl,
     });
 
+    uploadText.textContent = "Photo uploaded successfully."; // Show success message
     alert("Google Sign-In successful!");
     window.location.href = "join_event.html";
   } catch (error) {
     console.error("Error with Google Sign-In:", error);
+    uploadText.textContent = "Error uploading photo."; // Show error message
     alert("Google Sign-In failed.");
   }
 };
