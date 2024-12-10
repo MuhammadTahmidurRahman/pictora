@@ -7,7 +7,11 @@ import {
   onAuthStateChanged, 
   updateProfile, 
   signOut, 
-  deleteUser 
+  deleteUser,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  GoogleAuthProvider,
+  signInWithPopup
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { 
   getDatabase, 
@@ -113,7 +117,7 @@ function listenForProfileChanges(user) {
             profileImage.src = "default-avatar.png"; // Fallback to default avatar
           });
       } else {
-        profileImage.src = "default-avatar.png"; // Set default avatar if no photo
+        profileImage.src = "default-avatar.png";
       }
     }
   });
@@ -231,6 +235,29 @@ async function deleteAccount() {
       }
     }
 
+    // Remove user from all participants lists in rooms
+    const roomsSnapshotBefore = await get(dbRef(database, `rooms`));
+    if (roomsSnapshotBefore.exists()) {
+      const roomsDataBefore = roomsSnapshotBefore.val();
+      const updatesBefore = {};
+
+      Object.keys(roomsDataBefore).forEach((roomId) => {
+        const roomData = roomsDataBefore[roomId];
+
+        // If user is the host, skip removing them here as they will be handled later
+        if (roomData.hostId === uid) return;
+
+        // If user is a participant, remove them
+        if (roomData.participants && roomData.participants[uid]) {
+          updatesBefore[`/rooms/${roomId}/participants/${uid}`] = null;
+        }
+      });
+
+      if (Object.keys(updatesBefore).length > 0) {
+        await update(dbRef(database), updatesBefore);
+      }
+    }
+
     // Delete user data from Firebase Realtime Database
     await remove(dbRef(database, `users/${uid}`));
 
@@ -248,6 +275,23 @@ async function deleteAccount() {
       });
 
       await update(dbRef(database), updates);
+    }
+
+    // Reauthenticate user before deletion
+    const providerData = user.providerData[0];
+    if (providerData.providerId === 'google.com') {
+      // Reauthenticate with Google
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+    } else if (user.email) {
+      // Email/Password reauthentication
+      const password = prompt("Please enter your password for reauthentication:");
+      if (!password) {
+        console.error("No password entered for reauthentication.");
+        return;
+      }
+      const credential = EmailAuthProvider.credential(user.email, password);
+      await reauthenticateWithCredential(user, credential);
     }
 
     // Delete user account from Firebase Auth
