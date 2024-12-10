@@ -7,7 +7,9 @@ import {
   onAuthStateChanged, 
   updateProfile, 
   signOut, 
-  deleteUser 
+  deleteUser,
+  EmailAuthProvider,
+  reauthenticateWithCredential
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { 
   getDatabase, 
@@ -271,6 +273,15 @@ async function deleteAccount() {
       });
 
       await update(dbRef(database), updates);
+    }
+
+    // Reauthenticate the user before deletion to avoid requires-recent-login error
+    if (user.email) {
+      const password = prompt("Please enter your password for reauthentication:");
+      if (password) {
+        const credential = EmailAuthProvider.credential(user.email, password);
+        await reauthenticateWithCredential(user, credential);
+      }
     }
 
     // Delete user account from Firebase Auth
