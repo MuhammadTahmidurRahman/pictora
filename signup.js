@@ -1,6 +1,6 @@
-// Firebase imports
+// Ensure no duplicate imports and only import necessary functions once
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, fetchSignInMethodsForEmail, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, fetchSignInMethodsForEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import { getDatabase, ref as dbRef, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
@@ -29,28 +29,29 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// Toggle password visibility
+// Function to toggle password visibility
 window.togglePassword = function (fieldId) {
   const field = document.getElementById(fieldId);
   field.type = field.type === "password" ? "text" : "password";
 };
 
-// Show image picker
+// Function to show the file picker
 window.showImagePicker = function () {
   document.getElementById("image").click();
 };
 
-// Display selected image message
+// Function to display selected image message
 window.displayImage = function (input) {
   const uploadText = document.getElementById("upload-text");
   if (input.files && input.files[0]) {
+    console.log("File selected:", input.files[0].name);  // Log the file name to confirm it's being selected
     uploadText.textContent = "Photo selected"; // Show message when a photo is selected
   } else {
     uploadText.textContent = "Upload your photo here"; // Show default message if no photo selected
   }
 };
 
-// Register user and upload profile image
+// Function to register a user and upload the profile image
 window.registerUser = async function () {
   const name = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
@@ -80,7 +81,7 @@ window.registerUser = async function () {
   }
 
   if (!imageFile) {
-    uploadText.textContent = "No photo uploaded."; // Show message when no photo is uploaded
+    uploadText.textContent = "No photo uploaded."; // Show message if no image selected
     return;
   }
 
@@ -95,13 +96,18 @@ window.registerUser = async function () {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // Show uploading message
-    uploadText.textContent = "Uploading photo...";
+    uploadText.textContent = "Uploading photo...";  // Show upload message
 
     // Upload image to Firebase Storage
     const storageRef = ref(storage, `uploads/${user.uid}`);
+    console.log("Uploading photo...");
     await uploadBytes(storageRef, imageFile);
+
+    // Log the upload status
+    console.log("Upload completed");
+
     const imageUrl = await getDownloadURL(storageRef);
+    console.log("Image URL:", imageUrl);
 
     // Save user data to Firebase Realtime Database
     await set(dbRef(database, `users/${user.uid}`), {
@@ -112,7 +118,7 @@ window.registerUser = async function () {
 
     uploadText.textContent = "Photo uploaded successfully."; // Show success message
     alert("User registered successfully!");
-    window.location.href = "join_event.html";
+    window.location.href = "join_event.html"; // Redirect to join event after successful signup
   } catch (error) {
     console.error("Error registering user:", error);
     uploadText.textContent = "Error uploading photo."; // Show error message
@@ -120,16 +126,16 @@ window.registerUser = async function () {
   }
 };
 
-// Google sign-in function
+// Google Sign-In function with image upload validation
 window.signInWithGoogle = async function () {
   const provider = new GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: "select_account" });
+  provider.setCustomParameters({
+    prompt: "select_account", // Ensures the user is prompted to select an account
+  });
 
   const imageFile = document.getElementById("image").files[0];
-  const uploadText = document.getElementById("upload-text");
 
   if (!imageFile) {
-    uploadText.textContent = "No photo uploaded.";
     alert("Please upload an image before signing up with Google.");
     return;
   }
@@ -137,33 +143,31 @@ window.signInWithGoogle = async function () {
   try {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
+
+    // Check if the user is already registered in Realtime Database
     const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
-    
     if (userSnapshot.exists()) {
-      uploadText.textContent = "Photo uploaded successfully.";
-      alert("User already signed up, redirecting to join event...");
+      alert("You have already signed up. Redirecting you to the join event page.");
       window.location.href = "join_event.html";
       return;
     }
 
-    // Upload image to Firebase Storage
+    // Upload profile image to Firebase Storage
     const storageRef = ref(storage, `uploads/${user.uid}`);
     await uploadBytes(storageRef, imageFile);
     const imageUrl = await getDownloadURL(storageRef);
 
-    // Save user data to Firebase Realtime Database
+    // Store user data in Realtime Database
     await set(dbRef(database, `users/${user.uid}`), {
       email: user.email,
       name: user.displayName,
       photo: imageUrl,
     });
 
-    uploadText.textContent = "Photo uploaded successfully."; // Show success message
-    alert("Google Sign-In successful!");
-    window.location.href = "join_event.html";
+    alert("Google Sign-In successful and image uploaded!");
+    window.location.href = "join_event.html"; // Redirect after successful Google sign-in
   } catch (error) {
     console.error("Error with Google Sign-In:", error);
-    uploadText.textContent = "Error uploading photo."; // Show error message
-    alert("Google Sign-In failed.");
+    alert("Google Sign-In failed. Please try again.");
   }
 };
