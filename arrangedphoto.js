@@ -357,7 +357,7 @@ async function loadPhotos(eventCode) {
     photoContainer.innerHTML = "";
 
     if (listResult.items.length === 0) {
-      photoContainer.textContent = "No photos available.";
+      //photoContainer.textContent = "No photos available.";
       return;
     }
 

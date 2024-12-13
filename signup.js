@@ -1,10 +1,9 @@
 // Ensure no duplicate imports and only import necessary functions once
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword,GoogleAuthProvider,signInWithPopup, fetchSignInMethodsForEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import { getDatabase, ref as dbRef, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// Firebase configuration
 // Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDHLMbTbLBS0mhw2dLFkLt4OzBEWyubr3c",
@@ -22,13 +21,7 @@ const auth = getAuth();
 const storage = getStorage();
 const database = getDatabase();
 
-// Check auth state and handle redirection
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log("User is logged in, redirecting to join event...");
-    window.location.href = 'join_event.html';
-  }
-});
+// Removed the onAuthStateChanged listener to prevent premature redirection
 
 // Function to toggle password visibility
 window.togglePassword = function (fieldId) {
@@ -61,12 +54,14 @@ window.registerUser = async function () {
   const imageFile = document.getElementById("image").files[0];
   const uploadText = document.getElementById("upload-text");
 
-    // Log inputs for debugging
-    console.log("Name:", name);
-    console.log("Email:", email);
-    console.log("Password Length:", password.length);
-    console.log("Confirm Password Length:", confirmPassword.length);
-    console.log("Image file:", imageFile);
+  // Log inputs for debugging
+  console.log("Name:", name);
+  console.log("Email:", email);
+  console.log("Password Length:", password.length);
+  console.log("Confirm Password Length:", confirmPassword.length);
+  console.log("Image file:", imageFile);
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Added email regex
 
   if (!name || !email || !password || !confirmPassword) {
     alert("Please fill up all the information boxes.");
@@ -123,6 +118,7 @@ window.registerUser = async function () {
       name: name,
       photo: imageUrl,
     });
+    console.log("User data successfully written to Realtime Database."); // Added log
 
     uploadText.textContent = "Photo uploaded successfully."; // Show success message
     alert("User registered successfully!");
@@ -153,7 +149,7 @@ window.signInWithGoogle = async function () {
     const user = result.user;
 
     // Check if the user is already registered in Realtime Database
-    const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
+    const userSnapshot = await get(dbRef(database, `users/${user.uid}`)); // Use get() to retrieve data
     if (userSnapshot.exists()) {
       alert("You have already signed up. Redirecting you to the join event page.");
       window.location.href = "join_event.html";
@@ -162,8 +158,8 @@ window.signInWithGoogle = async function () {
 
     // Upload profile image to Firebase Storage
     const storageRef = ref(storage, `uploads/${user.uid}`);
-    await uploadBytes(storageRef, imageFile);
-    const imageUrl = await getDownloadURL(storageRef);
+    const uploadSnapshot = await uploadBytes(storageRef, imageFile);
+    const imageUrl = await getDownloadURL(storageRef);  // Get the image URL after upload completes
 
     // Store user data in Realtime Database
     await set(dbRef(database, `users/${user.uid}`), {
@@ -171,6 +167,8 @@ window.signInWithGoogle = async function () {
       name: user.displayName,
       photo: imageUrl,
     });
+
+    console.log("Google Sign-In user data successfully written to Realtime Database."); // Added log
 
     alert("Google Sign-In successful and image uploaded!");
     window.location.href = "join_event.html"; // Redirect after successful Google sign-in

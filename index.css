@@ -31,24 +31,5 @@
     z-index: 1;
     opacity: 0.9;
   }
-  
-  .logo-text {
-    position: relative;
-    z-index: 2;
-    font-size: 48px;
-    font-weight: bold;
-    color: white;
-    display: flex;
-    align-items: center;
-  }
-  
-  .logo-text span {
-    margin: 0 5px;
-  }
-  
-  .icon-camera::before {
-    content: '📷';
-    font-size: 38px;
-    margin-bottom: -4px;
-  }
+
   

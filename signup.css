@@ -15,7 +15,6 @@ body, html {
   overflow: hidden; /* Prevent scrolling */
 }
 
-
 .signup-page {
   display: flex;
   justify-content: center;
