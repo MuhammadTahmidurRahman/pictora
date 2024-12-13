@@ -76,3 +76,4 @@ Creators:
 For the app version go to this git repository: "https://github.com/MuhammadTahmidurRahman/CSE-299-FACE-RECPGNITION-APP"
 
 For the backend go to this git repository: "https://github.com/MuhammadTahmidurRahman/Face_Recognition_UsingOPENCV_HARCASCADE_FACE_RECOGNITION-pictorabackend-"
+Web UI: https://github.com/MuhammadTahmidurRahman/pictora/tree/main/WEB%20UI
